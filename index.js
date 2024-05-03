@@ -11,22 +11,23 @@
  * - homepage (url)
  */
 
-import { stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
-import { Shop } from './Shop.js';
+import { stdin as input, stdout as output } from 'node:process';
 import menuImport from './menu.js';
 const menu = menuImport.menu;
 const clear = menuImport.clear;
+import { Shop } from './Shop.js';
 
 const rl = readline.createInterface({ input, output });
 
 /* APP */
 const tiendas = [];
 
+// Crear menú
 const menuPpal = {
   1: { display: 'Crear tienda', cb: createShop },
   2: { display: 'Listar tiendas', cb: listShops },
-  3: { display: 'Editar tienda', cb: notImplemented }, //editShop },
+  3: { display: 'Editar tienda', cb: modifyShop },
   4: { display: 'Eliminar tienda', cb: deleteShop },
 };
 await menu('Administración tiendas', menuPpal, rl);
@@ -35,8 +36,6 @@ rl.close();
 
 /* Funciones del CRUD */
 async function createShop() {
-  // id, nombre, imagen, link
-  // TODO: Para el id quería hacer un hash del `nombre+home` y al final quedó pendiente
   do {
     clear();
     const nombre = await rl.question('Nombre de la tienda \n> ');
@@ -49,30 +48,79 @@ async function createShop() {
   } while ('y' === (await rl.question('[y/N]> ', (d) => d.toLowerCase())));
 }
 
-async function listShops() {
+/**
+ *
+ * @param {*} options
+ * `options` es un objeto con dos posibles booleanos, y el parámetro es opcional
+ * - Si block es true, la función espera al usuario para salir
+ * - Si compact es true, sólo lista los id y nombres
+ */
+async function listShops(options = { block: true }) {
   clear();
-  // TODO: Hacer un listado un poco más bonito
-  console.log(tiendas);
-  await rl.question('\n<Enter> para volver');
+  console.log('## Tiendas (id: nombre)');
+  tiendas.forEach((t) => {
+    let item = `* ${t.id}: "${t.name}"`;
+    if (!options.compact) {
+      item += `\n  - Homepage: ${t.home}`;
+      item += `\n  - Ícono: ${t.img}`;
+    }
+
+    console.log(item);
+  });
+  if (options.block) await rl.question('\n<Enter> para volver');
 }
 
 async function deleteShop() {
+  let repeat;
   do {
     clear();
-    for (const s of tiendas) {
-      console.log(`- ${s.name}: ID NOT_IMPLEMENTED`);
-    }
-    console.log('Escriba el nombre de la tienda a eliminar (vacío para salir)');
-    let sel = await rl.question('> ');
-    const idx = tiendas.findIndex(
-      (el) => el.name.toLowerCase() === sel.toLowerCase()
-    );
+    listShops({ block: false, compact: true });
+    console.log('\nIngrese ID de la tienda a eliminar (0 para volver)');
+    let sel = Number.parseInt(await rl.question('> '));
 
+    if (sel == 0) return;
+
+    const idx = tiendas.findIndex((el) => el.id === sel);
     tiendas.splice(idx, 1);
-    console.log('* Tienda borrada. ¿Borrar otra?');
-  } while ('y' === (await rl.question('[y/N]> ', (d) => d.toLowerCase())));
+
+    let repeat = (
+      await rl.question('* Tienda borrada. ¿Borrar otra?\n[y/N]> ')
+    ).toLowerCase();
+  } while (repeat === 'y');
 }
 
-function notImplemented() {
-  console.log('/!\\ No implementado');
+async function modifyShop() {
+  let repeat;
+  do {
+    clear();
+    listShops({ block: false, compact: true });
+    console.log('Ingrese ID de la tienda a modificar (0 para salir)');
+    let sel = Number.parseInt(await rl.question('> '));
+    const idx = tiendas.findIndex((el) => el.id === sel);
+
+    // Guard statement
+    if (sel == 0) return;
+
+    console.log('Escriba el nuevo nombre (vacio para mantener)');
+    let name = await rl.question('> ');
+    if (name !== '') {
+      tiendas[idx].name = name;
+    }
+
+    console.log('Escriba el nuevo path al ícono (vacio para mantener)');
+    let img = await rl.question('> ');
+    if (img !== '') {
+      tiendas[idx].img = img;
+    }
+
+    console.log('Escriba la nueva dirección web (vacío para mantener)');
+    let link = await rl.question('> ');
+    if (link !== '') {
+      tiendas[idx].home = link;
+    }
+
+    repeat = (
+      await rl.question('* Tienda modificada. ¿Cambiar otra?\n[y/N]> ')
+    ).toLowerCase();
+  } while (repeat === 'y');
 }
