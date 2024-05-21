@@ -29,15 +29,3 @@ function clear() {
 }
 
 export default { menu, clear };
-
-/*
-
-Steam
-/res/storeIcons/steam.svg
-https://store.steampowered.com/
-
-Epic Games
-/res/storeIcons/epic.svg
-https://store.epicgames.com
-
-*/

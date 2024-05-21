@@ -5,32 +5,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
+      "name": "build",
       "request": "launch",
-      "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}\\index.js"
+      "runtimeArgs": ["build"],
+      "runtimeExecutable": "pnpm",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
     },
     {
-      "type": "node",
+      "name": "start:dev",
       "request": "launch",
-      "name": "Launch Program (with FNM)",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "console": "integratedTerminal",
-      "internalConsoleOptions":"neverOpen",
-      "program": "${workspaceFolder}/index.js",
-      "runtimeExecutable": "fnm",
-      "runtimeArgs": [
-        "exec",
-        "--using-file",
-        "--",
-        "node"
-      ],
-      "restart": true
+      "runtimeArgs": ["start:dev"],
+      "runtimeExecutable": "pnpm",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
     }
   ]
 }
