@@ -17,19 +17,10 @@ shops.push(new Shop("PSN Store", "/assets/psn.svg", "https://store.playstation.c
  * Para no tener TODOS los CRUD en un mismo archivo app.ts
  */
 
-app.get("/api/shops", (req, res) => {
-  res.json(shops)
-})
+app.route("/api/shops")
+  .get((req, res) => { res.json(shops) })
 
-app.get("/api/shops/:id", (req: Request, res) => {
-  const x = shops.find((e) => {
-    return e.getId() === Number.parseInt(req.params.id)
-  })
-
-  res.json(x)
-})
-
-app.post("/api/shops", (req: Request, res) => {
+  .post((req: Request, res) => {
   /** CONSULTA
    * req.params() está deprecado, pero qué debería hacer?
    * Para el POST siempre se usa el body de la request? (Creo que sí)
@@ -51,12 +42,9 @@ app.post("/api/shops", (req: Request, res) => {
   res.json(shops[x-1])
 })
 
-app.delete("/api/shops/:id", (req: Request, res) => {
-  /** NOTA
-   * Luego de un res.send(), corresponde un return para cerrar el callback.
-   * Especificamente si estoy usando guard clauses
-   */
-  const id: number = Number.parseInt(req.params['id']);
+app.route("/api/shops/:id")
+  .all((req: Request, res) => {
+    const id = Number.parseInt(req.params.id);
   if (Number.isNaN(id)) {
     res.status(400).send("ID must be an integer.");
     return
@@ -67,31 +55,38 @@ app.delete("/api/shops/:id", (req: Request, res) => {
     res.sendStatus(404);
     return
   }
+  })
+
+  .get((req: Request, res) => {
+    const id = Number.parseInt(req.params.id);
+    const shop = shops.find((e) => { return e.getId() === id })
+    res.json(shop)
+  })
+
+  .delete((req: Request, res) => {
+    /** NOTA
+     * Luego de un res.send(), corresponde un return para cerrar el callback.
+     * Especificamente si estoy usando guard clauses
+     */
+    const id = Number.parseInt(req.params.id);
+    const idxShop = shops.findIndex((e) => { return e.getId() === id })
 
   const shop = shops[idxShop];
   res.send(shop)
   shops.splice(idxShop, 1);
 })
 
+  .patch((req, res) => {
 // Se ejecuta si la request tiene algun parámetro válido, actualizará ese
 //  y descartará el resto
 app.patch("/api/shops/:id", (req, res) => {
   /** CONSULTA
    * Es necesario o no escribir los tipos req: Request, res: Response?
    */
+    const id = Number.parseInt(req.params.id);
+    const idxShop = shops.findIndex((e) => { return e.getId() === id })
+
   const VALID_PARAMS = ["name", "img", "site"]
-  const id: number = Number.parseInt(req.params.id);
-  if (Number.isNaN(id)) {
-    res.status(400).send("ID must be an integer.");
-    return
-  }
-
-  const idxShop = shops.findIndex((e)=>{return e.getId() === id});
-  if (idxShop === -1) {
-    res.sendStatus(404);
-    return
-  }
-
   if (!reqHasSomeParams(req, VALID_PARAMS)) {
     res.status(400).send("Request must provide at least 1 valid parameter")
     return
