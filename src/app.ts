@@ -57,11 +57,13 @@ app.route("/api/shops/:id")
     const id = Number.parseInt(req.params.id);
     if (Number.isNaN(id)) {
       res.status(400).send("ID must be an integer.");
+      return
     }
 
     const idxShop = shops.findIndex((e)=>{return e.getId() === id});
     if (idxShop === -1) {
       res.sendStatus(404);
+      return
     }
 
     // Pasar al handler correspondiente para el método HTTP que haya llegado
