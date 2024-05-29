@@ -31,16 +31,7 @@ app.route("/api/shops")
   .get((req, res) => { res.json(shops) })
 
   .post((req: Request, res) => {
-    /** CONSULTA
-     * req.params() está deprecado, pero qué debería hacer?
-     * Para el POST siempre se usa el body de la request? (Creo que sí)
-     */
-
-    /** NOTA
-     * Da igual si uso req.body.name o req.body['name'] pues ambos dan undefined
-     *  si no existe el parámetro
-     */
-    if (!reqHasParams(req, "name img site".split(" "))) {
+    if (!reqHasParams(req, ["name", "img", "site"])) {
       res.sendStatus(400)
     }
 
@@ -66,58 +57,56 @@ app.route("/api/shops/:id")
       return
     }
 
-    // Pasar al handler correspondiente para el método HTTP que haya llegado
+    /** NOTA
+     * El objeto respuesta `res` tiene un objeto `res.locals` donde podemos guardar datos que nos interesen.
+     * Cuando el `.all` le pase el control al `.get` o `.post` (mediante el callback `next`), estos últimos tendrán
+     * acceso a las variables guardadas en `res.locals`, ya que están procesando la misma request y la misma response.
+     * Esto lo hacemos para no tener que, en los demás callbacks, no tengamos que volver a buscar la shop
+     * con shops.find() como lo hicimos en la línea 54.
+     */
+    res.locals.idxShop = idxShop;
+    res.locals.shop = shops[idxShop];
     next()
   })
 
   .get((req: Request, res) => {
-    const id = Number.parseInt(req.params.id);
-    const shop = shops.find((e) => { return e.getId() === id })
-    res.json(shop)
+    res.json(res.locals.shop)
   })
 
   .delete((req: Request, res) => {
-    /** NOTA
-     * Luego de un res.send(), corresponde un return para cerrar el callback.
-     * Especificamente si estoy usando guard clauses
-     */
-    const id = Number.parseInt(req.params.id);
-    const idxShop = shops.findIndex((e) => { return e.getId() === id })
-
-    const shop = shops[idxShop];
-    res.send(shop)
-    shops.splice(idxShop, 1);
+    res.send(res.locals.shop)
+    shops.splice(res.locals.idxShop, 1);
   })
 
   .patch((req, res) => {
     // Se ejecuta si la request tiene algun parámetro válido, actualizará ese
     //  y descartará el resto
+
     /** CONSULTA
      * Es necesario o no escribir los tipos req: Request, res: Response?
      */
-    const id = Number.parseInt(req.params.id);
-    const idxShop = shops.findIndex((e) => { return e.getId() === id })
-
     const VALID_PARAMS = ["name", "img", "site"]
     if (!reqHasSomeParams(req, VALID_PARAMS)) {
       res.status(400).send("Request must provide at least 1 valid parameter")
       return
     }
 
-    const shop = shops[idxShop];
+    // TODO: Debe haber una mejor forma de hacer esto...
+    // Traemos el objeto shop de las variables locales de la request para no escribir res.locals cada vez (conveniencia)
+    const shop = res.locals.shop;
     VALID_PARAMS.forEach( (field) => {
-      const newVal = req.body[field];
-      if (newVal === undefined) return;
+      const newValue = req.body[field];
+      if (newValue === undefined) return;
+
       switch (field) {
-        case "name": shop.setName(newVal); break;
-        case "img": shop.setImg(newVal); break;
-        case "site": shop.setSite(newVal); break;
+        case "name": shop.setName(newValue); break;
+        case "img": shop.setImg(newValue); break;
+        case "site": shop.setSite(newValue); break;
       }
     })
     res.send(shop)
   })
 
-// Responder a la ruta / con la callback
 app.get('/', (req, res) => {
   res.sendFile("index.html", {root: ROOT})
 })
@@ -127,13 +116,13 @@ app.listen(8080, ()=> {
 root in ${ROOT}`)
 })
 
-function reqHasParams(req: Request, params: string[]) {
+function reqHasParams(req: Request, params: string[]): Boolean {
   return params.every( (e) => {
     return Object.keys(req.body).includes(e)
   })
 }
 
-function reqHasSomeParams(req: Request, params: string[]) {
+function reqHasSomeParams(req: Request, params: string[]): Boolean {
   return params.some( (e) => {
     return Object.keys(req.body).includes(e)
   })
