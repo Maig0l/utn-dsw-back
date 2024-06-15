@@ -2,6 +2,8 @@ import express, {Request} from 'express'
 import {Shop} from './Shop.js'
 import path from 'path'
 import { fileURLToPath } from 'url';
+import { platform } from 'os';
+import { Platform } from './platform.js';
 
 // Metadatos para saber en qué directorio está el programa
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -127,3 +129,12 @@ function reqHasSomeParams(req: Request, params: string[]): Boolean {
     return Object.keys(req.body).includes(e)
   })
 }
+
+//CRUD Platform
+
+const platforms: Platform[] = [];
+platforms.push(new Platform("Play Station 3", "/assets/ps3.svg"))
+
+app.get('/api/platforms', (req,res)=> {
+  res.json(platforms) 
+})
