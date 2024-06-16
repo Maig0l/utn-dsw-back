@@ -28,5 +28,14 @@ export class Tag {
     getDescriptions(): string{
         return this.description;
     }
+
+
+    setName(name:string):void{
+        this.name = name;
+    }
+
+    set(description:string){
+        this.description = description;
+    }
 }
 
