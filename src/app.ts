@@ -1,9 +1,8 @@
 import express, {Request} from 'express'
 import {Shop} from './Shop.js'
+import { Platform } from './platform.js';
 import path from 'path'
 import { fileURLToPath } from 'url';
-import { platform } from 'os';
-import { Platform } from './platform.js';
 
 // Metadatos para saber en qué directorio está el programa
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -64,7 +63,7 @@ app.route("/api/shops/:id")
      * Cuando el `.all` le pase el control al `.get` o `.post` (mediante el callback `next`), estos últimos tendrán
      * acceso a las variables guardadas en `res.locals`, ya que están procesando la misma request y la misma response.
      * Esto lo hacemos para no tener que, en los demás callbacks, no tengamos que volver a buscar la shop
-     * con shops.find() como lo hicimos en la línea 54.
+     * con shops.find() como lo hicimos en la línea 55.
      */
     res.locals.idxShop = idxShop;
     res.locals.shop = shops[idxShop];
@@ -133,8 +132,30 @@ function reqHasSomeParams(req: Request, params: string[]): Boolean {
 //CRUD Platform
 
 const platforms: Platform[] = [];
-platforms.push(new Platform("Play Station 3", "/assets/ps3.svg"))
+platforms.push(new Platform("Play Station 1", "/assets/ps1.svg"))
+platforms.push(new Platform("Play Station 2", "/assets/ps2.svg"))
 
+//list all platforms
 app.get('/api/platforms', (req,res)=> {
-  res.json(platforms) 
+  res.json({data: platforms}) 
 })
+
+//show one platform
+app.get('/api/platforms/:id', (req ,res)=> {
+  const platform = platforms.find((character)=> character.getId()===Number.parseInt(req.params.id))
+  if(!platform){
+    res.status(404).send({message: 'Platform not found'})
+  }
+  res.json({data: platform})
+})
+
+//set a new platform
+app.post('/api/platforms', (req,res) => {
+    if (!reqHasParams(req, ["name", "img"])) {
+      res.sendStatus(400)
+    }
+    const { name , img } = req.body
+    const platform =  new Platform (name,img)
+    platforms.push(platform)
+    res.status(201).send({message: 'Platform created', data: platform})
+} )
