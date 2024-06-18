@@ -1,4 +1,4 @@
-import express, {NextFunction, Request} from 'express'
+import express, {NextFunction, Request, Response} from 'express'
 import {Shop} from './Shop.js'
 import { Platform } from './platform.js';
 import path from 'path'
@@ -139,55 +139,81 @@ function reqHasSomeParams(req: Request, params: string[]): Boolean {
 
 
 //CRUD Platform
-/*
+
 function sanitizePlatformInput(req:Request, res:Response, next:NextFunction){
   req.body.sanitizedInput = {
     name: req.body.name,
     img: req.body.img
   }
+  Object.keys(req.body.sanitizedInput).forEach(key=>{
+    if(req.body.sanitizedInput[key]=== undefined) 
+      delete req.body.sanitizedInput[key]
+  })
   next()
 }
-*/
+
 
 const platforms: Platform[] = [];
 platforms.push(new Platform("Play Station 1", "/assets/ps1.svg"))
 platforms.push(new Platform("Play Station 2", "/assets/ps2.svg"))
 
-//list all platforms
-app.get('/api/platforms', (req,res)=> {
+
+app.route("/api/platforms")
+  .get((req,res)=> {
   res.json({data: platforms}) 
 })
 
-//show one platform
-app.get('/api/platforms/:id', (req ,res)=> {
+
+  .post(sanitizePlatformInput, (req,res) => {
+    const { name , img } = req.body
+    const platform =  new Platform (name,img)
+    platforms.push(platform)
+    return res.status(201).send({message: 'Platform created.', data: platform})
+} )
+
+
+app.route("/api/platforms/:id")
+  .get((req ,res)=> {
   const platform = platforms.find((platform)=> platform.getId()===Number.parseInt(req.params.id))
   if(!platform){
-    res.status(404).send({message: 'Platform not found'})
+    return res.status(404).send({message: 'Platform not found.'})
   }
   res.json({data: platform})
 })
 
 
-//set a new platform SIN SANITIZAR. me pide parametros en el middleware
-app.post('/api/platforms', (req,res) => {
-    if (!reqHasParams(req, ["name", "img"])) {
-      res.sendStatus(400)
-    }
-    const { name , img } = req.body
-    const platform =  new Platform (name,img)
-    platforms.push(platform)
-    res.status(201).send({message: 'Platform created', data: platform})
-} )
-
-
-//update a platform SIN SANITIZAR
-app.put('/api/platforms/:id', (req ,res)=>{
-  const platformIdx = platforms.findIndex((platform) => platform.getId() === Number.parseInt(req.params.id) )
+.put(sanitizePlatformInput, (req ,res)=>{
+  const platformIdx = platforms.findIndex((platform) => platform.getId() === Number.parseInt(req.params.id))
   if(platformIdx===-1){
-    res.status(404).send({message: 'platform not found'})
+    return res.status(404).send({message: 'Platform not found.'})
   }
-  const { name , img } = req.body
-  platforms[platformIdx] = {...platforms[platformIdx], ... req.body }
-  res.status(200).send({message: 'plaform updated succesfully', data: platforms[platformIdx]})
+  Object.assign(platforms[platformIdx],req.body.sanitizedInput)
+  return res.status(200).send({message: 'Plaform updated succesfully.', data: platforms[platformIdx]})
 })
 
+
+.patch(sanitizePlatformInput, (req ,res)=>{
+  const platformIdx = platforms.findIndex((platform) => platform.getId() === Number.parseInt(req.params.id))
+  if(platformIdx===-1){
+    return res.status(404).send({message: 'Platform not found.'})
+  }
+  Object.assign(platforms[platformIdx],req.body.sanitizedInput)
+  return res.status(200).send({message: 'Plaform updated succesfully.', data: platforms[platformIdx]})
+})
+
+
+.delete((req,res)=>{
+  const platformIdx = platforms.findIndex((platform) => platform.getId() === Number.parseInt(req.params.id))
+  if(platformIdx===-1){
+    res.status(404).send({message: 'Platform not found.'})
+  } else {
+    res.status(200).send({data: platforms[platformIdx],message: 'Platform deleted succesfully.'})
+    platforms.splice(platformIdx,1)
+  }
+})
+
+
+// Para manejar URL que no existe
+app.use((_,res)=>{
+  return res.status(404).send({message: 'Resource not found.'})
+})
