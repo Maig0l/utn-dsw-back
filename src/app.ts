@@ -1,4 +1,4 @@
-import express, {Request} from 'express'
+import express, {NextFunction, Request} from 'express'
 import {Shop} from './Shop.js'
 import { Platform } from './platform.js';
 import path from 'path'
@@ -129,7 +129,25 @@ function reqHasSomeParams(req: Request, params: string[]): Boolean {
   })
 }
 
+
+
+
+
+
+
+
+
+
 //CRUD Platform
+/*
+function sanitizePlatformInput(req:Request, res:Response, next:NextFunction){
+  req.body.sanitizedInput = {
+    name: req.body.name,
+    img: req.body.img
+  }
+  next()
+}
+*/
 
 const platforms: Platform[] = [];
 platforms.push(new Platform("Play Station 1", "/assets/ps1.svg"))
@@ -142,14 +160,15 @@ app.get('/api/platforms', (req,res)=> {
 
 //show one platform
 app.get('/api/platforms/:id', (req ,res)=> {
-  const platform = platforms.find((character)=> character.getId()===Number.parseInt(req.params.id))
+  const platform = platforms.find((platform)=> platform.getId()===Number.parseInt(req.params.id))
   if(!platform){
     res.status(404).send({message: 'Platform not found'})
   }
   res.json({data: platform})
 })
 
-//set a new platform
+
+//set a new platform SIN SANITIZAR. me pide parametros en el middleware
 app.post('/api/platforms', (req,res) => {
     if (!reqHasParams(req, ["name", "img"])) {
       res.sendStatus(400)
@@ -159,3 +178,16 @@ app.post('/api/platforms', (req,res) => {
     platforms.push(platform)
     res.status(201).send({message: 'Platform created', data: platform})
 } )
+
+
+//update a platform SIN SANITIZAR
+app.put('/api/platforms/:id', (req ,res)=>{
+  const platformIdx = platforms.findIndex((platform) => platform.getId() === Number.parseInt(req.params.id) )
+  if(platformIdx===-1){
+    res.status(404).send({message: 'platform not found'})
+  }
+  const { name , img } = req.body
+  platforms[platformIdx] = {...platforms[platformIdx], ... req.body }
+  res.status(200).send({message: 'plaform updated succesfully', data: platforms[platformIdx]})
+})
+
