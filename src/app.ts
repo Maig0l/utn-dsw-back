@@ -1,5 +1,6 @@
-import express, {Request} from 'express'
+import express, {NextFunction, Request, Response} from 'express'
 import {Shop} from './Shop.js'
+import { Platform } from './platform.js';
 import path from 'path'
 import { fileURLToPath } from 'url';
 
@@ -62,7 +63,7 @@ app.route("/api/shops/:id")
      * Cuando el `.all` le pase el control al `.get` o `.post` (mediante el callback `next`), estos últimos tendrán
      * acceso a las variables guardadas en `res.locals`, ya que están procesando la misma request y la misma response.
      * Esto lo hacemos para no tener que, en los demás callbacks, no tengamos que volver a buscar la shop
-     * con shops.find() como lo hicimos en la línea 54.
+     * con shops.find() como lo hicimos en la línea 55.
      */
     res.locals.idxShop = idxShop;
     res.locals.shop = shops[idxShop];
@@ -127,3 +128,92 @@ function reqHasSomeParams(req: Request, params: string[]): Boolean {
     return Object.keys(req.body).includes(e)
   })
 }
+
+
+
+
+
+
+
+
+
+
+//CRUD Platform
+
+function sanitizePlatformInput(req:Request, res:Response, next:NextFunction){
+  req.body.sanitizedInput = {
+    name: req.body.name,
+    img: req.body.img
+  }
+  Object.keys(req.body.sanitizedInput).forEach(key=>{
+    if(req.body.sanitizedInput[key]=== undefined) 
+      delete req.body.sanitizedInput[key]
+  })
+  next()
+}
+
+
+const platforms: Platform[] = [];
+platforms.push(new Platform("Play Station 1", "/assets/ps1.svg"))
+platforms.push(new Platform("Play Station 2", "/assets/ps2.svg"))
+
+
+app.route("/api/platforms")
+  .get((req,res)=> {
+  res.json({data: platforms}) 
+})
+
+
+  .post(sanitizePlatformInput, (req,res) => {
+    const { name , img } = req.body
+    const platform =  new Platform (name,img)
+    platforms.push(platform)
+    return res.status(201).send({message: 'Platform created.', data: platform})
+} )
+
+
+app.route("/api/platforms/:id")
+  .get((req ,res)=> {
+  const platform = platforms.find((platform)=> platform.getId()===Number.parseInt(req.params.id))
+  if(!platform){
+    return res.status(404).send({message: 'Platform not found.'})
+  }
+  res.json({data: platform})
+})
+
+
+.put(sanitizePlatformInput, (req ,res)=>{
+  const platformIdx = platforms.findIndex((platform) => platform.getId() === Number.parseInt(req.params.id))
+  if(platformIdx===-1){
+    return res.status(404).send({message: 'Platform not found.'})
+  }
+  Object.assign(platforms[platformIdx],req.body.sanitizedInput)
+  return res.status(200).send({message: 'Plaform updated succesfully.', data: platforms[platformIdx]})
+})
+
+
+.patch(sanitizePlatformInput, (req ,res)=>{
+  const platformIdx = platforms.findIndex((platform) => platform.getId() === Number.parseInt(req.params.id))
+  if(platformIdx===-1){
+    return res.status(404).send({message: 'Platform not found.'})
+  }
+  Object.assign(platforms[platformIdx],req.body.sanitizedInput)
+  return res.status(200).send({message: 'Plaform updated succesfully.', data: platforms[platformIdx]})
+})
+
+
+.delete((req,res)=>{
+  const platformIdx = platforms.findIndex((platform) => platform.getId() === Number.parseInt(req.params.id))
+  if(platformIdx===-1){
+    res.status(404).send({message: 'Platform not found.'})
+  } else {
+    res.status(200).send({data: platforms[platformIdx],message: 'Platform deleted succesfully.'})
+    platforms.splice(platformIdx,1)
+  }
+})
+
+
+// Para manejar URL que no existe
+app.use((_,res)=>{
+  return res.status(404).send({message: 'Resource not found.'})
+})
