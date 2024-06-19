@@ -1,6 +1,7 @@
 import express, {NextFunction, Request, Response} from 'express'
 import {Shop} from './Shop.js'
 import { Platform } from './platform.js';
+import {Studio} from './studio.js'
 import path from 'path'
 import { fileURLToPath } from 'url';
 
@@ -108,6 +109,72 @@ app.route("/api/shops/:id")
     res.send(shop)
   })
 
+  app.route ("/api/studios") //aca es donde se genera la vista de los estudios
+  .get((req,res)=> { res.json(studios)})
+
+  .post((req: Request, res) => {                           
+    if (!reqHasParams(req, ["name", "type", "site"])) {
+      res.sendStatus(400)
+    } 
+
+    const x = studios.push(
+      new Studio(req.body.name,
+              req.body.type,
+              req.body.site)
+    );
+    res.json(studios[x-1])
+  })
+
+  app.route("/api/studio/:id")
+  .all((req: Request, res, next) => {
+    const id = Number.parseInt(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).send("ID must be an integer.");
+      return
+    }
+
+    const idxStudio = studios.findIndex((e)=>{return e.getId() === id});
+    if (idxStudio === -1) {
+      res.sendStatus(404);
+      return
+    }
+
+    res.locals.idxStudio = idxStudio;
+    res.locals.studio = studios[idxStudio];
+    next()
+  })
+
+  .get((req: Request, res) => {
+    res.json(res.locals.studio)
+  })
+
+  .delete((req: Request, res) => {
+    res.send(res.locals.studio)
+    studios.splice(res.locals.idxStudio, 1);
+  })
+
+  .patch((req, res) => {
+    const VALID_PARAMS = ["name", "type", "site"]
+    if (!reqHasSomeParams(req, VALID_PARAMS)) {
+      res.status(400).send("Request must provide at least 1 valid parameter")
+      return
+    }
+
+    const studio = res.locals.studio;
+    VALID_PARAMS.forEach( (field) => {
+      const newValue = req.body[field];
+      if (newValue === undefined) return;
+
+      switch (field) {
+        case "name": studio.setName(newValue); break;
+        case "type": studio.setType(newValue); break;
+        case "site": studio.setSite(newValue); break;
+      }
+    })
+    res.send(studio)
+  })
+  
+
 app.get('/', (req, res) => {
   res.sendFile("index.html", {root: ROOT})
 })
@@ -212,6 +279,74 @@ app.route("/api/platforms/:id")
   }
 })
 
+//CRUD Studio
+
+function sanitizeStudioInput(req:Request, res:Response, next:NextFunction){
+  req.body.sanitizedInput = {
+    name: req.body.name,
+    type: req.body.type,
+    site: req.body.site
+  }
+  Object.keys(req.body.sanitizedInput).forEach(key=>{
+    if(req.body.sanitizedInput[key]=== undefined) 
+      delete req.body.sanitizedInput[key]
+  })
+  next()
+}
+
+const studios: Studio[] = [];
+studios.push(new Studio("ATLUS",["Desarrollador"],"https://atlus.com/"))
+studios.push(new Studio("WSS Playground",["Desarrollador", "Editor"],"https://whysoserious.jp/en/"))
+studios.push(new Studio("Square Enix",["Desarrollador", "Editor"],"https://www.square-enix-games.com/es_XL/home"))
+
+app.route("/api/studios")
+  .get((req,res)=> {
+  res.json({data: Studio}) 
+})
+
+  .post(sanitizeStudioInput, (req,res) => {
+    const { name , type, site } = req.body
+    const studio =  new Studio (name,type,site)
+    studios.push(studio)
+    return res.status(201).send({message: 'Studio created.', data: studio})
+} )
+
+app.route("/api/studios/:id")
+  .get((req ,res)=> {
+  const studio = studios.find((studio)=> studio.getId()===Number.parseInt(req.params.id))
+  if(!studio){
+    return res.status(404).send({message: 'Studio not found.'})
+  }
+  res.json({data: studio})
+})
+
+.put(sanitizeStudioInput, (req ,res)=>{
+  const studioIdx = studios.findIndex((studio) => studio.getId() === Number.parseInt(req.params.id))
+  if(studioIdx===-1){
+    return res.status(404).send({message: 'Studio not found.'})
+  }
+  Object.assign(studios[studioIdx],req.body.sanitizedInput)
+  return res.status(200).send({message: 'Studio updated succesfully.', data: studios[studioIdx]})
+})
+
+.patch(sanitizeStudioInput, (req ,res)=>{
+  const studioIdx = studios.findIndex((studio) => studio.getId() === Number.parseInt(req.params.id))
+  if(studioIdx===-1){
+    return res.status(404).send({message: 'Studio not found.'})
+  }
+  Object.assign(studios[studioIdx],req.body.sanitizedInput)
+  return res.status(200).send({message: 'Studio updated succesfully.', data: studios[studioIdx]})
+})
+
+.delete((req,res)=>{
+  const studioIdx = studios.findIndex((studio) => studio.getId() === Number.parseInt(req.params.id))
+  if(studioIdx===-1){
+    res.status(404).send({message: 'Studio not found.'})
+  } else {
+    res.status(200).send({data: studios[studioIdx],message: 'Studio deleted succesfully.'})
+    studios.splice(studioIdx,1)
+  }
+})
 
 // Para manejar URL que no existe
 app.use((_,res)=>{
