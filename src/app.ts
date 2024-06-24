@@ -109,72 +109,6 @@ app.route("/api/shops/:id")
     res.send(shop)
   })
 
-  app.route ("/api/studios") //aca es donde se genera la vista de los estudios
-  .get((req,res)=> { res.json(studios)})
-
-  .post((req: Request, res) => {                           
-    if (!reqHasParams(req, ["name", "type", "site"])) {
-      res.sendStatus(400)
-    } 
-
-    const x = studios.push(
-      new Studio(req.body.name,
-              req.body.type,
-              req.body.site)
-    );
-    res.json(studios[x-1])
-  })
-
-  app.route("/api/studio/:id")
-  .all((req: Request, res, next) => {
-    const id = Number.parseInt(req.params.id);
-    if (Number.isNaN(id)) {
-      res.status(400).send("ID must be an integer.");
-      return
-    }
-
-    const idxStudio = studios.findIndex((e)=>{return e.getId() === id});
-    if (idxStudio === -1) {
-      res.sendStatus(404);
-      return
-    }
-
-    res.locals.idxStudio = idxStudio;
-    res.locals.studio = studios[idxStudio];
-    next()
-  })
-
-  .get((req: Request, res) => {
-    res.json(res.locals.studio)
-  })
-
-  .delete((req: Request, res) => {
-    res.send(res.locals.studio)
-    studios.splice(res.locals.idxStudio, 1);
-  })
-
-  .patch((req, res) => {
-    const VALID_PARAMS = ["name", "type", "site"]
-    if (!reqHasSomeParams(req, VALID_PARAMS)) {
-      res.status(400).send("Request must provide at least 1 valid parameter")
-      return
-    }
-
-    const studio = res.locals.studio;
-    VALID_PARAMS.forEach( (field) => {
-      const newValue = req.body[field];
-      if (newValue === undefined) return;
-
-      switch (field) {
-        case "name": studio.setName(newValue); break;
-        case "type": studio.setType(newValue); break;
-        case "site": studio.setSite(newValue); break;
-      }
-    })
-    res.send(studio)
-  })
-  
-
 app.get('/', (req, res) => {
   res.sendFile("index.html", {root: ROOT})
 })
@@ -294,6 +228,72 @@ function sanitizeStudioInput(req:Request, res:Response, next:NextFunction){
   next()
 }
 
+app.route ("/api/studios") //aca es donde se genera la vista de los estudios
+  
+.get((req,res)=> { res.json(studios)})
+
+.post((req: Request, res) => {                           
+  if (!reqHasParams(req, ["name", "type", "site"])) {
+    res.sendStatus(400)
+  } 
+
+  const x = studios.push(
+    new Studio(req.body.name,
+            req.body.type,
+            req.body.site)
+  );
+  res.json(studios[x-1])
+})
+
+app.route("/api/studios/:id")
+  .all((req: Request, res, next) => {
+    const id = Number.parseInt(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).send("ID must be an integer.");
+      return
+    }
+
+    const idxStudio = studios.findIndex((e)=>{return e.getId() === id});
+    if (idxStudio === -1) {
+      res.sendStatus(404);
+      return
+    }
+
+    res.locals.idxStudio = idxStudio;
+    res.locals.studio = studios[idxStudio];
+    next()
+  })
+
+  .get((req: Request, res) => {
+    res.json(res.locals.studio)
+  })
+
+  .delete((req: Request, res) => {
+    res.send(res.locals.studio)
+    studios.splice(res.locals.idxStudio, 1);
+  })
+
+  .patch((req, res) => {
+    const VALID_PARAMS = ["name", "type", "site"]
+    if (!reqHasSomeParams(req, VALID_PARAMS)) {
+      res.status(400).send("Request must provide at least 1 valid parameter")
+      return
+    }
+
+    const studio = res.locals.studio;
+    VALID_PARAMS.forEach( (field) => {
+      const newValue = req.body[field];
+      if (newValue === undefined) return;
+
+      switch (field) {
+        case "name": studio.setName(newValue); break;
+        case "type": studio.setType(newValue); break;
+        case "site": studio.setSite(newValue); break;
+      }
+    })
+    res.send(studio)
+  })
+
 const studios: Studio[] = [];
 studios.push(new Studio("ATLUS",["Desarrollador"],"https://atlus.com/"))
 studios.push(new Studio("WSS Playground",["Desarrollador", "Editor"],"https://whysoserious.jp/en/"))
@@ -330,7 +330,11 @@ app.route("/api/studios/:id")
 })
 
 .patch(sanitizeStudioInput, (req ,res)=>{
+  const VALID_PARAMS = ["name", "type", "site"]
   const studioIdx = studios.findIndex((studio) => studio.getId() === Number.parseInt(req.params.id))
+  if(!reqHasSomeParams(req, VALID_PARAMS)){
+    return res.status(400).send({message: 'Request must provide at least 1 valid parameter.'})
+  }
   if(studioIdx===-1){
     return res.status(404).send({message: 'Studio not found.'})
   }
@@ -347,6 +351,8 @@ app.route("/api/studios/:id")
     studios.splice(studioIdx,1)
   }
 })
+
+
 
 // Para manejar URL que no existe
 app.use((_,res)=>{
