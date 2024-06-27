@@ -1,0 +1,19 @@
+GET http://localhost:8080/api/tags/
+
+
+### obtener un tag
+GET http://localhost:8080/api/tags/1
+
+
+### crear un nuevo tag
+POST http://localhost:8080/api/tags/
+Content-Type: application/json
+
+{
+  "name": "Sci-Fi",
+  "description": "Ships and planets"
+  
+}
+
+### borrar un tag
+DELETE http://localhost:8080/api/tags/1
