@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, Router } from "express";
 import {findAll, findById, add, update, remove, sanitizeInput, validateExists} from "./studio.controller.js";
 
 
-const studioRouter = Router();
+export const studioRouter = Router();
 
 studioRouter.get("/", findAll);
 studioRouter.post("/", sanitizeInput, add);

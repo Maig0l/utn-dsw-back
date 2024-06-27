@@ -4,6 +4,7 @@ import { Platform } from './platform.js';
 import {Studio} from './studio/studio.entity.js';
 import path from 'path'
 import { fileURLToPath } from 'url';
+import { studioRouter } from './studio/studio.routes.js';
 
 // Metadatos para saber en qué directorio está el programa
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -18,6 +19,8 @@ const app = express()
 // Nota: En Postman usar body de tipo x-www-form-urlencoded
 app.use(express.urlencoded({extended: true}))
 app.use(express.static("public"))
+
+app.use('/api/studios', studioRouter)
 
 const shops: Shop[] = [];
 shops.push(new Shop("Steam", "/assets/steam.svg", "https://steampowered.com/"))
