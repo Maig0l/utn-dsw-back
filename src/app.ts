@@ -1,3 +1,4 @@
+import fs from 'fs';
 import express, {Request} from 'express' 
 import {Shop} from './shop/shop.entity.js'
 import path from 'path'
@@ -16,6 +17,7 @@ const app = express()
 //  no me toma el body de la request POST si tiene Content-Type:application/form-data
 // Nota: En Postman usar body de tipo x-www-form-urlencoded
 app.use(express.urlencoded({extended: true}))
+app.use(express.json())
 app.use(express.static("public"))
 
 // Registrar routers para entidades
@@ -24,6 +26,12 @@ app.use('/api/shops', shopRouter)
 // Index para debug
 app.get('/', (req, res) => {
   res.sendFile("index.html", {root: ROOT})
+})
+
+app.post('/restart', (req, res) => {
+  console.log("Restarting server...")
+  res.json({message: "Restarting server..."})
+  fs.writeFileSync("src/restart.ts", `const x = "${new Date().toISOString()}"`)
 })
 
 app.use((_, res) => {

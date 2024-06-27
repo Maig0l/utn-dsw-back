@@ -1,5 +1,10 @@
 import {Request, Response, NextFunction, response} from 'express'
 import { ShopRepository } from './shop.repository.js'
+import { paramCheckFrom } from '../shared/hasParams.js';
+
+// Registrar parámetros válidos para un post/put/patch
+const VALID_PARAMS = "name img site".split(' ')
+const hasParams = paramCheckFrom(VALID_PARAMS)
 
 const repository = new ShopRepository();
 
@@ -8,23 +13,34 @@ function findAll(req: Request, res: Response) {
 }
 
 function findOne(req: Request, res: Response) {
-  // El middleware validateExists asegura la existencia del objeto
   const shop = repository.findOne( {id: res.locals.id} )
+  if (!shop)
+    return res.status(500).json({message: "FindOne failed!"})
   res.json({data: shop})
 }
 
 function add(req: Request, res: Response) {
   const shop = repository.add(res.locals.sanitizedInput)
+  if (!shop)
+    return res.status(500).json({message: "Add failed!"})
   res.status(201).json({data: shop})
 }
 
 function update(req: Request, res: Response) {
-  const shop = repository.update(res.locals.sanitizedInput)
+  // El método Repository.Update toma un objeto que contiene el ID para buscar
+  //  JUNTO con los datos a reemplazar
+  const newData = {...res.locals.sanitizedInput, id: res.locals.id}
+
+  const shop = repository.update(newData)
+  if (!shop)
+    return res.status(500).json({message: "Update failed!"})
   res.json({data: shop})
 }
 
 function remove(req: Request, res: Response) {
   const shop = repository.remove({id: res.locals.id})
+  if (!shop)
+    return res.status(500).json({message: "Remove failed!"})
   res.json({data: shop})
 }
 
@@ -38,13 +54,13 @@ function remove(req: Request, res: Response) {
  * TODO: (Code Convention para el equipo)
  */
 function sanitizeInput(req:Request, res:Response, next:NextFunction) {
-  // Robado de SO, como para que sanitize algo (?
-  // https://stackoverflow.com/a/3809435
-  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
+  if (["POST", "PUT"].includes(req.method) && !hasParams(req, true))
+    return res.status(400)
+      .json({message: "Must provide all attributes"})
 
-  // if (!req.body.site.match(urlRegex))
-  //   return res.status(400).json({message: 'Attribute site must be a valid URL'})
-
+  if ("PATCH" == req.method && !hasParams(req, false))
+    return res.status(400)
+      .json({message: "Must provide at least one valid attribute"})
 
   res.locals.sanitizedInput = {
     name: req.body.name,
@@ -52,10 +68,13 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
     site: req.body.site
   }
   
-  // CONSULTA: La sanitización debería ser silenciosa¿
-  if (!req.body.site.match(urlRegex))
+  // Robado de SO, como para que sanitize algo (?
+  // https://stackoverflow.com/a/3809435
+  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
+  if (!urlRegex.test(req.body.site))
     res.locals.sanitizedInput.site = undefined
 
+  // CONSULTA: La sanitización debería ser silenciosa¿
   Object.keys(res.locals.sanitizedInput).forEach((k) => {
     if (res.locals.sanitizedInput[k] === undefined) {
       delete res.locals.sanitizedInput[k]

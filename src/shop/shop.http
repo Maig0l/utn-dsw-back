@@ -1,0 +1,36 @@
+### Reiniciar server
+POST http://localhost:8080/restart
+
+###
+GET http://localhost:8080/api/shops
+
+###
+POST http://localhost:8080/api/shops
+Content-Type: application/json
+
+{
+  "name": "test shop",
+  "img": "/assets/placeholder.png",
+  "site": "https://google.com"
+}
+
+###
+GET http://localhost:8080/api/shops/4
+
+###
+PUT http://localhost:8080/api/shops/4
+Content-Type: application/json
+
+{
+  "name": "Test shop",
+  "img": "/assets/placeholder.png",
+  "site": "https://example.org"
+}
+
+###
+PATCH http://localhost:8080/api/shops/4
+Content-Type: application/json
+
+{
+  "name": "test patched"
+}
