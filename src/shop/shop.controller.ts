@@ -1,10 +1,10 @@
 import {Request, Response, NextFunction, response} from 'express'
 import { ShopRepository } from './shop.repository.js'
-import { paramCheckFrom } from '../shared/hasParams.js';
+import { paramCheckFromList } from '../shared/paramCheckFromList.js';
 
 // Registrar parámetros válidos para un post/put/patch
 const VALID_PARAMS = "name img site".split(' ')
-const hasParams = paramCheckFrom(VALID_PARAMS)
+const hasParams = paramCheckFromList(VALID_PARAMS)
 
 const repository = new ShopRepository();
 

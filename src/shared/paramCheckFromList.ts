@@ -7,7 +7,7 @@ import {Request} from 'express'
  * @param {boolean} all - Chequear que tenga *todos* los atributos, o sólo
  * algunos¿ (usar `false` para el patch)
  */
-export function paramCheckFrom(attrs: string[]) {
+export function paramCheckFromList(attrs: string[]) {
   return (req: Request, all: boolean) => {
     const ATTRS = attrs
 
