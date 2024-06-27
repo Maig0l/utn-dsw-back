@@ -1,4 +1,4 @@
-import {Request, Response, NextFunction, response} from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { ShopRepository } from './shop.repository.js'
 import { paramCheckFromList } from '../shared/paramCheckFromList.js';
 
