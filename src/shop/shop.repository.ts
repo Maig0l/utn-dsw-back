@@ -16,16 +16,12 @@ export class ShopRepository implements Repository<Shop> {
   }
 
   public add(item: Shop): Shop | undefined {
-    if (!reqHasParams(item, ["name", "img", "site"])) {
+    if (!reqHasParams(item, ["name", "img", "site"]))
       return
-    }
 
-    const x = shops.push(
-      new Shop(item.name,
-              item.img,
-              item.site)
-    );
-    return item
+    const x = new Shop(item.name, item.img, item.site)
+    shops.push(x);
+    return x
   }
 
   // Un objeto que conforme al prototipo Shop debe tener los campos *públicos*
@@ -47,7 +43,6 @@ export class ShopRepository implements Repository<Shop> {
 
     // splice elimina el elemento y devuelve un array de 1 item con la shop borrada
     const shop = shops.splice(idxShop, 1)[0]
-    // TODO: Esto funciona o el objeto deja de existir?
     return shop
   }
 }
