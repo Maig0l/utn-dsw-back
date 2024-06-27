@@ -75,24 +75,7 @@ function validateExists(req:Request, res:Response, next:NextFunction) {
 
     if (!studio) 
         return res.status(404).json({ message: "Studio Not Found with the selected ID" });
-    
-// chequear esto
-/*    if (studio.name === res.locals.sanitizedInput.name) {
-        return res.status(400).json({ message: "Invalid Name" });
-    }
 
-    if (studio.type === res.locals.sanitizedInput.type) {
-        return res.status(400).json({ message: "Invalid Type" });
-    }
-
-    if (studio.site === res.locals.sanitizedInput.site) {
-        return res.status(400).json({ message: "Invalid Site" });
-    }
-
-
-    res.locals.id = id;
-    res.locals.studio = studio;
-*/
     next();
 }
     
