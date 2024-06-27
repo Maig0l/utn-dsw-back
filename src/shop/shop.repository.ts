@@ -17,7 +17,7 @@ export class ShopRepository implements Repository<Shop> {
 
   public add(item: Shop): Shop | undefined {
     if (!reqHasParams(item, ["name", "img", "site"])) {
-      return undefined
+      return
     }
 
     const x = shops.push(
@@ -43,7 +43,7 @@ export class ShopRepository implements Repository<Shop> {
   public remove(item: { id: number; }): Shop | undefined {
     const idxShop = shops.findIndex((e)=>{return e.id === item.id});
     if (idxShop == -1)
-      return undefined
+      return
 
     // splice elimina el elemento y devuelve un array de 1 item con la shop borrada
     const shop = shops.splice(idxShop, 1)[0]
