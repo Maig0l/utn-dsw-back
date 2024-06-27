@@ -1,7 +1,5 @@
 import fs from 'fs';
-import express, {NextFunction, Request, Response} from 'express' 
-import {Shop} from './shop/shop.entity.js'
-import { Platform } from './platform.js';
+import express from 'express' 
 import path from 'path'
 import { fileURLToPath } from 'url';
 import { shopRouter } from './shop/shop.routes.js';
@@ -24,6 +22,7 @@ app.use(express.static("public"))
 
 // Registrar routers para entidades
 app.use('/api/shops', shopRouter)
+app.use('/api/platforms', platformRouter)
 
 // Index para debug
 app.get('/', (req, res) => {
@@ -43,28 +42,4 @@ app.use((_, res) => {
 app.listen(8080, ()=> {
   console.log(`running on http://localhost:8080
 root in ${ROOT}`)
-})
-
-function reqHasParams(req: Request, params: string[]): Boolean {
-  return params.every( (e) => {
-    return Object.keys(req.body).includes(e)
-  })
-}
-
-function reqHasSomeParams(req: Request, params: string[]): Boolean {
-  return params.some( (e) => {
-    return Object.keys(req.body).includes(e)
-  })
-}
-
-
-
-
-//CRUD Platform
-
-app.use('/api/platforms', platformRouter)
-
-// Para manejar URL que no existe
-app.use((_,res)=>{
-  return res.status(404).send({message: 'Resource not found.'})
 })
