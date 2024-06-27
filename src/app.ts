@@ -20,6 +20,8 @@ const app = express()
 app.use(express.urlencoded({extended: true}))
 app.use(express.static("public"))
 
+app.use('/api/studios', studioRouter)
+
 app.use("/api/studios", studioRouter)
 
 const shops: Shop[] = [];
