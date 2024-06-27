@@ -2,6 +2,7 @@ import express, {NextFunction, Request, Response} from 'express'
 import {Shop} from './Shop.js'
 import { Platform } from './platform.js';
 import {Studio} from './studio/studio.entity.js';
+import { studioRouter } from './studio/studio.routes.js';
 import path from 'path'
 import { fileURLToPath } from 'url';
 
@@ -18,6 +19,8 @@ const app = express()
 // Nota: En Postman usar body de tipo x-www-form-urlencoded
 app.use(express.urlencoded({extended: true}))
 app.use(express.static("public"))
+
+app.use("/api/studios", studioRouter)
 
 const shops: Shop[] = [];
 shops.push(new Shop("Steam", "/assets/steam.svg", "https://steampowered.com/"))
