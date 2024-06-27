@@ -9,5 +9,5 @@ studioRouter.post("/", sanitizeInput, add);
 
 studioRouter.get("/:id", validateExists, findById);
 studioRouter.put("/:id", validateExists, sanitizeInput, update);
-studioRouter.patch("/:id", validateExists, update);
+studioRouter.patch("/:id", validateExists, sanitizeInput, update);
 studioRouter.delete("/:id", validateExists, remove);

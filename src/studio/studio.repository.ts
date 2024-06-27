@@ -10,26 +10,27 @@ export class StudioRepository implements Repository<Studio> {
     public findAll(): Studio[] | undefined {
         return studios;
     }
+
     public findById(item: {id: number}): Studio | undefined {
         return studios.find(studio => studio.id === item.id);
     }
+
     public add(item: Studio): Studio | undefined{
         if(!reqHasParams(item, ["name", "type", "site"])) 
         return undefined;
     
-        const x = studios.push(
-            new Studio(item.name,
-                       item.type,
-                       item.site)
-        );
-        return item;
+        const x = new Studio(item.name,
+                             item.type,
+                             item.site)
+        //studios.push(x);
+        return x;
     }
 
     public update(item: Studio): Studio | undefined {
-        const idxStudio = studios.findIndex(studio => studio.id === item.id);
-        studios[idxStudio] = item;
+        const idxStudio = studios.findIndex(studio => studio.id === item.id)
+   //     studios[idxStudio] = item;
         if (idxStudio === -1)
-            return undefined;
+            return
         studios[idxStudio] = {...studios[idxStudio], ...item, id: studios[idxStudio].id};
         return studios[idxStudio];
     }
