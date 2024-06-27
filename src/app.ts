@@ -2,6 +2,7 @@ import express, {Request} from 'express'
 import {Shop} from './shop/shop.entity.js'
 import path from 'path'
 import { fileURLToPath } from 'url';
+import { shopRouter } from './shop/shop.routes.js';
 
 // Metadatos para saber en qué directorio está el programa
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -17,9 +18,16 @@ const app = express()
 app.use(express.urlencoded({extended: true}))
 app.use(express.static("public"))
 
+// Registrar routers para entidades
+app.use('/api/shops', shopRouter)
 
+// Index para debug
 app.get('/', (req, res) => {
   res.sendFile("index.html", {root: ROOT})
+})
+
+app.use((_, res) => {
+  return res.status(404).json({message: "Resource not found"})
 })
 
 app.listen(8080, ()=> {

@@ -5,7 +5,7 @@ import {Request, Response, NextFunction, Router} from 'express'
 import {findOne, findAll, add, remove, update, validateExists,
   sanitizeInput} from './shop.controller.js'
 
-const shopRouter = Router()
+export const shopRouter = Router()
 
 shopRouter.get('/', findAll)
 shopRouter.post('/', sanitizeInput, add)
