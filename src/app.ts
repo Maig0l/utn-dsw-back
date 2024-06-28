@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { platformRouter } from './platform/platform.routes.js';
 import { shopRouter } from './shop/shop.routes.js';
 import { studioRouter } from './studio/studio.routes.js';
+import { userRouter } from './user/user.routes.js';
 
 // Metadatos para saber en qué directorio está el programa
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -22,6 +23,7 @@ app.use(express.json())
 app.use(express.static("public"))
 
 // Registrar routers para entidades
+app.use('/api/users', userRouter)
 app.use('/api/shops', shopRouter)
 app.use('/api/studios', studioRouter)
 app.use('/api/platforms', platformRouter)
