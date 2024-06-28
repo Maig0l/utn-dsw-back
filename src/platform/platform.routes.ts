@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { sanitizePlatformInput, findAll, findOne, add, update, remove } from "./platform.controler.js";
+import { sanitizePlatformInput, findAll, findOne, add, update, remove } from "./platform.controller.js";
 
 export const platformRouter = Router()
 

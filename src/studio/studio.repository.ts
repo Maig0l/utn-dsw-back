@@ -11,7 +11,7 @@ export class StudioRepository implements Repository<Studio> {
         return studios;
     }
 
-    public findById(item: {id: number}): Studio | undefined {
+    public findOne(item: {id: number}): Studio | undefined {
         return studios.find(studio => studio.id === item.id);
     }
 
@@ -19,16 +19,13 @@ export class StudioRepository implements Repository<Studio> {
         if(!reqHasParams(item, ["name", "type", "site"])) 
         return undefined;
     
-        const x = new Studio(item.name,
-                             item.type,
-                             item.site)
+        const x = new Studio(item.name, item.type, item.site)
         studios.push(x);
         return x;
     }
 
     public update(item: Studio): Studio | undefined {
         const idxStudio = studios.findIndex(studio => studio.id === item.id)
-   //     studios[idxStudio] = item;
         if (idxStudio === -1)
             return
         studios[idxStudio] = {...studios[idxStudio], ...item, id: studios[idxStudio].id};

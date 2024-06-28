@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import { StudioRepository } from "./studio.repository.js"
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
-import { url } from "inspector";
 
 const validParams = ['name', 'type', 'site']
 const hasParams = paramCheckFromList(validParams)
@@ -16,8 +15,8 @@ function findAll(req: Request, res: Response) {
     res.json({data: studios});
 }
 
-function findById(req: Request, res: Response) {
-    const studio = Repository.findById({ id: parseInt(req.params.id) });
+function findOne(req: Request, res: Response) {
+    const studio = Repository.findOne({ id: parseInt(req.params.id) });
     if (!studio) {
         return res.status(404).json({ message: "Studio Not Found" });
     }
@@ -94,7 +93,7 @@ function validateExists(req:Request, res:Response, next:NextFunction) {
     if (Number.isNaN(id))
         return res.status(400).json({ message: "ID must be an integer" })
 
-    const studio = Repository.findById({ id });
+    const studio = Repository.findOne({ id });
 
     if (!studio) 
         return res.status(404).json({ message: "Studio Not Found with the selected ID" });
@@ -105,4 +104,4 @@ function validateExists(req:Request, res:Response, next:NextFunction) {
     next();
 }
     
-export { findAll, findById, add, update, remove, sanitizeInput, validateExists };
+export { findAll, findOne, add, update, remove, sanitizeInput, validateExists };

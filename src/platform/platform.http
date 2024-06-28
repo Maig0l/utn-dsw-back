@@ -2,10 +2,10 @@
 POST http://localhost:8080/restart
 
 ###
-GET http://localhost:8080/api/studios
+GET http://localhost:8080/api/platforms
 
 ###
-POST http://localhost:8080/api/studios
+POST http://localhost:8080/api/platforms
 Content-Type: application/json
 
 {
@@ -15,10 +15,10 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/studios/4
+GET http://localhost:8080/api/platforms/1
 
 ###
-PUT http://localhost:8080/api/studios/4
+PUT http://localhost:8080/api/platforms/4
 Content-Type: application/json
 
 {
@@ -28,7 +28,7 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:8080/api/studios/4
+PATCH http://localhost:8080/api/platforms/4
 Content-Type: application/json
 
 {
@@ -37,4 +37,4 @@ Content-Type: application/json
 
 
 ###
-DELETE http://localhost:8080/api/studios/1
+DELETE http://localhost:8080/api/platforms/1
