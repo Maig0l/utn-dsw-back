@@ -5,17 +5,14 @@ import { Tag } from './tag.entity.js'
 const repository = new TagRepository()
 
 function sanitizeTagInput(req: Request, res: Response, next: NextFunction) {
+  console.log(req.body)
   req.body.sanitizedInput = {
     name: req.body.name,
     description: req.body.description
-    
   }
-  //more checks here
-
-  Object.keys(req.body.sanitizedInput).forEach((key) => {
-   /* if (req.body.sanitizedInput[key] === undefined) {
+  Object.keys(req.body.sanitizedInput).forEach((key)=>{
+    if(req.body.sanitizedInput[key]=== undefined) 
       delete req.body.sanitizedInput[key]
-    }*/
   })
   next()
 }
@@ -37,13 +34,14 @@ function add(req: Request, res: Response) {
   const { name , description} = req.body.sanitizedInput
 
   const tagInput = new Tag(name, description)
-
+  console.log(name)
+  console.log(description)
   const tag = repository.add(tagInput)
   return res.status(201).send({ message: 'Tag created', data: tag })
 }
 
 function update(req: Request, res: Response) {
-  req.body.sanitizedInput.id = req.params.id
+  req.body.sanitizedInput.id = parseInt(req.params.id)
   const tag = repository.update(req.body.sanitizedInput)
 
   if (!tag) {

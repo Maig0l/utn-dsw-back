@@ -14,27 +14,6 @@ export class Tag {
     }
 
 
-    getId(): number{
-        return this.id;
-
-    }
-
-    getName(): string{
-        return this.name;
-
-    }
-
-    getDescriptions(): string{
-        return this.description;
-    }
-
-
-    setName(name:string):void{
-        this.name = name;
-    }
-
-    set(description:string){
-        this.description = description;
-    }
+   
 }
 

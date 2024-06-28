@@ -17,15 +17,15 @@ export class TagRepository implements Repository<Tag>{
         return item
     }
     public update(item: Tag): Tag | undefined {
-        const tagIdx = tags.findIndex((tag) =>tag.id === item.getId())
+        const tagIdx = tags.findIndex((tag) =>tag.id === item.id)
 
-       /* if (tagIdx !== -1) {
-          tags[tagIdx] = {...tags[tagIdx], ...item }
-        }*/
+        if (tagIdx !== -1) {
+          tags[tagIdx] = {...tags[tagIdx], ...item, id: tags[tagIdx].id }
+        }
         return tags[tagIdx]
     }
     public delete(item: { id: number; }): Tag | undefined {
-        const tagIdx = tags.findIndex((tag) => String(tag.getId()) === String(item.id))
+        const tagIdx = tags.findIndex((tag) => String(tag.id) === String(item.id))
 
         if (tagIdx !== -1) {
           const deletedTags = tags[tagIdx]
