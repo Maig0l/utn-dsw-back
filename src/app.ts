@@ -1,7 +1,7 @@
 import fs from 'fs';
 import express, {NextFunction, Request, Response} from 'express' 
-import {Shop} from './shop/shop.entity.js'
 import { Platform } from './platform.js';
+import { studioRouter } from './studio/studio.routes.js';
 import path from 'path'
 import { fileURLToPath } from 'url';
 import { shopRouter } from './shop/shop.routes.js';
@@ -23,6 +23,7 @@ app.use(express.static("public"))
 
 // Registrar routers para entidades
 app.use('/api/shops', shopRouter)
+app.use('/api/studios', studioRouter)
 
 // Index para debug
 app.get('/', (req, res) => {
@@ -139,8 +140,3 @@ app.route("/api/platforms/:id")
   }
 })
 
-
-// Para manejar URL que no existe
-app.use((_,res)=>{
-  return res.status(404).send({message: 'Resource not found.'})
-})
