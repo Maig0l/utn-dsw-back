@@ -22,7 +22,7 @@ export class StudioRepository implements Repository<Studio> {
         const x = new Studio(item.name,
                              item.type,
                              item.site)
-        //studios.push(x);
+        studios.push(x);
         return x;
     }
 

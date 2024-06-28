@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { StudioRepository } from "./studio.repository.js"
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
+import { url } from "inspector";
 
 const validParams = ['name', 'type', 'site']
 const hasParams = paramCheckFromList(validParams)
@@ -55,13 +56,10 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
         return res.status(400)
             .json({message: "Must provide all attributes"})
 
-    if ("PATCH" == req.method && !hasParams(req, false))
+    if ("PATCH" == req.method && !hasParams(req.body, false))
         return res.status(400)
             .json({message: "Must provide at least one valid attribute"})
           
-    const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
-        if(!urlRegex.test(req.body.site))
-            res.locals.sanitizedInput.site = undefined
 
     res.locals.sanitizedInput = {
         name: req.body.name,
@@ -69,18 +67,26 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
         site: req.body.site
     }
 
-    if (!req.body.site.match(urlRegex)) {
-        return res.status(400).json({ message: "Bad Request" }); // chequear esto
-    }
+    const sanitizedInput = res.locals.sanitizedInput
+    
+    const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
+    if(!urlRegex.test(req.body.site))
+        sanitizedInput.site = undefined
 
-    Object.keys(res.locals.sanitizedInput).forEach((key) => {
-        if (!res.locals.sanitizedInput[key] === undefined) {
-            delete res.locals.sanitizedInput[key];
+    if (!urlRegex.test(req.body.site))
+        sanitizedInput.site = undefined
+    
+
+    Object.keys(sanitizedInput).forEach((key) => {
+        if (sanitizedInput[key] === undefined) {
+            delete sanitizedInput[key];
         }
     });
     
     next();
 }
+
+// santizacion del tipo
 
 function validateExists(req:Request, res:Response, next:NextFunction) {
     const id = parseInt(req.params.id);
