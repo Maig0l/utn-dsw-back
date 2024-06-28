@@ -1,7 +1,7 @@
-export interface Repository<Tipo> { 
-  findAll(): Tipo[] | undefined
-  findOne(item: {id: number}): Tipo | undefined
-  add(item: Tipo): Tipo | undefined
-  update(item: Tipo): Tipo | undefined
-  remove(item: {id: number}): Tipo | undefined
+export interface Repository<T> { 
+  findAll(): T[] | undefined
+  findOne(item: {id: number}): T | undefined
+  add(item: T): T | undefined
+  update(item: T): T | undefined
+  remove(item: {id: number}): T | undefined
 }
