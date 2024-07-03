@@ -52,7 +52,8 @@ export class UserRepository implements Repository<User> {
   }
 
   findByNick(query: string): User | undefined {
-    return users.find((u) => u.nick === query)
+    // La comparación por nicks es insensible a las mayúsculas, como en Github
+    return users.find((u) => u.nick.toLowerCase() === query.toLowerCase())
   }
 
   findByEmail(query: string): User | undefined {

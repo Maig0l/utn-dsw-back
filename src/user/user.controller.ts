@@ -3,6 +3,8 @@ import { UserRepository } from "./user.repository.js";
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import sanitizeHtml from 'sanitize-html'
 
+const ERR_500 = "Something went horribly wrong. Oops (this is our fault)"
+
 const REQ_PARAMS = "nick email password".split(' ')
 const VALID_PARAMS = "nick email password profilePic bio".split(' ')
 const hasParams = paramCheckFromList(VALID_PARAMS)
@@ -19,12 +21,27 @@ function findOne(req: Request, res: Response) {
 }
 
 function add(req: Request, res: Response) {
+  const user = repo.add(res.locals.sanitizedInpunt)
+  if (!user)
+    return res.status(500).json({message: ERR_500})
+
+  res.json({data: user})
 }
 
 function update(req: Request, res: Response) {
+  const user = repo.update(res.locals.sanitizedInpunt)
+  if (!user)
+    return res.status(500).json({message: ERR_500})
+
+  res.json({data: user})
 }
 
 function remove(req: Request, res: Response) {
+  const user = repo.remove(res.locals.id)
+  if (!user)
+    return res.status(500).json({message: ERR_500})
+
+  res.json({data: user})
 }
 
 /** Middlewarez
