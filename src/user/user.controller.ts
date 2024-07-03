@@ -47,9 +47,11 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
 
 function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   // Mensajes de error
-  const ERR_BADNICK = "Invalid username. (It must be between 3-20 alphanumeric characters, _ allowed)"
-  const ERR_BADEMAIL = 'Invalid email address. Correct format: "user@mail.com"'
-  const ERR_PASS_BADFORMAT = 'Invalid password. Must have over 7 characters, at least one letter, one number and one special character'
+  const ERR_BAD_NICK = "Invalid username. (It must be between 3-20 alphanumeric characters, _ allowed)"
+  const ERR_BAD_EMAIL = 'Invalid email address. Correct format: "user@mail.com"'
+  const ERR_BAD_PASS = 'Invalid password. Must have over 7 characters, at least one letter, one number and one special character'
+  const ERR_USED_NICK = "Nickname already in use"
+  const ERR_USED_EMAIL = 'Email address already in use'
 
   // no hay nada mejor, no hay nada mejor
   // que casa.
@@ -67,18 +69,22 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   const sanIn = res.locals.sanitizedInput
 
   /** Requisitos del nickname:
-   * TODO: No debe haber un usuario con el mismo nick
+   * No debe haber un usuario con el mismo nick
    * Caract. permitidos: a-z A-Z 0-9 _
    * Longitud: 3 <= L <= 20
    */
   const nicknameRegex = /^\w{3,20}$/
   if (!nicknameRegex.test(sanIn.nick))
-    return res.status(400).json({message: ERR_BADNICK})
+    return res.status(400).json({message: ERR_BAD_NICK})
+  if (repo.findByNick(sanIn.nick) !== undefined)
+    return res.status(400).json({message: ERR_USED_NICK})
 
-  // TODO: No puede haber dos usuarios con el mismo email
   const emailRegex = /^[\w+.]+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
   if (!emailRegex.test(sanIn.email))
-    return res.status(400).json({message: ERR_BADEMAIL})
+    return res.status(400).json({message: ERR_BAD_EMAIL})
+  // No puede haber dos usuarios con el mismo email
+  if (repo.findByEmail(sanIn.email) !== undefined)
+    return res.status(400).json({message: ERR_USED_EMAIL})
 
   /** Requisitos de la contraseña:
    * Longitud >= 8
@@ -87,7 +93,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
    */
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
   if (!passwordRegex.test(sanIn.password))
-    return res.status(400).json({message: ERR_PASS_BADFORMAT})
+    return res.status(400).json({message: ERR_BAD_PASS})
   
   // Se borran todos los códigos HTML que el usuario ingrese, dejándo sólo los
   //   válidos para formatear un poco la bio

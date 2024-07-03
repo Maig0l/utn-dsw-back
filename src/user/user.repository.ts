@@ -50,4 +50,12 @@ export class UserRepository implements Repository<User> {
     const user = users.splice(idx, 1)[0]
     return user
   }
+
+  findByNick(query: string): User | undefined {
+    return users.find((u) => u.nick === query)
+  }
+
+  findByEmail(query: string): User | undefined {
+    return users.find((u) => u.email === query)
+  }
 }
