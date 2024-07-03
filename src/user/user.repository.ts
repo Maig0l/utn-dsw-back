@@ -9,13 +9,13 @@ const hasParams = paramCheckFromList(VALID_PARAMS)
 const users: User[] = [];
 users.push(new User("Maigol", "maigol@example.org", "hunter2"))
 
-export class UserRepository implements Repository<User, string> {
+export class UserRepository implements Repository<User> {
   findAll(): User[] | undefined {
     return users;
   }
 
-  findOne(item: { id: string }): User | undefined {
-    const user = users.find((u) => u.nick === item.id)
+  findOne(item: { id: number }): User | undefined {
+    const user = users.find((u) => u.id === item.id)
     if (!user)
       return
     return user
@@ -42,7 +42,7 @@ export class UserRepository implements Repository<User, string> {
     return users[idx]
   }
 
-  remove(item: { id: string; }): User | undefined {
+  remove(item: { id: number }): User | undefined {
     const idx = users.findIndex((u)=>{return u.id === item.id});
     if (idx == -1)
       return

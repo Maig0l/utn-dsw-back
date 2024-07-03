@@ -13,11 +13,8 @@ function findAll(req: Request, res: Response) {
 }
 
 function findOne(req: Request, res: Response) {
-  const user = repo.findOne({id: req.params.nick})
-  if (!user)
-    return res.status(404).json({message: `User ${req.params.nick} not found`})
-
-  return res.json({data: user})
+  // El middleware validateExists ya llama al repo y devuelve el 404
+  return res.json({data: res.locals.user})
 }
 
 function add(req: Request, res: Response) {
@@ -34,11 +31,15 @@ function remove(req: Request, res: Response) {
 */
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
-  const user = repo.findOne({id: req.params.nick})
-  if (!user)
-    return res.status(404).json({message: `User ${req.params.nick} not found`})
+  const id = Number.parseInt(req.params.id)
+  if (Number.isNaN(id))
+    return res.status(400).json({message: "ID must be an integer"})
 
-  res.locals.nick = req.params.nick
+  const user = repo.findOne({id})
+  if (!user)
+    return res.status(404).json({message: `User ${req.params.id} not found`})
+
+  res.locals.id = id
   res.locals.user = user
 
   next()

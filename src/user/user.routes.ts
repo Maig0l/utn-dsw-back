@@ -6,7 +6,10 @@ export const userRouter = Router()
 userRouter.get('/', findAll)
 userRouter.post('/', sanitizeInput, add)
 
-userRouter.get('/:nick', findOne)
-userRouter.put('/:nick', validateExists, sanitizeInput, update)
-userRouter.patch('/:nick', validateExists, sanitizeInput, update)
-userRouter.delete('/:nick', validateExists, sanitizeInput, remove)
+// Todas las rutas /:id usan el validateExists
+userRouter.use('/:id', validateExists)
+
+userRouter.get('/:id', findOne)
+userRouter.put('/:id', sanitizeInput, update)
+userRouter.patch('/:id', sanitizeInput, update)
+userRouter.delete('/:id', sanitizeInput, remove)
