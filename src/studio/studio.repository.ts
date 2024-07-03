@@ -6,7 +6,7 @@ studios.push(new Studio("ATLUS",["Desarrollador"],"https://atlus.com/"))
 studios.push(new Studio("WSS Playground",["Desarrollador", "Editor"],"https://whysoserious.jp/en/"))
 studios.push(new Studio("Square Enix",["Desarrollador", "Editor"],"https://www.square-enix-games.com/es_XL/home"))
 
-export class StudioRepository implements Repository<Studio, number> {
+export class StudioRepository implements Repository<Studio> {
     public findAll(): Studio[] | undefined {
         return studios;
     }

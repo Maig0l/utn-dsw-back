@@ -6,7 +6,7 @@ shops.push(new Shop("Steam", "/assets/steam.svg", "https://steampowered.com/"))
 shops.push(new Shop("Epic Games", "/assets/epic.svg", "https://store.epicgames.com/"))
 shops.push(new Shop("PSN Store", "/assets/psn.svg", "https://store.playstation.com/"))
 
-export class ShopRepository implements Repository<Shop, number> {
+export class ShopRepository implements Repository<Shop> {
   public findAll(): Shop[] | undefined {
     return shops;
   }
