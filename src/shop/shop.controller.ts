@@ -54,11 +54,11 @@ function remove(req: Request, res: Response) {
  * TODO: (Code Convention para el equipo)
  */
 function sanitizeInput(req:Request, res:Response, next:NextFunction) {
-  if (["POST", "PUT"].includes(req.method) && !hasParams(req, true))
+  if (["POST", "PUT"].includes(req.method) && !hasParams(req.body, true))
     return res.status(400)
       .json({message: "Must provide all attributes"})
 
-  if ("PATCH" == req.method && !hasParams(req, false))
+  if ("PATCH" == req.method && !hasParams(req.body, false))
     return res.status(400)
       .json({message: "Must provide at least one valid attribute"})
 
