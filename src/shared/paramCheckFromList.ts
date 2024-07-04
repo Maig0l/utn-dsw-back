@@ -1,5 +1,7 @@
 import {Request} from 'express'
 
+// TODO: Volar esto a la mierda. Fue una mala idea (ver user.repository.ts)
+
 /** Toma los parámetros válidos (admitidos para post/put/patch) y genera una
  * función que chequea si el objeto (por ejemplo, request.body)tiene los
  * atributos necesarios
