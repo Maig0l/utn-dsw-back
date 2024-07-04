@@ -7,7 +7,7 @@ import { shopRouter } from './shop/shop.routes.js';
 import { studioRouter } from './studio/studio.routes.js';
 import { userRouter } from './user/user.routes.js';
 
-const app = express()
+export const app = express()
 
 // Tenemos que usar el middleware url-encoded extendido porque Express
 //  no me toma el body de la request POST si tiene Content-Type:application/form-data

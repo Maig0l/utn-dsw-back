@@ -46,7 +46,7 @@ function remove(req: Request, res: Response) {
     if (!studio) {
         return res.status(404).json({ message: "Studio Not Found, so no deleted" });
     }
-    res.status(200).json(studio);
+    res.status(200).json({data: studio});
 }
 
 function sanitizeInput(req:Request, res:Response, next:NextFunction) {
