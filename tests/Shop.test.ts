@@ -1,7 +1,6 @@
-import {describe, it, expect} from 'vitest'
+import {describe, test, expect, afterEach, beforeEach} from 'vitest'
 import {app} from '../src/app'
 import supertest from 'supertest'
-import { create } from 'domain'
 
 const BASE_ENDPOINT = "/api/shops"
 let createdShopId = null
@@ -15,7 +14,7 @@ const newName = "GOG"
 
 describe('Shop CRUD API', () => {
   describe('Happy Path', () => {
-    it('List all shops', async () => {
+    test('List all shops', async () => {
       let res = await supertest(app).get(BASE_ENDPOINT).send()
 
       expect(res.status).toBe(200)
@@ -24,7 +23,7 @@ describe('Shop CRUD API', () => {
     })
 
     // Create
-    it('Create a new Shop', async ()=> {
+    test('Create a new Shop', async ()=> {
       let repoTotal = await supertest(app).get('/api/shops').send()
       let repoSizeBefore = repoTotal.body.data.length
 
@@ -50,7 +49,7 @@ describe('Shop CRUD API', () => {
     })
 
     // Read
-    it('Read the created Shop', async () => {
+    test('Read the created Shop', async () => {
       const response = await supertest(app)
         .get(`${BASE_ENDPOINT}/${createdShopId}`)
         .send()
@@ -61,17 +60,21 @@ describe('Shop CRUD API', () => {
     })
 
     // Update
-    it('Update Shop using PATCH', async() => {
-      const response = await supertest(app)
+    test('Update Shop using PATCH', async() => {
+      const res = await supertest(app)
         .patch(`${BASE_ENDPOINT}/${createdShopId}`)
         .send({name: 'GOG'})
       
-      expect(response.statusCode).toBe(200)
-      expect(response.body).toHaveProperty('data')
-      expect(response.body.data.name).toBe('GOG')
+      try {
+        expect(res.status).toBe(200)
+        expect(res.body).toHaveProperty('data')
+        expect(res.body.data.name).toBe('GOG')
+      } catch(e) {
+        throw new Error(`Expected code 200, got ${res.status} with message: "${res.body.message}"`)
+      }
     })
 
-    it('Update Shop using PUT', async() => {
+    test('Update Shop using PUT', async() => {
       const newData = {name: 'GOG',
         img: '/assets/shops/gog.svg',
         site: 'https://gog.com'
@@ -90,7 +93,7 @@ describe('Shop CRUD API', () => {
     })
 
     // Delete
-    it('Delete Shop', async () => {
+    test('Delete Shop', async () => {
       let res = await supertest(app)
         .delete(`${BASE_ENDPOINT}/${createdShopId}`)
         .send()
@@ -108,8 +111,8 @@ describe('Shop CRUD API', () => {
 
   })
 
-  describe('Shop Guard middlewarez', () => {
-    it('Inexistent Shop', async () => {
+  describe('Test errors', () => {
+    test('Inexistent Shop', async () => {
       const res = await supertest(app)
         .get(`${BASE_ENDPOINT}/40296`)
         .send()
@@ -117,7 +120,7 @@ describe('Shop CRUD API', () => {
       expect(res.statusCode).toBe(404)
     })
 
-    it('Invalid Shop ID', async () => {
+    test('Invalid Shop ID', async () => {
       const res = await supertest(app)
         .get(`${BASE_ENDPOINT}/notANumber`)
         .send()
@@ -125,7 +128,7 @@ describe('Shop CRUD API', () => {
       expect(res.statusCode).toBe(400)
     })
 
-    it('Empty PATCH', async () => {
+    test('Empty PATCH', async () => {
       let res = await supertest(app).post(BASE_ENDPOINT).send(baseShop)
       let createdShopId = res.body.data.id
 
@@ -136,7 +139,7 @@ describe('Shop CRUD API', () => {
       expect(res.status).toBe(400)
     })
 
-    it('Incomplete PUT', async () => {
+    test('Incomplete PUT', async () => {
       let res = await supertest(app).post(BASE_ENDPOINT).send(baseShop)
       let createdShopId = res.body.data.id
 
@@ -144,6 +147,14 @@ describe('Shop CRUD API', () => {
         .put(`${BASE_ENDPOINT}/${createdShopId}`)
         .send({name: "GOG"})
       
+      expect(res.status).toBe(400)
+    })
+
+    test('Other sanitizations', async () => {
+      let invalidShop = baseShop
+      invalidShop.site = "Clearly not a website"
+
+      let res = await supertest(app).post(BASE_ENDPOINT).send(invalidShop).send()
       expect(res.status).toBe(400)
     })
   })

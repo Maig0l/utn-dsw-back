@@ -68,11 +68,10 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
     site: req.body.site
   }
   
-  // Robado de SO, como para que sanitize algo (?
   // https://stackoverflow.com/a/3809435
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
-  if (!urlRegex.test(req.body.site))
-    res.locals.sanitizedInput.site = undefined
+  if (req.body.site && !urlRegex.test(req.body.site))
+    return res.status(400).json({message: "Invalid Site attribute (Should be a URL)"})
 
   // CONSULTA: La sanitización debería ser silenciosa¿
   Object.keys(res.locals.sanitizedInput).forEach((k) => {
