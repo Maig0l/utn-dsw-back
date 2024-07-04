@@ -135,10 +135,11 @@ describe('User CRUD', () => {
 
     test('Empty PATCH', async () => {
       let res = await supertest(app).post(BASE_ENDPOINT).send(baseUser)
+      expect(res.status).toBe(201)
       let createdStudioId = res.body.data.id
 
       res = await supertest(app)
-        .put(`${BASE_ENDPOINT}/${createdStudioId}`)
+        .patch(`${BASE_ENDPOINT}/${createdStudioId}`)
         .send({})
       
       try {
@@ -149,12 +150,17 @@ describe('User CRUD', () => {
     })
 
     test('Incomplete PUT', async () => {
-      let res = await supertest(app).post(BASE_ENDPOINT).send(baseUser)
+      let res = await supertest(app).post(BASE_ENDPOINT).send({nick: "bruh", email: "bruh@gmail.com", password: "Really Secur3!"})
+      try {
+        expect(res.status).toBe(201)
+      } catch(e) {
+        throw new Error(`${res.status}: "${res.body.message}"`)
+      }
       let createdStudioId = res.body.data.id
 
       res = await supertest(app)
         .put(`${BASE_ENDPOINT}/${createdStudioId}`)
-        .send({name: "GOG"})
+        .send({nick: "Platformer_enjoyer"})
       
       expect(res.status).toBe(400)
     })

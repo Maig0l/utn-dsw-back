@@ -75,13 +75,13 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   const ERR_PARAMS_MODIFY_PUT = 'Must update all attributes'
 
   if (req.method === "POST" && !hasCreationParams(req.body, true))
-    return res.status(500).json({message: ERR_PARAMS_CREATE})
+    return res.status(400).json({message: ERR_PARAMS_CREATE})
 
   if (req.method === "PATCH" && !hasAnyParams(req.body, false))
-    return res.status(500).json({message: ERR_PARAMS_PATCH})
+    return res.status(400).json({message: ERR_PARAMS_PATCH})
 
   if (req.method === "PUT" && !hasCreationParams(req.body, true))
-    return res.status(500).json({message: ERR_PARAMS_MODIFY_PUT})
+    return res.status(400).json({message: ERR_PARAMS_MODIFY_PUT})
 
   res.locals.sanitizedInput = {
     nick: req.body.nick,
@@ -122,6 +122,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
    * Longitud >= 8
    * Caracteres obligatorios: 1x letra, 1x número, 1x caractér especial
    * RegEx tomado de: https://stackoverflow.com/a/21456918
+   * TODO: El espacio no está siendo tomado como caracter especial
    */
   if (sanIn.password) {
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,}$/
