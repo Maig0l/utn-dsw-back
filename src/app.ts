@@ -24,7 +24,3 @@ app.use('/api/platforms', platformRouter)
 app.use((_, res) => {
   return res.status(404).json({message: "Resource not found"})
 })
-
-app.listen(8080, ()=> {
-  console.log(`Running on http://localhost:8080`)
-})
