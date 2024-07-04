@@ -1,0 +1,13 @@
+### Get users
+GET http://localhost:8080/api/users
+
+
+### New user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "nick": "Civy",
+  "email": "inbox@civy.net",
+  "password": "Hunter 2!"
+}

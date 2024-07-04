@@ -7,7 +7,8 @@ const ERR_500 = "Something went horribly wrong. Oops (this is our fault)"
 
 const REQ_PARAMS = "nick email password".split(' ')
 const VALID_PARAMS = "nick email password profilePic bio".split(' ')
-const hasParams = paramCheckFromList(VALID_PARAMS)
+const hasCreationParams = paramCheckFromList(REQ_PARAMS)
+const hasAnyParams = paramCheckFromList(VALID_PARAMS)
 
 const repo = new UserRepository()
 
@@ -21,15 +22,15 @@ function findOne(req: Request, res: Response) {
 }
 
 function add(req: Request, res: Response) {
-  const user = repo.add(res.locals.sanitizedInpunt)
+  const user = repo.add(res.locals.sanitizedInput)
   if (!user)
     return res.status(500).json({message: ERR_500})
 
-  res.json({data: user})
+  res.status(201).json({data: user})
 }
 
 function update(req: Request, res: Response) {
-  const user = repo.update(res.locals.sanitizedInpunt)
+  const user = repo.update(res.locals.sanitizedInput)
   if (!user)
     return res.status(500).json({message: ERR_500})
 
@@ -64,14 +65,24 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
 
 function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   // Mensajes de error
-  const ERR_BAD_NICK = "Invalid username. (It must be between 3-20 alphanumeric characters, _ allowed)"
+  const ERR_BAD_NICK = 'Invalid username. (It must be between 3-20 alphanumeric characters, _ allowed)'
   const ERR_BAD_EMAIL = 'Invalid email address. Correct format: "user@mail.com"'
   const ERR_BAD_PASS = 'Invalid password. Must have over 7 characters, at least one letter, one number and one special character'
-  const ERR_USED_NICK = "Nickname already in use"
+  const ERR_USED_NICK = 'Nickname already in use'
   const ERR_USED_EMAIL = 'Email address already in use'
+  const ERR_PARAMS_CREATE = 'Must provide all attributes for creation (nick, email, password)' // CONSULTA: Sería mejor NO decir los atributos? (ataque)
+  const ERR_PARAMS_PATCH = 'Must provide at least one valid attribute to update'
+  const ERR_PARAMS_MODIFY_PUT = 'Must update all attributes'
 
-  // no hay nada mejor, no hay nada mejor
-  // que casa.
+  if (req.method === "POST" && !hasCreationParams(req.body, true))
+    return res.status(500).json({message: ERR_PARAMS_CREATE})
+
+  if (req.method === "PATCH" && !hasAnyParams(req.body, false))
+    return res.status(500).json({message: ERR_PARAMS_PATCH})
+
+  if (req.method === "PUT" && !hasAnyParams(req.body, true))
+    return res.status(500).json({message: ERR_PARAMS_MODIFY_PUT})
+
   res.locals.sanitizedInput = {
     nick: req.body.nick,
     email: req.body.email,
@@ -108,7 +119,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
    * Caracteres obligatorios: 1x letra, 1x número, 1x caractér especial
    * RegEx tomado de: https://stackoverflow.com/a/21456918
    */
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,}$/
   if (!passwordRegex.test(sanIn.password))
     return res.status(400).json({message: ERR_BAD_PASS})
   
