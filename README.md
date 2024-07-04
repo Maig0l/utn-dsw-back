@@ -14,5 +14,6 @@
   - [x] Shop
   - [x] Studio
   - [ ] Tag
+  - [x] User
 
 - [ ] Persistencia
