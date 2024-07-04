@@ -67,7 +67,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   // Mensajes de error
   const ERR_BAD_NICK = 'Invalid username. (It must be between 3-20 alphanumeric characters, _ allowed)'
   const ERR_BAD_EMAIL = 'Invalid email address. Correct format: "user@mail.com"'
-  const ERR_BAD_PASS = 'Invalid password. Must have over 7 characters, at least one letter, one number and one special character'
+  const ERR_BAD_PASS = 'Invalid password. Must have 8-50 characters, at least one letter, one number and one special character'
   const ERR_USED_NICK = 'Nickname already in use'
   const ERR_USED_EMAIL = 'Email address already in use'
   const ERR_PARAMS_CREATE = 'Must provide all attributes for creation (nick, email, password)' // CONSULTA: Sería mejor NO decir los atributos? (ataque)
@@ -98,11 +98,13 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 
   /** Requisitos del nickname:
    * No debe haber un usuario con el mismo nick
-   * Caract. permitidos: a-z A-Z 0-9 _
-   * Longitud: 3 <= L <= 20
+   * Caract. permitidos: a-z A-Z 0-9 _ .
+   * No se permite empezar ni terminar el nick con (.)
+   * No se admiten nicks con dos o más (.) consecutivos
+   * Longitud: 3 <= L <= 30
    */
   if (sanIn.nick) {
-    const nicknameRegex = /^\w{3,20}$/
+    const nicknameRegex = /^(?!(^\.|.*\.$))(?!.*\.{2,}.*)[\w\.]{3,30}$/
     if (!nicknameRegex.test(sanIn.nick))
       return res.status(400).json({message: ERR_BAD_NICK})
     if (repo.findByNick(sanIn.nick) !== undefined)
@@ -119,13 +121,13 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   }
 
   /** Requisitos de la contraseña:
-   * Longitud >= 8
+   * Longitud: 8 >= L >= 50
    * Caracteres obligatorios: 1x letra, 1x número, 1x caractér especial
    * RegEx tomado de: https://stackoverflow.com/a/21456918
    * TODO: El espacio no está siendo tomado como caracter especial
    */
   if (sanIn.password) {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,}$/
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,50}$/
     if (!passwordRegex.test(sanIn.password))
       return res.status(400).json({message: ERR_BAD_PASS})
   }
