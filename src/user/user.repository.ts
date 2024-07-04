@@ -34,7 +34,7 @@ export class UserRepository implements Repository<User> {
     if (!hasParams(item, false))
       return
 
-    const idx = users.findIndex((u) => u.nick === item.nick)
+    const idx = users.findIndex((u) => u.id === item.id)
     if (idx == -1) 
       return
 

@@ -30,15 +30,15 @@ function add(req: Request, res: Response) {
 }
 
 function update(req: Request, res: Response) {
-  const user = repo.update(res.locals.sanitizedInput)
+  const user = repo.update({...res.locals.sanitizedInput, id: res.locals.id})
   if (!user)
     return res.status(500).json({message: ERR_500})
 
-  res.json({data: user})
+  res.status(200).json({data: user})
 }
 
 function remove(req: Request, res: Response) {
-  const user = repo.remove(res.locals.id)
+  const user = repo.remove({id: res.locals.id})
   if (!user)
     return res.status(500).json({message: ERR_500})
 
@@ -80,7 +80,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   if (req.method === "PATCH" && !hasAnyParams(req.body, false))
     return res.status(500).json({message: ERR_PARAMS_PATCH})
 
-  if (req.method === "PUT" && !hasAnyParams(req.body, true))
+  if (req.method === "PUT" && !hasCreationParams(req.body, true))
     return res.status(500).json({message: ERR_PARAMS_MODIFY_PUT})
 
   res.locals.sanitizedInput = {
@@ -101,37 +101,49 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
    * Caract. permitidos: a-z A-Z 0-9 _
    * Longitud: 3 <= L <= 20
    */
-  const nicknameRegex = /^\w{3,20}$/
-  if (!nicknameRegex.test(sanIn.nick))
-    return res.status(400).json({message: ERR_BAD_NICK})
-  if (repo.findByNick(sanIn.nick) !== undefined)
-    return res.status(400).json({message: ERR_USED_NICK})
+  if (sanIn.nick) {
+    const nicknameRegex = /^\w{3,20}$/
+    if (!nicknameRegex.test(sanIn.nick))
+      return res.status(400).json({message: ERR_BAD_NICK})
+    if (repo.findByNick(sanIn.nick) !== undefined)
+      return res.status(400).json({message: ERR_USED_NICK})
+  }
 
-  const emailRegex = /^[\w+.]+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
-  if (!emailRegex.test(sanIn.email))
-    return res.status(400).json({message: ERR_BAD_EMAIL})
-  // No puede haber dos usuarios con el mismo email
-  if (repo.findByEmail(sanIn.email) !== undefined)
-    return res.status(400).json({message: ERR_USED_EMAIL})
+  if (sanIn.email) {
+    const emailRegex = /^[\w+.]+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
+    if (!emailRegex.test(sanIn.email))
+      return res.status(400).json({message: ERR_BAD_EMAIL})
+    // No puede haber dos usuarios con el mismo email
+    if (repo.findByEmail(sanIn.email) !== undefined)
+      return res.status(400).json({message: ERR_USED_EMAIL})
+  }
 
   /** Requisitos de la contraseña:
    * Longitud >= 8
    * Caracteres obligatorios: 1x letra, 1x número, 1x caractér especial
    * RegEx tomado de: https://stackoverflow.com/a/21456918
    */
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,}$/
-  if (!passwordRegex.test(sanIn.password))
-    return res.status(400).json({message: ERR_BAD_PASS})
+  if (sanIn.password) {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,}$/
+    if (!passwordRegex.test(sanIn.password))
+      return res.status(400).json({message: ERR_BAD_PASS})
+  }
   
   // Se borran todos los códigos HTML que el usuario ingrese, dejándo sólo los
   //   válidos para formatear un poco la bio
   // TODO: El frontend debe admitir un editor de bbText o MD y transformar los
   //   *, **, []() a HTML válido
-  sanIn.bioText = sanitizeHtml(sanIn.bioText, {
-    allowedTags: ['b', 'i', 'em', 'strong', 'a'],
-    allowedAttributes: {
-      'a': ['href']
-    }
+  if (sanIn.bio)
+    sanIn.bioText = sanitizeHtml(sanIn.bioText, {
+      allowedTags: ['b', 'i', 'em', 'strong', 'a'],
+      allowedAttributes: {
+        'a': ['href']
+      }
+    })
+  
+  Object.keys(res.locals.sanitizedInput).forEach((k) => {
+    if (res.locals.sanitizedInput[k] === undefined)
+      delete res.locals.sanitizedInput[k]
   })
 
   next()

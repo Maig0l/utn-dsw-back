@@ -53,12 +53,9 @@ describe('User CRUD', () => {
 
     // Update
     test('Update User using PATCH', async() => {
-      let createdUserId = 1
       const res = await supertest(app)
         .patch(`${BASE_ENDPOINT}/${createdUserId}`)
         .send({password: newPass})
-      
-      console.log(`targeting: ${createdUserId}`)
       
       try {
         expect(res.status).toBe(200)
@@ -71,8 +68,9 @@ describe('User CRUD', () => {
     })
 
     test('Update User using PUT', async() => {
+      // createdUserId = 1
       const newData = {nick: 'Ci_Vy',
-        email: 'inbox@civy.com',
+        email: 'inbox2@civy.com',
         password: 'Hunter0PUT!'
       }
 
@@ -82,15 +80,20 @@ describe('User CRUD', () => {
       
       // CONSULTA: Tiene que haber una mejor forma de testear esto que comprobar
       //   uno por uno
-      expect(response.statusCode).toBe(200)
-      expect(response.body).toHaveProperty('data')
-      expect(response.body.data.nick).toBe(newData.nick)
-      expect(response.body.data.email).toBe(newData.email)
-      expect(response.body.data.password).toBe(newData.password)
+      try {
+        expect(response.statusCode).toBe(200)
+        expect(response.body).toHaveProperty('data')
+        expect(response.body.data.nick).toBe(newData.nick)
+        expect(response.body.data.email).toBe(newData.email)
+        expect(response.body.data.password).toBe(newData.password)
+      } catch(e) {
+        throw new Error(`${e}\nServer replied (${response.status}): ${response.body.message}`)
+      }
     })
 
     // Delete
     test('Delete User', async () => {
+      createdUserId = 1
       let res = await supertest(app)
         .delete(`${BASE_ENDPOINT}/${createdUserId}`)
         .send()
@@ -138,7 +141,11 @@ describe('User CRUD', () => {
         .put(`${BASE_ENDPOINT}/${createdStudioId}`)
         .send({})
       
-      expect(res.status).toBe(400)
+      try {
+        expect(res.status).toBe(400)
+      } catch(e) {
+        throw new Error(`${e}\nServer returned (${res.status}): ${res.body.message}`)
+      }
     })
 
     test('Incomplete PUT', async () => {
