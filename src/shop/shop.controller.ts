@@ -73,7 +73,7 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
   if (req.body.site && !urlRegex.test(req.body.site))
     return res.status(400).json({message: "Invalid Site attribute (Should be a URL)"})
 
-  // CONSULTA: La sanitización debería ser silenciosa¿
+  // TODO: Revisar que no haya sanitización silenciosa
   Object.keys(res.locals.sanitizedInput).forEach((k) => {
     if (res.locals.sanitizedInput[k] === undefined) {
       delete res.locals.sanitizedInput[k]
