@@ -85,11 +85,16 @@ describe('Shop CRUD API', () => {
         .send(newData);
       
       // CONSULTA: Tiene que haber una mejor forma de testear esto
+      // ^ Nope, se hace así.
+      // Esto es "Integration testing"
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('data')
-      expect(response.body.data.name).toBe('GOG')
-      expect(response.body.data.img).toBe('/assets/shops/gog.svg')
-      expect(response.body.data.site).toBe('https://gog.com')
+      // Algo así expect(response.body.data).toEqual(newData) //Falta el ID igual
+
+      // Modificar solo en newData
+      expect(response.body.data.name).toBe(newData.name)
+      expect(response.body.data.img).toBe(newData.img)
+      expect(response.body.data.site).toBe(newData.site)
     })
 
     // Delete
