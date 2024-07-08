@@ -121,13 +121,13 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   }
 
   /** Requisitos de la contraseña:
-   * Longitud: 8 >= L >= 50
+   * Longitud: 8 >= L >= 128
    * Caracteres obligatorios: 1x letra, 1x número, 1x caractér especial
    * RegEx tomado de: https://stackoverflow.com/a/21456918
    * TODO: El espacio no está siendo tomado como caracter especial
    */
   if (sanIn.password) {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,50}$/
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,128}$/
     if (!passwordRegex.test(sanIn.password))
       return res.status(400).json({message: ERR_BAD_PASS})
   }
