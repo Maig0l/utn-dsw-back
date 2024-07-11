@@ -6,6 +6,7 @@ import { platformRouter } from './platform/platform.routes.js';
 import { shopRouter } from './shop/shop.routes.js';
 import { studioRouter } from './studio/studio.routes.js';
 import { userRouter } from './user/user.routes.js';
+import { tagRouter } from './tag/tag.routes.js'
 
 export const app = express()
 
@@ -20,6 +21,7 @@ app.use('/api/users', userRouter)
 app.use('/api/shops', shopRouter)
 app.use('/api/studios', studioRouter)
 app.use('/api/platforms', platformRouter)
+app.use('/api/tags', tagRouter)
 
 app.use((_, res) => {
   return res.status(404).json({message: "Resource not found"})
