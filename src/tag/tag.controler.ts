@@ -23,10 +23,10 @@ function findAll(req: Request, res: Response) {
 
 function findOne(req: Request, res: Response) {
   const id:number = parseInt(req.params.id)
-  const tag = repository.getOne({id })
-  if (!tag) {
+  const tag = repository.findOne({ id })
+  if (!tag)
     return res.status(404).send({ message: 'Tag not found' })
-  }
+
   res.json({ data: tag })
 }
 
@@ -34,8 +34,6 @@ function add(req: Request, res: Response) {
   const { name , description} = req.body.sanitizedInput
 
   const tagInput = new Tag(name, description)
-  console.log(name)
-  console.log(description)
   const tag = repository.add(tagInput)
   return res.status(201).send({ message: 'Tag created', data: tag })
 }
@@ -44,21 +42,20 @@ function update(req: Request, res: Response) {
   req.body.sanitizedInput.id = parseInt(req.params.id)
   const tag = repository.update(req.body.sanitizedInput)
 
-  if (!tag) {
+  if (!tag)
     return res.status(404).send({ message: 'Tag not found' })
-  }
 
-  return res.status(200).send({ message: 'Tag updated successfully', data: tag })
+  return res.send({ message: 'Tag updated successfully', data: tag })
 }
 
 function remove(req: Request, res: Response) {
   const id:number = parseInt(req.params.id)
-  const tag = repository.delete({ id })
+  const tag = repository.remove({ id })
 
   if (!tag) {
     res.status(404).send({ message: 'Tag not found' })
   } else {
-    res.status(200).send({ message: 'Tag deleted successfully' })
+    res.send({ message: 'Tag deleted successfully' })
   }
 }
 
