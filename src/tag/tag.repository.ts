@@ -9,7 +9,7 @@ tags.push( new Tag("Action","Juegos con mucha violencia"))
 
 
 export class TagRepository implements Repository<Tag>{
-    public getOne(item: { id: number; }): Tag | undefined {
+    public findOne(item: { id: number; }): Tag | undefined {
         return tags.find((tag) => tag.id == item.id)
     }
     public add(item: Tag): Tag | undefined {
@@ -24,7 +24,8 @@ export class TagRepository implements Repository<Tag>{
         }
         return tags[tagIdx]
     }
-    public delete(item: { id: number; }): Tag | undefined {
+
+    public remove(item: { id: number; }): Tag | undefined {
         const tagIdx = tags.findIndex((tag) => String(tag.id) === String(item.id))
 
         if (tagIdx !== -1) {

@@ -1,7 +1,6 @@
 import fs from 'fs';
 import express from 'express' 
 import path from 'path'
-import { fileURLToPath } from 'url';
 import { platformRouter } from './platform/platform.routes.js';
 import { shopRouter } from './shop/shop.routes.js';
 import { studioRouter } from './studio/studio.routes.js';
