@@ -22,7 +22,12 @@
     "vitest": "^1.6.0"
   },
   "dependencies": {
+    "@mikro-orm/core": "5.8.10",
+    "@mikro-orm/mysql": "5.8.10",
+    "@mikro-orm/sql-highlighter": "1.0.1",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "reflect-metadata": "0.2.2",
     "sanitize-html": "^2.13.0"
   }
 }
