@@ -1,7 +1,7 @@
-import {describe, test, expect, afterEach, beforeEach} from 'vitest'
-import {app} from '../src/app'
+import { describe, test, expect } from 'vitest'
+import { app } from '../src/app'
+import { randomBytes } from 'crypto'
 import supertest from 'supertest'
-import { randomBytes, randomUUID } from 'crypto'
 
 const BASE_ENDPOINT = "/api/shops"
 let createdShopId = null

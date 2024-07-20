@@ -121,27 +121,28 @@ function validateExists(req:Request, res:Response, next: NextFunction) {
 }
 
 function handleOrmError(res: Response, err: any) {
-  switch (err.name) {
-    case "NotFoundError":
-      res.status(404).json({message: `Shop not found for ID ${res.locals.id}`})
-      break
-    case "UniqueConstraintViolationException": // Code: er_dup_entry
-      // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-      res.status(400).json({message: `A shop with that name/site already exists.`})
-      break
-    case "DriverException":
-      // Por qué MikroORM mezcla NOMBRES de error y CÓDIGOS de error (T-T)
-      switch (err.code) {
-        case "ER_DATA_TOO_LONG":
-          res.status(400).json({message: `Data too long.`})
-          break
-      }
-      break
-    default:
-      console.error("\n--- ORM ERROR ---")
-      console.error(err.message)
-      res.status(500).json({message: "Oops! Something went wrong. This is our fault."})
-      break
+  if (err.code) {
+    switch (err.code) {
+      case "ER_DUP_ENTRY":
+        // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
+        res.status(400).json({message: `A shop with that name/site already exists.`})
+        break
+      case "ER_DATA_TOO_LONG":
+        res.status(400).json({message: `Data too long.`})
+        break
+    }
+  }
+  else {
+    switch (err.name) {
+      case "NotFoundError":
+        res.status(404).json({message: `Shop not found for ID ${res.locals.id}`})
+        break
+      default:
+        console.error("\n--- ORM ERROR ---")
+        console.error(err.message)
+        res.status(500).json({message: "Oops! Something went wrong. This is our fault."})
+        break
+    }
   }
 }
 
