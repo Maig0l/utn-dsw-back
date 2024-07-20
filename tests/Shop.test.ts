@@ -1,16 +1,19 @@
 import {describe, test, expect, afterEach, beforeEach} from 'vitest'
 import {app} from '../src/app'
 import supertest from 'supertest'
+import { randomBytes, randomUUID } from 'crypto'
 
 const BASE_ENDPOINT = "/api/shops"
 let createdShopId = null
 
-const baseShop = {
-  name: "GOG Games",
-  img: "/assets/gog.svg",
-  site: "http://gogames.com"
+const saltedShop = () => {
+  const salt = randomBytes(6).toString('hex')
+  return {
+    name: `GOG Games-${salt}`,
+    img: '/assets/gog.svg',
+    site: `http://gogames.com/${salt.substring(0,2)}`
+  }
 }
-const newName = "GOG"
 
 describe('Shop CRUD API', () => {
   describe('Happy Path', () => {
@@ -29,9 +32,7 @@ describe('Shop CRUD API', () => {
 
       const response = await supertest(app)
         .post('/api/shops')
-        .send({name: 'GOG Games',
-                img: '/assets/gog.svg',
-                site: 'http://gog.com'});
+        .send(saltedShop())
 
       if (response.statusCode !== 201)
         throw new Error(`Expected code 201 but got ${response.statusCode}. Message: ${response.body.message}`)
@@ -61,14 +62,15 @@ describe('Shop CRUD API', () => {
 
     // Update
     test('Update Shop using PATCH', async() => {
+      const newName = saltedShop().name
       const res = await supertest(app)
         .patch(`${BASE_ENDPOINT}/${createdShopId}`)
-        .send({name: 'GOG'})
+        .send({name: newName})
       
       try {
         expect(res.status).toBe(200)
         expect(res.body).toHaveProperty('data')
-        expect(res.body.data.name).toBe('GOG')
+        expect(res.body.data.name).toBe(newName)
       } catch(e) {
         throw new Error(`Expected code 200, got ${res.status} with message: "${res.body.message}"`)
       }
@@ -87,7 +89,12 @@ describe('Shop CRUD API', () => {
       // CONSULTA: Tiene que haber una mejor forma de testear esto
       // ^ Nope, se hace así.
       // Esto es "Integration testing"
-      expect(response.statusCode).toBe(200)
+      try {
+        expect(response.statusCode).toBe(200)
+      } catch(e) {
+        throw new Error(`Expected code 200, got ${response.status} with message: "${response.body.message}"`)
+      }
+
       expect(response.body).toHaveProperty('data')
       // Algo así expect(response.body.data).toEqual(newData) //Falta el ID igual
 
@@ -118,8 +125,10 @@ describe('Shop CRUD API', () => {
 
   describe('Test errors', () => {
     test('Inexistent Shop', async () => {
+      // Some day this ID will exist, and it will be funny
+      //  to see us debug why the test fails
       const res = await supertest(app)
-        .get(`${BASE_ENDPOINT}/40296`)
+        .get(`${BASE_ENDPOINT}/420`) 
         .send()
       
       expect(res.statusCode).toBe(404)
@@ -134,7 +143,7 @@ describe('Shop CRUD API', () => {
     })
 
     test('Empty PATCH', async () => {
-      let res = await supertest(app).post(BASE_ENDPOINT).send(baseShop)
+      let res = await supertest(app).post(BASE_ENDPOINT).send(saltedShop())
       let createdShopId = res.body.data.id
 
       res = await supertest(app)
@@ -142,21 +151,27 @@ describe('Shop CRUD API', () => {
         .send({})
       
       expect(res.status).toBe(400)
+
+      //Cleanup
+      await supertest(app).delete(`${BASE_ENDPOINT}/${createdShopId}`)
     })
 
     test('Incomplete PUT', async () => {
-      let res = await supertest(app).post(BASE_ENDPOINT).send(baseShop)
+      let res = await supertest(app).post(BASE_ENDPOINT).send(saltedShop())
       let createdShopId = res.body.data.id
 
       res = await supertest(app)
         .put(`${BASE_ENDPOINT}/${createdShopId}`)
-        .send({name: "GOG"})
+        .send({name: saltedShop().name})
       
       expect(res.status).toBe(400)
+
+      //Cleanup
+      await supertest(app).delete(`${BASE_ENDPOINT}/${createdShopId}`)
     })
 
     test('Other sanitizations', async () => {
-      let invalidShop = baseShop
+      let invalidShop = {...saltedShop(), site: 'contact@gog.com'}
       invalidShop.site = "Clearly not a website"
 
       let res = await supertest(app).post(BASE_ENDPOINT).send(invalidShop).send()
