@@ -1,10 +1,13 @@
+// DEPRECATED: Deprecado en favor del ORM
+
 import { Repository } from "../shared/repository.js";
 import { Shop } from "./shop.entity.js";
 
 const shops: Shop[] = [];
-shops.push(new Shop("Steam", "/assets/steam.svg", "https://steampowered.com/"))
-shops.push(new Shop("Epic Games", "/assets/epic.svg", "https://store.epicgames.com/"))
-shops.push(new Shop("PSN Store", "/assets/psn.svg", "https://store.playstation.com/"))
+// Dummy data ya está cargada en mysql
+// shops.push(new Shop("Steam", "/assets/steam.svg", "https://steampowered.com/"))
+// shops.push(new Shop("Epic Games", "/assets/epic.svg", "https://store.epicgames.com/"))
+// shops.push(new Shop("PSN Store", "/assets/psn.svg", "https://store.playstation.com/"))
 
 export class ShopRepository implements Repository<Shop> {
   public findAll(): Shop[] | undefined {
@@ -19,9 +22,9 @@ export class ShopRepository implements Repository<Shop> {
     if (!reqHasParams(item, ["name", "img", "site"]))
       return
 
-    const x = new Shop(item.name, item.img, item.site)
-    shops.push(x);
-    return x
+    // const x = new Shop(item.name, item.img, item.site)
+    // shops.push(x);
+    // return x
   }
 
   // Un objeto que conforme al prototipo Shop debe tener los campos *públicos*

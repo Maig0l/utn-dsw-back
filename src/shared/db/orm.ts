@@ -9,6 +9,8 @@ const host = process.env.dbHost
 const port = process.env.dbPort
 const name = process.env.dbName
 
+console.info("--(i)-- Connecting to DB")
+
 export const orm = await MikroORM.init({
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
