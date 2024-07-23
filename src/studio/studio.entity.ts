@@ -1,16 +1,14 @@
-export class Studio {
-    private static ID_COUNTER = 0;
-    public id: number;
-  constructor(
-    public name: string,
-    public type: StudioType[],
-    public site: string) {
-        
-        this.id = ++Studio.ID_COUNTER;
-    }
-}
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 
-export enum StudioType {
-  Developer = "Desarrollador",
-  Publisher = "Editor"
+@Entity()
+export class Studio extends BaseEntity {
+  @Property({nullable: false, unique: true})
+  name!: string
+
+  @Property()
+  type!: string
+
+  @Property({unique: true})
+  site!: string
 }

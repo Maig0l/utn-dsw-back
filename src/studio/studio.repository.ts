@@ -1,10 +1,10 @@
 import { Repository } from "../shared/repository.js";
-import { Studio, StudioType } from "./studio.entity.js";
+import { Studio } from "./studio.entity.js";
 
 const studios: Studio[] = [];
-studios.push(new Studio("ATLUS",[StudioType.Developer],"https://atlus.com/"))
-studios.push(new Studio("WSS Playground",[StudioType.Developer, StudioType.Publisher],"https://whysoserious.jp/en/"))
-studios.push(new Studio("Square Enix",[StudioType.Developer, StudioType.Publisher],"https://www.square-enix-games.com/es_XL/home"))
+// studios.push(new Studio("ATLUS",[StudioType.Developer],"https://atlus.com/"))
+// studios.push(new Studio("WSS Playground",[StudioType.Developer, StudioType.Publisher],"https://whysoserious.jp/en/"))
+// studios.push(new Studio("Square Enix",[StudioType.Developer, StudioType.Publisher],"https://www.square-enix-games.com/es_XL/home"))
 
 export class StudioRepository implements Repository<Studio> {
     public findAll(): Studio[] | undefined {
@@ -19,9 +19,9 @@ export class StudioRepository implements Repository<Studio> {
         if(!reqHasParams(item, ["name", "type", "site"])) 
         return undefined;
     
-        const x = new Studio(item.name, item.type, item.site)
-        studios.push(x);
-        return x;
+    //   const x = new Studio(item.name, item.type, item.site)
+    //    studios.push(x);
+    //    return x;
     }
 
     public update(item: Studio): Studio | undefined {
@@ -35,10 +35,10 @@ export class StudioRepository implements Repository<Studio> {
     public remove(item: {id: number; }): Studio | undefined{
         const idxStudio = studios.findIndex(studio => studio.id === item.id);
         if (idxStudio === -1)
-            return undefined;
+            return
 
         const studio = studios.splice(idxStudio, 1)[0];
-        return studio;
+        return studio
     }
 }
 
