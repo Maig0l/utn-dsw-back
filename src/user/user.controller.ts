@@ -5,6 +5,7 @@ import sanitizeHtml from 'sanitize-html'
 import { orm } from "../shared/db/orm.js";
 import { User } from "./user.entity.js";
 import bcrypt from 'bcrypt';
+import { randomBytes } from "crypto";
 
 const PASSWD_SALT_ROUNDS = 10
 
@@ -70,13 +71,44 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-  if (!user)
+/** Login 
+ * {
+ *  user
+ *  passwd
+ * }
+ */
+async function login(req: Request, res: Response) {
+  const ERR_LOGIN_BAD_CREDS = "Invalid user/pass"
 
+  let user;
+  try {
+    user = await em.findOne(User, {nick: req.body.nick})
+  } catch(e) {
+    handleOrmError(res, e)
+  }
+  if (!user)
+    return res.status(400).json({message: ERR_LOGIN_BAD_CREDS})
+
+  const passwdIsCorrect = await bcrypt.compare(res.locals.sanitizedInput.password, user.password)
+  if (!passwdIsCorrect)
+    return res.status(400).json({message: ERR_LOGIN_BAD_CREDS})
+
+  res.json({message: "Login successful", data: {sessionToken: randomBytes(20).toString('hex')}})
 }
 
 /** Helper functions
  */
 
+function sanitizeLoginForm(req: Request, res: Response, next: NextFunction) {
+  res.locals.sanitizedInput = {
+    nick: req.body.nick,
+    password: req.body.password
+  }
+  const sanIn = res.locals.sanitizedInput
+  if (!sanIn.nick || !sanIn.password)
+    return res.status(400).json({message: "Fields required"})
+  next()
+}
 
 function hashPassword(passwd: string): string {
   return bcrypt.hashSync(passwd, PASSWD_SALT_ROUNDS)
@@ -230,4 +262,4 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
-export {findAll, findOne, add, update, remove, validateExists, sanitizeInput}
+export {findAll, findOne, add, update, remove, validateExists, sanitizeInput, login, sanitizeLoginForm}
