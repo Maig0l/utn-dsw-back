@@ -1,9 +1,9 @@
 import {NextFunction, Request, Response} from 'express'
-import { PlatformRepository } from './platform.repository.js'
+//import { PlatformRepository } from './platform.repository.js'
 import { Platform } from './platform.entity.js'
 
 
-const repository = new PlatformRepository()
+//const repository = new PlatformRepository()
 
 
 function sanitizePlatformInput(req:Request, res:Response, next:NextFunction){
@@ -20,45 +20,28 @@ function sanitizePlatformInput(req:Request, res:Response, next:NextFunction){
 
 
 function findAll(req: Request,res: Response) {
-  res.json({data: repository.findAll()}) 
+  res.status(500).json({message: 'Not implemented'}) 
 }
 
 
 function findOne(req: Request ,res:Response) {
-  const platform = repository.findOne({id : Number.parseInt(req.params.id)})
-  if(!platform){
-    return res.status(404).send({message: 'Platform not found.'})
-  }
-  res.json({data: platform})
+  res.status(500).json({message: 'Not implemented'}) 
 }
 
 
 function add(req:Request,res:Response) {
-    const { name , img } = req.body.sanitizedInput
-    const platform =  new Platform (name,img)
-    const plat = repository.add(platform)
-    return res.status(201).send({message: 'Platform created.', data: plat})
+    res.status(500).json({message: 'Not implemented'}) 
 }
 
 
 function update (req:Request,res:Response) {
-  req.body.sanitizedInput.id= req.params.id
-  const platform = repository.update(req.body.sanitizedInput)
-  if(!platform){
-    return res.status(404).send({message: 'Platform not found.'})
-  }
-  return res.status(200).send({message: 'Plaform updated succesfully.', data: platform})
+  res.status(500).json({message: 'Not implemented'}) 
 }
 
 
 function remove (req:Request,res:Response) {
-  const platform = repository.remove({id:  Number.parseInt(req.params.id)})
-  if(!platform){
-    res.status(404).send({message: 'Platform not found.'})
-  } else {
-    res.status(200).send({message: 'Platform deleted succesfully.'})
+  res.status(500).json({message: 'Not implemented'}) 
   }
-}
 
 
 export {sanitizePlatformInput, findAll, findOne, add, update, remove}

@@ -1,13 +1,13 @@
-export class Platform {
-    private static ID_COUNTER = 0;
-    public id: number;
-  
-    constructor(
-    public name: string,
-    public img: string) {
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 
-        this.id = ++Platform.ID_COUNTER;
-        this.name = name;
-        this.img = img;
-    }
-  }
+@Entity()
+export class Platform extends BaseEntity {
+    @Property({nullable: false, unique: true})
+    name!: string
+    
+    @Property()
+    img!: string
+
+    //falta relacion n..m con game
+}
