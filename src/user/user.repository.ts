@@ -7,7 +7,7 @@ const VALID_PARAMS = "nick email password profilePic bio".split(' ')
 const hasParams = paramCheckFromList(VALID_PARAMS)
 
 const users: User[] = [];
-users.push(new User("Maigol", "maigol@example.org", "hunter2"))
+// users.push(new User("Maigol", "maigol@example.org", "hunter2"))
 
 export class UserRepository implements Repository<User> {
   findAll(): User[] | undefined {
@@ -25,9 +25,9 @@ export class UserRepository implements Repository<User> {
     if (!paramCheckFromList(REQ_PARAMS)(item, true))
       return
 
-    const user = new User(item.nick, item.email, item.password)
-    users.push(user)
-    return user
+    // const user = new User(item.nick, item.email, item.password)
+    // users.push(user)
+    // return user
   }
 
   update(item: User): User | undefined {

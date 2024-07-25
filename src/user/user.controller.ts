@@ -2,6 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import { UserRepository } from "./user.repository.js";
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import sanitizeHtml from 'sanitize-html'
+import { orm } from "../shared/db/orm.js";
+import { User } from "./user.entity.js";
+import bcrypt from 'bcrypt';
+
+const PASSWD_SALT_ROUNDS = 10
 
 const ERR_500 = "Something went horribly wrong. Oops (this is our fault)"
 
@@ -10,40 +15,105 @@ const VALID_PARAMS = "nick email password profilePic bio".split(' ')
 const hasCreationParams = paramCheckFromList(REQ_PARAMS)
 const hasAnyParams = paramCheckFromList(VALID_PARAMS)
 
-const repo = new UserRepository()
+const em = orm.em
 
-function findAll(req: Request, res: Response) {
-  res.json({data: repo.findAll()})
+async function findAll(req: Request, res: Response) {
+  try {
+    const users = await em.find(User, {})
+    res.json({data: users})
+  } catch (e) {
+    handleOrmError(res, e)
+  }
 }
 
-function findOne(req: Request, res: Response) {
-  // El middleware validateExists ya llama al repo y devuelve el 404
-  return res.json({data: res.locals.user})
+async function findOne(req: Request, res: Response) {
+  try {
+    const user = await em.findOneOrFail(User, {id: res.locals.id})
+    res.json({data: user})
+  } catch (e) {
+    handleOrmError(res, e)
+  }
 }
 
-function add(req: Request, res: Response) {
-  const user = repo.add(res.locals.sanitizedInput)
+async function add(req: Request, res: Response) {
+  try {
+    const user = await em.create(User, res.locals.sanitizedInput)
+    if (!user)
+      throw new Error(ERR_500)
+    await em.flush()
+    res.status(201).json({message: "User created successfully", data: user})
+  } catch (e) {
+    handleOrmError(res, e)
+  }
+}
+
+async function update(req: Request, res: Response) {
+  try {
+    // TODO: Qué pasa si en el input viene para cambiar el id?
+    // Debería sacarlo la sanitización
+
+    const user = await em.findOneOrFail(User, {id: res.locals.id})
+    em.assign(user, res.locals.sanitizedInput)
+    await em.flush()
+  } catch (e) {
+    handleOrmError(res, e)
+  }
+}
+
+async function remove(req: Request, res: Response) {
+  try {
+    const user = await em.findOneOrFail(User, {id: res.locals.id})
+    await em.removeAndFlush(user)
+    res.json({message: "User deleted successfully", data: user})
+  } catch (e) {
+    handleOrmError(res, e)
+  }
+}
+
   if (!user)
-    return res.status(500).json({message: ERR_500})
 
-  res.status(201).json({data: user})
 }
 
-function update(req: Request, res: Response) {
-  const user = repo.update({...res.locals.sanitizedInput, id: res.locals.id})
-  if (!user)
-    return res.status(500).json({message: ERR_500})
+/** Helper functions
+ */
 
-  res.status(200).json({data: user})
+
+function hashPassword(passwd: string): string {
+  return bcrypt.hashSync(passwd, PASSWD_SALT_ROUNDS)
 }
 
-function remove(req: Request, res: Response) {
-  const user = repo.remove({id: res.locals.id})
-  if (!user)
-    return res.status(500).json({message: ERR_500})
-
-  res.json({data: user})
+async function checkPassword(passwd: string): Promise<boolean> {
+  // TODO: write
+  return true
 }
+
+function handleOrmError(res: Response, err: any) {
+  if (err.code) {
+    switch (err.code) {
+      case "ER_DUP_ENTRY":
+        // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
+        // TODO: no debería ocurrir
+        res.status(400).json({message: `A user with those attributes already exists.`})
+        break
+      case "ER_DATA_TOO_LONG":
+        res.status(400).json({message: `Data too long.`})
+        break
+    }
+  }
+  else {
+    switch (err.name) {
+      case "NotFoundError":
+        res.status(404).json({message: `User not found for ID ${res.locals.id}`})
+        break
+      default:
+        console.error("\n--- ORM ERROR ---")
+        console.error(err.message)
+        res.status(500).json({message: "Oops! Something went wrong. This is our fault."})
+        break
+    }
+  }
+}
+
 
 /** Middlewarez
 */
@@ -53,17 +123,18 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
   if (Number.isNaN(id))
     return res.status(400).json({message: "ID must be an integer"})
 
-  const user = repo.findOne({id})
-  if (!user)
-    return res.status(404).json({message: `User ${req.params.id} not found`})
+  // const user = repo.findOne({id})
+  // if (!user)
+  //   return res.status(404).json({message: `User ${req.params.id} not found`})
 
   res.locals.id = id
-  res.locals.user = user
+  // res.locals.user = user
 
   next()
 }
 
-function sanitizeInput(req: Request, res: Response, next: NextFunction) {
+// Se ejecuta al crear o modificar un registro
+async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   // Mensajes de error
   const ERR_BAD_NICK = 'Invalid username. (It must be between 3-20 alphanumeric characters, _ allowed)'
   const ERR_BAD_EMAIL = 'Invalid email address. Correct format: "user@mail.com"'
@@ -107,7 +178,9 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
     const nicknameRegex = /^(?!(^\.|.*\.$))(?!.*\.{2,}.*)[\w\.]{3,30}$/
     if (!nicknameRegex.test(sanIn.nick))
       return res.status(400).json({message: ERR_BAD_NICK})
-    if (repo.findByNick(sanIn.nick) !== undefined)
+
+    // CONSULTA: Se puede evitar la consulta a la base de datos?
+    if (await em.findOne(User, {nick: sanIn.nick}) != null)
       return res.status(400).json({message: ERR_USED_NICK})
   }
 
@@ -116,7 +189,8 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
     if (!emailRegex.test(sanIn.email))
       return res.status(400).json({message: ERR_BAD_EMAIL})
     // No puede haber dos usuarios con el mismo email
-    if (repo.findByEmail(sanIn.email) !== undefined)
+    // TODO: Esta comprobación ya la hace la DB (Users.email es Unique)
+    if (await em.findOne(User, {email: sanIn.email}) !== null)
       return res.status(400).json({message: ERR_USED_EMAIL})
   }
 
@@ -126,10 +200,14 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
    * RegEx tomado de: https://stackoverflow.com/a/21456918
    * TODO: El espacio no está siendo tomado como caracter especial
    */
+  // CONSULTA: Conviene hashear la passwd acá? O debería ser otro middleware?
+  // probablemente sí
   if (sanIn.password) {
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,128}$/
     if (!passwordRegex.test(sanIn.password))
       return res.status(400).json({message: ERR_BAD_PASS})
+
+    sanIn.password = hashPassword(sanIn.password)
   }
   
   // Se borran todos los códigos HTML que el usuario ingrese, dejándo sólo los
