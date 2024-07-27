@@ -13,8 +13,8 @@ async function findAll(req: Request,res: Response) {
   try{
     const platforms = await em.find(Platform, {})
     res.status(200).json({message:'found all platforms', data: platforms})
-  } catch (error: any){
-    res.status(500).json({message: error.message})
+  } catch(err) {
+    handleOrmError(res, err)
   }
    
 }
@@ -25,8 +25,8 @@ async function findOne(req: Request ,res:Response) {
     const id = Number.parseInt(res.locals.id)
     const platform = await em.findOneOrFail(Platform, {id})
     res.status(200).json({message:'found platform', data: platform})
-  } catch (error: any){
-    res.status(500).json({message: error.message})
+  } catch(err) {
+    handleOrmError(res, err)
   }
 }
 
@@ -36,9 +36,9 @@ async function add(req:Request,res:Response) {
     const platform = em.create(Platform, req.body)
     await em.flush()
     res.status(201).json({message: 'platform created', data: platform})
-  }  catch  (error: any){
-    res.status(500).json({message: error.message})
-  }  
+  }  catch(err) {
+    handleOrmError(res, err)
+  }
 }
 
 
@@ -49,9 +49,9 @@ async function update (req:Request,res:Response) {
     em.assign(platform, req.body)
     await em.flush()
     res.status(200).json({message: 'platform updated', data: platform})
-  }  catch  (error: any){
-    res.status(500).json({message: error.message})
-  }   
+  }  catch(err) {
+    handleOrmError(res, err)
+  }
 }
 
 
@@ -61,9 +61,9 @@ async function remove (req:Request,res:Response) {
     const platform = em.getReference(Platform, id)
     await em.removeAndFlush(platform)
     res.status(200).send({message: 'platform deleted'})
-  } catch  (error: any){
-    res.status(500).json({message: error.message})
-  }  
+  } catch(err) {
+    handleOrmError(res, err)
+  }
   }
 
 
