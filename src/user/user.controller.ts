@@ -18,6 +18,8 @@ const hasAnyParams = paramCheckFromList(VALID_PARAMS)
 
 const em = orm.em
 
+// *** CRUD ***
+
 async function findAll(req: Request, res: Response) {
   try {
     const users = await em.find(User, {})
@@ -36,10 +38,12 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+// *** A.K.A: Register ***
 async function add(req: Request, res: Response) {
   try {
+    // TODO: Validate
     const user = await em.create(User, res.locals.sanitizedInput)
-    if (!user)
+    if (!user) //why tho
       throw new Error(ERR_500)
     await em.flush()
     res.status(201).json({message: "User created successfully", data: user})
@@ -96,8 +100,8 @@ async function login(req: Request, res: Response) {
   res.json({message: "Login successful", data: {sessionToken: randomBytes(20).toString('hex')}})
 }
 
-/** Helper functions
- */
+/* *** Helper functions ***
+*/
 
 function sanitizeLoginForm(req: Request, res: Response, next: NextFunction) {
   res.locals.sanitizedInput = {
@@ -147,7 +151,7 @@ function handleOrmError(res: Response, err: any) {
 }
 
 
-/** Middlewarez
+/* *** Middlewarez ***
 */
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
@@ -164,6 +168,13 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
 
   next()
 }
+
+/** CONSLUTA: Los middlewares para sanitizar input, y para validar
+ *             el formato de los inputs (ej: user, password) deberían estar separados?
+ *             ahora mismo están ambas cosas en el mismo sanitizeInput()
+ */
+
+/** ANS: Zod, valibot, classValidator para validar user, passwd */
 
 // Se ejecuta al crear o modificar un registro
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
@@ -212,6 +223,7 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
       return res.status(400).json({message: ERR_BAD_NICK})
 
     // CONSULTA: Se puede evitar la consulta a la base de datos?
+    // TODO: Esto es VALIDACIÓN PARA EL REGISTRO, no sanitización... *** delete this ***
     if (await em.findOne(User, {nick: sanIn.nick}) != null)
       return res.status(400).json({message: ERR_USED_NICK})
   }
@@ -221,7 +233,8 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
     if (!emailRegex.test(sanIn.email))
       return res.status(400).json({message: ERR_BAD_EMAIL})
     // No puede haber dos usuarios con el mismo email
-    // TODO: Esta comprobación ya la hace la DB (Users.email es Unique)
+    // CONSULTA: Esta comprobación ya la hace la DB (Users.email es Unique) y tira su error
+    //            debería dejar que handleOrmError() se encargue de avisar esto?
     if (await em.findOne(User, {email: sanIn.email}) !== null)
       return res.status(400).json({message: ERR_USED_EMAIL})
   }
@@ -232,13 +245,14 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
    * RegEx tomado de: https://stackoverflow.com/a/21456918
    * TODO: El espacio no está siendo tomado como caracter especial
    */
-  // CONSULTA: Conviene hashear la passwd acá? O debería ser otro middleware?
-  // probablemente sí
   if (sanIn.password) {
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,128}$/
     if (!passwordRegex.test(sanIn.password))
       return res.status(400).json({message: ERR_BAD_PASS})
 
+    // CONSULTA[ans]: Conviene hashear la passwd en el midware de sanitización? O debería ser otro middleware?
+    //            Probablemente iría en la función de validación para registro (?)
+    //            o directamente en las funciones de /login y /register ? ANS: <-- THIS
     sanIn.password = hashPassword(sanIn.password)
   }
   

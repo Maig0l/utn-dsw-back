@@ -87,7 +87,7 @@ describe('Studio CRUD API', () => {
         .put(`${BASE_ENDPOINT}/${createdStudioId}`)
         .send(newData);
       
-      // CONSULTA: Tiene que haber una mejor forma de testear esto
+      // CONSULTA[Resuelta]: Tiene que haber una mejor forma de testear esto
       // ^ Nope, se hace así.
       // Esto es "Integration testing"
       try {
@@ -101,7 +101,7 @@ describe('Studio CRUD API', () => {
 
       // Modificar solo en newData
       expect(response.body.data.name).toBe(newData.name)
-      expect(response.body.data.img).toBe(newData.img)
+      expect(response.body.data.img).toBe(newData.type)
       expect(response.body.data.site).toBe(newData.site)
     })
 

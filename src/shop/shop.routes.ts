@@ -1,6 +1,3 @@
-/** Consulta 
- * Se puede embellecer esta maraña de imports¿
- */
 import {Request, Response, NextFunction, Router} from 'express'
 import {findOne, findAll, add, remove, update, validateExists,
   sanitizeInput} from './shop.controller.js'

@@ -7,6 +7,8 @@ import { userRouter } from './user/user.routes.js';
 import { tagRouter } from './tag/tag.routes.js'
 import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
+// TODO: Cargar configuraciones desde .env (con dotenv), o generar archivo .env
+//        con las variables válidas en caso de no existir
 
 export const app = express()
 
