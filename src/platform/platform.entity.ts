@@ -9,5 +9,5 @@ export class Platform extends BaseEntity {
     @Property()
     img!: string
 
-    //falta relacion n..m con game
+    //falta relacion n..m con game. ver Rel<entidadX> en vid 68
 }
