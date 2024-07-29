@@ -3,8 +3,8 @@ import { Platform } from "./platform.entity.js";
 
 
 const platforms: Platform[] = [];
-platforms.push(new Platform("Play Station 1", "/assets/ps1.svg"))
-platforms.push(new Platform("Play Station 2", "/assets/ps2.svg"))
+//platforms.push(new Platform("Play Station 1", "/assets/ps1.svg"))
+//platforms.push(new Platform("Play Station 2", "/assets/ps2.svg"))
 
 export class PlatformRepository implements Repository<Platform> {
   
