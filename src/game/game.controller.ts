@@ -1,17 +1,17 @@
 import { Request, Response, NextFunction } from "express"
-import { Studio } from "./studio.entity.js";
+import { Game } from "./game.entity.js";
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import { orm } from "../shared/db/orm.js";
 
-const validParams = "name type site".split(' ')
+const validParams = "title synopsis releaseDate portrait banner pictures".split(' ')
 const hasParams = paramCheckFromList(validParams)
 
 const em = orm.em
 
 async function findAll(req: Request, res: Response) {
     try {
-        const studios = await em.find(Studio, {})
-        res.json({data: studios})
+        const games = await em.find(Game, {})
+        res.json({data: games})
     } catch (err) {
         handleOrmError(res, err)
     }
@@ -19,18 +19,18 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
     try {
-      const studio = await em.findOneOrFail(Studio, {id: res.locals.id})
-      res.json({data: studio})
+      const game = await em.findOneOrFail(Game, {id: res.locals.id})
+      res.json({data: game})
     } catch(err) {
       handleOrmError(res, err)
     }
-  }
+}
 
 async function add(req: Request, res: Response) {
     try {
-        const studio = em.create(Studio, res.locals.sanitizedInput)
+        const game = em.create(Game, res.locals.sanitizedInput)
         await em.flush()
-        res.status(201).json({message: "Studio created successfully", data: studio})
+        res.status(201).json({message: "Game created successfully", data: game})
     } catch(err) {
         handleOrmError(res, err)
     }
@@ -38,10 +38,10 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
     try {
-        const studio = await em.findOneOrFail(Studio, {id: res.locals.id})
-        em.assign(studio, res.locals.sanitizedInput)
+        const game = await em.findOneOrFail(Game, {id: res.locals.id})
+        em.assign(game, res.locals.sanitizedInput)
         await em.flush()
-        res.json({message: "Studio updated", data: studio})
+        res.json({message: "Game updated", data: game})
     } catch(err) {
         handleOrmError(res, err)
     }
@@ -49,11 +49,11 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
     try {
-        const studio = await em.findOneOrFail(Studio, {id: res.locals.id})
-        const studioRef = em.getReference(Studio, res.locals.id)
-        await em.removeAndFlush(studioRef)
+        const game = await em.findOneOrFail(Game, {id: res.locals.id})
+        const gameRef = em.getReference(Game, res.locals.id)
+        await em.removeAndFlush(gameRef)
 
-        res.json({message: "Studio deleted successfully", data: studio})
+        res.json({message: "Game deleted successfully", data: game})
     }   catch(err) {
         handleOrmError(res, err)
     }
@@ -61,7 +61,7 @@ async function remove(req: Request, res: Response) {
 
 //middleware
 
-function sanitizeInput(req:Request, res:Response, next:NextFunction) {
+function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 
     if (["POST", "PUT"].includes(req.method) && !hasParams(req.body, true))
         return res.status(400)
@@ -73,11 +73,13 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
           
 
     res.locals.sanitizedInput = {
-        name: req.body.name,
-        type: req.body.type,
-        site: req.body.site
+        title: req.body.title,
+        synopsis: req.body.synopsis,
+        releaseDate: req.body.releaseDate,
+        portrait: req.body.portrait,
+        banner: req.body.banner,
+        pictures: req.body.pictures
     }
-
     const sanitizedInput = res.locals.sanitizedInput
     
     const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
@@ -136,5 +138,5 @@ function handleOrmError(res: Response, err: any) {
       }
     }
   }
-    
-export { findAll, findOne, add, update, remove, sanitizeInput, validateExists };
+
+export { findAll, findOne, add, update, remove, sanitizeInput, handleOrmError }
