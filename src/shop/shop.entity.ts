@@ -1,11 +1,11 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, PrimaryKey, Property, ManyToMany, Cascade, Collection } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
+import { Game } from "../game/game.entity.js";
 
 @Entity()
 export class Shop extends BaseEntity {
   @Property({nullable: false, unique: true})
   name!: string
-
   // Mientras que img y site pueden ser vacíos, no serán undefined, si no ""
   // O sea, son nullables en la DB, pero en TS serán String 
   @Property()
@@ -13,4 +13,7 @@ export class Shop extends BaseEntity {
 
   @Property({unique: true})
   site!: string
+
+  @ManyToMany(() => Game, (game) => game.shop)
+  games = new Collection<Game>(this)
 }
