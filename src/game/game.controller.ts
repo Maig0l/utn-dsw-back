@@ -139,4 +139,4 @@ function handleOrmError(res: Response, err: any) {
     }
   }
 
-export { findAll, findOne, add, update, remove, sanitizeInput, handleOrmError }
+export { findAll, findOne, add, update, remove, sanitizeInput, handleOrmError, validateExists }
