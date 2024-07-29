@@ -1,5 +1,6 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, Property, ManyToMany, Collection } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
+import { Game } from "../game/game.entity.js";
 
 @Entity()
 export class Platform extends BaseEntity {
@@ -9,5 +10,7 @@ export class Platform extends BaseEntity {
     @Property()
     img!: string
 
-    //falta relacion n..m con game. ver Rel<entidadX> en vid 68
+    @ManyToMany(() => Game, (game) => game.platform)
+    games = new Collection<Game>(this)
+    //Deberia estar bien
 }
