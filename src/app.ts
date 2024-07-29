@@ -6,6 +6,7 @@ import { studioRouter } from './studio/studio.routes.js';
 import { userRouter } from './user/user.routes.js';
 import { tagRouter } from './tag/tag.routes.js'
 import { gameRouter } from './game/game.routes.js';
+import { playlistRouter } from './playlist/playlist.routes.js'
 import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 
@@ -28,6 +29,7 @@ app.use('/api/studios', studioRouter)
 app.use('/api/platforms', platformRouter)
 app.use('/api/tags', tagRouter)
 app.use('/api/games', gameRouter)
+app.use('/api/playlists', playlistRouter)
 
 await syncSchema() // TODO: Never in prod
 
