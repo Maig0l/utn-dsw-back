@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { add, findAll, findOne, remove, sanitizeInput, update, validateExists, login, sanitizeLoginForm } from "./user.controller.js";
+import { add, findAll, findOne, remove, sanitizeInput, update, validateExists, login } from "./user.controller.js";
 
 export const userRouter = Router()
 
 userRouter.get('/', findAll)
 userRouter.post('/', sanitizeInput, add)
-userRouter.post('/login', sanitizeLoginForm, login)
+userRouter.post('/login', sanitizeInput, login)
 
 // Todas las rutas /:id usan el validateExists
 userRouter.use('/:id', validateExists)
