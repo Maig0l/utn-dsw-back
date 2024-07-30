@@ -2,7 +2,7 @@ import { Repository } from "../shared/repository.js";
 import { Tag } from "./tag.entity.js";
 
 const tags: Tag[] = [];
-tags.push(new Tag("Action","Juegos con mucha violencia"))
+//tags.push(new Tag("Action","Juegos con mucha violencia"))
 
 export class TagRepository implements Repository<Tag>{
     public findOne(item: { id: number }): Tag | undefined {
@@ -10,15 +10,16 @@ export class TagRepository implements Repository<Tag>{
     }
 
     public add(item: Tag): Tag | undefined {
-        tags.push(item)
-        return item
+        if (!reqHasParams(item, ["name", "description"]))
+            return
     }
 
     public update(item: Tag): Tag | undefined {
         const tagIdx = tags.findIndex((tag) => tag.id === item.id)
-
-        if (tagIdx !== -1)
-          tags[tagIdx] = {...tags[tagIdx], ...item, id: tags[tagIdx].id }
+        if (tagIdx === -1)
+            return
+        
+        tags[tagIdx] = {...tags[tagIdx], ...item, id: tags[tagIdx].id }
 
         return tags[tagIdx]
     }
@@ -36,4 +37,13 @@ export class TagRepository implements Repository<Tag>{
     public findAll(): Tag[] | undefined {
         return tags 
     }
+
+   
+      
 }
+
+function reqHasParams(item: Tag, params: string[]): Boolean {
+    return params.every( (e) => {
+      return Object.keys(item).includes(e)
+    })
+  }

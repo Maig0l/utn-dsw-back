@@ -1,14 +1,15 @@
-export class Tag {
-    private static ID_COUNTER = 0;
-    public id: number;
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 
-    constructor(
-        public name: string,
-        public description: string,
-    ) {
-        this.id = ++Tag.ID_COUNTER;
-        this.name = name;
-        this.description = description 
-    }
+
+@Entity()
+export class Tag extends BaseEntity {
+    @Property({nullable: false, unique: true})
+    name!: string
+    
+    @Property()
+    description!: string
+
+   
 }
 
