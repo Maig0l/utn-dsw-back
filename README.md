@@ -8,12 +8,19 @@
 
 ### 28/07/24
 
-- [ ] CRUD simple
+- [x] CRUD simple
 
   - [x] Platform
   - [x] Shop
   - [x] Studio
-  - [ ] Tag
+  - [x] Tag
   - [x] User
 
 - [ ] Persistencia
+
+  - [x] **Platform** (WIP)
+  - [x] Shop
+  - [x] **Studio** (WIP)
+  - [ ] Tag
+  - [x] **User** (WIP)
+  - [ ] Review
