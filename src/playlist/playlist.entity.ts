@@ -1,5 +1,6 @@
-import { Entity, Property } from "@mikro-orm/core";
+import { Cascade, Entity, ManyToOne, Property } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
+import { User } from "../user/user.entity.js";
 
 @Entity()
 export class Playlist extends BaseEntity {
@@ -13,6 +14,10 @@ export class Playlist extends BaseEntity {
     is_private!: boolean
     // "is_private" un buen nombre? CONSULTA
 
+    @ManyToOne('User', {
+        cascade: [Cascade.ALL]
+    })
+    owner!: User
 
-    //falta relacion n..m con game, y 1 a n con usuario. ver Rel<entidadX> en vid 68
+    // TODO: Relacion n..m con Game. Ver Rel<entidadX> en vid 68
 }

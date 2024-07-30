@@ -3,11 +3,13 @@ import {
     Property,
     ManyToMany,
     Cascade,
+    Collection,
   } from '@mikro-orm/core'
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Studio } from '../studio/studio.entity.js';
 import { Shop } from '../shop/shop.entity.js';
 import { Platform } from '../platform/platform.entity.js';
+import { User } from '../user/user.entity.js';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -47,4 +49,4 @@ export class Game extends BaseEntity {
     })
     platform!: Platform[]
 }
-    //Proximamente propiedades de relaciones con otras entidades
+    //Proximamente propiedades de relaciones con otras entidades (menos User; ver comentario en User.entity.ts)
