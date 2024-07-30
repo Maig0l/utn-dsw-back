@@ -10,7 +10,7 @@ export class Platform extends BaseEntity {
     @Property()
     img!: string
 
-    @ManyToMany(() => Game, (game) => game.platform)
+    @ManyToMany(() => Game, (game) => game.platforms)
     games = new Collection<Game>(this)
     //Deberia estar bien
 }

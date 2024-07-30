@@ -35,18 +35,18 @@ export class Game extends BaseEntity {
         cascade: [Cascade.ALL],
         owner: true,
     }) //Relacion muchos a muchos con la entidad Studio?
-    studio!: Studio[]
+    studios = new Collection<Studio>(this)
 
     @ManyToMany(() => Shop, (shop) => shop.games, {
         cascade: [Cascade.ALL],
         owner: true,
     })
-    shop!: Shop[] 
+    shops = new Collection<Shop>(this)
 
    @ManyToMany(() => Platform, (platform) => platform.games, {
         cascade: [Cascade.ALL],
         owner: true,
     })
-    platform!: Platform[]
+    platforms = new Collection<Platform>(this)
 }
     //Proximamente propiedades de relaciones con otras entidades (menos User; ver comentario en User.entity.ts)
