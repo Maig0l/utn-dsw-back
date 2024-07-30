@@ -11,6 +11,7 @@ import { playlistRouter } from './playlist/playlist.routes.js'
 import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import cors from 'cors'
+import { reviewRouter } from './review/review.routes.js';
 
 export const app = express()
 
@@ -35,6 +36,7 @@ app.use('/api/platforms', platformRouter)
 app.use('/api/tags', tagRouter)
 app.use('/api/games', gameRouter)
 app.use('/api/playlists', playlistRouter)
+app.use('/api/reviews', reviewRouter)
 
 await syncSchema() // TODO: Never in prod
 
