@@ -78,8 +78,6 @@ describe('User CRUD', () => {
         .put(`${BASE_ENDPOINT}/${createdUserId}`)
         .send(newData);
       
-      // CONSULTA: Tiene que haber una mejor forma de testear esto que comprobar
-      //   uno por uno
       try {
         expect(response.statusCode).toBe(200)
         expect(response.body).toHaveProperty('data')

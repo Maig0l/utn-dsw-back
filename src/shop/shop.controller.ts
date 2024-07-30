@@ -50,9 +50,9 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
-    // CONSULTA: Está bien hacer esta doble consulta? O getReference no va a la DB?
+    // CONSULTA[ans]: Está bien hacer esta doble consulta? O getReference no va a la DB?
     const shop = await em.findOneOrFail(Shop, {id: res.locals.id})
-    const shopRef = em.getReference(Shop, res.locals.id)
+    const shopRef = em.getReference(Shop, res.locals.id) // ANS: TODO: Quitar
     await em.removeAndFlush(shopRef)
 
     res.json({message: "Shop deleted successfully", data: shop})

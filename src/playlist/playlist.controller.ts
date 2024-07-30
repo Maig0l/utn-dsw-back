@@ -1,9 +1,9 @@
 import {NextFunction, Request, Response} from 'express'
 import { paramCheckFromList } from '../shared/paramCheckFromList.js';
-import { Platform } from './platform.entity.js'
+import { Playlist } from './playlist.entity.js'
 import { orm } from '../shared/db/orm.js'
 
-const VALID_PARAMS = "name img".split(' ')
+const VALID_PARAMS = "name description is_private".split(' ')
 const hasParams = paramCheckFromList(VALID_PARAMS)
 
 const em = orm.em
@@ -11,8 +11,8 @@ const em = orm.em
 
 async function findAll(req: Request,res: Response) {
   try{
-    const platforms = await em.find(Platform, {})
-    res.status(200).json({message:'found all platforms', data: platforms})
+    const playlists = await em.find(Playlist, {})
+    res.status(200).json({message:'found all playlists', data: playlists})
   } catch(err) {
     handleOrmError(res, err)
   }
@@ -23,8 +23,8 @@ async function findAll(req: Request,res: Response) {
 async function findOne(req: Request ,res:Response) {
   try{
     const id = Number.parseInt(res.locals.id)
-    const platform = await em.findOneOrFail(Platform, {id})
-    res.status(200).json({message:'found platform', data: platform})
+    const playlist = await em.findOneOrFail(Playlist, {id})
+    res.status(200).json({message:'found playlist', data: playlist})
   } catch(err) {
     handleOrmError(res, err)
   }
@@ -33,38 +33,38 @@ async function findOne(req: Request ,res:Response) {
 
 async function add(req:Request,res:Response) {
   try{
-    const platform = em.create(Platform, req.body)
+    const playlist = em.create(Playlist, req.body)
     await em.flush()
-    res.status(201).json({message: 'platform created', data: platform})
-  }  catch(err) {
+    res.status(201).json({message: 'playlist created', data: playlist})
+  } catch(err) {
     handleOrmError(res, err)
-  }
+  }  
 }
 
 
 async function update (req:Request,res:Response) {
     try{
     const id = Number.parseInt(res.locals.id)
-    const platform = em.getReference(Platform, id)
-    em.assign(platform, req.body)
+    const playlist = em.getReference(Playlist, id)
+    em.assign(playlist, req.body)
     await em.flush()
-    res.status(200).json({message: 'platform updated', data: platform})
-  }  catch(err) {
+    res.status(200).json({message: 'playlist updated', data: playlist})
+  } catch(err) {
     handleOrmError(res, err)
-  }
+  }   
 }
 
 
 async function remove (req:Request,res:Response) {
   try{
     const id = Number.parseInt(res.locals.id)
-    const platform = em.getReference(Platform, id)
-    await em.removeAndFlush(platform)
-    res.status(200).send({message: 'platform deleted'})
+    const playlist = em.getReference(Playlist, id)
+    await em.removeAndFlush(playlist)
+    res.status(200).send({message: 'playlist deleted'})
   } catch(err) {
     handleOrmError(res, err)
-  }
-  }
+  }  
+}
 
 
 
@@ -79,7 +79,8 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
 
   res.locals.sanitizedInput = {
     name: req.body.name,
-    img: req.body.img,
+    description: req.body.description,
+    is_private: req.body.is_private
   }
   
   // https://stackoverflow.com/a/3809435
