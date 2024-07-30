@@ -1,18 +1,32 @@
-export class User {
-  private static idCounter = 0;
-  public id: number;
+import { Entity, ManyToMany, OneToMany, Property } from "@mikro-orm/core";
+import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 
-  constructor(
-    public nick: string, // Actúa como id, debe ser único
-    public email: string,
-    public password: string,
-    public profilePic: string = "",
-    public bioText: string = "",
-    public likes: any[] = [], //TODO: Falta entidad Tag
-    public linkedAccounts: string[] = [],
-    public createdPlaylists: any[] = [], //TODO: Falta entidad Playlist
-    public reviews: any[] = [], //TODO: Falta entidad Review
-  ) {
-    this.id = ++User.idCounter;
-  }
+@Entity()
+export class User extends BaseEntity {
+  @Property({nullable: false, unique: true})
+  nick!: string
+
+  @Property({nullable: false, unique: true})
+  email!: string
+
+  @Property({nullable: false})
+  password!: string
+
+  @Property({nullable: true})
+  profile_img?: string
+
+  @Property({nullable: true})
+  bio_text?: string
+
+  @Property({nullable: true})
+  linked_accounts?: string[]
+
+  // @OneToMany(Playlist)
+  // playlists!: Playlist[]
+
+  // @ManyToMany(Title)
+  // likes!: Title[]
+
+  // @OneToMany(Review)
+  // reviews!: Review[]
 }

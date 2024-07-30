@@ -86,9 +86,6 @@ describe('Shop CRUD API', () => {
         .put(`${BASE_ENDPOINT}/${createdShopId}`)
         .send(newData);
       
-      // CONSULTA: Tiene que haber una mejor forma de testear esto
-      // ^ Nope, se hace así.
-      // Esto es "Integration testing"
       try {
         expect(response.statusCode).toBe(200)
       } catch(e) {
