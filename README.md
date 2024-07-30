@@ -24,3 +24,11 @@
   - [ ] Tag
   - [x] **User** (WIP)
   - [ ] Review
+
+## Branch To-Dos
+
+- Crear un juego
+- Validar mejor el registro de usuario
+- Hacer que un usuario de Like a un juego
+- Sería útil que la tabla game_shop tenga un atributo URL para tener un link directo de la página del juego en la app a la página de compra en la tienda
+- Una funcion fuera de alcance sería una relacion platform_shop PC->{Steam,GOG,Epic}, [PS3,PS4,PS5]->{PSN Store}, [XBox,PC]->{Xbox/gamepass}
