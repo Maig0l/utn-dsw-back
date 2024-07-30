@@ -30,6 +30,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "reflect-metadata": "0.2.2",
-    "sanitize-html": "^2.13.0"
+    "sanitize-html": "^2.13.0",
+    "valibot": "^0.36.0"
   }
 }
