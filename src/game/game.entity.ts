@@ -50,7 +50,7 @@ export class Game extends BaseEntity {
         cascade: [Cascade.ALL],
         owner: true,
     })
-    shop!: Shop[]
+    shops = new Collection<Shop>(this)
 
     @ManyToOne(() => Franchise, { nullable: true })
     franchise?: Rel<Franchise>
@@ -59,11 +59,5 @@ export class Game extends BaseEntity {
         cascade: [Cascade.ALL],
         owner: true,
     })
-    platforms = new Collection<Platform>(this);
-
-    @ManyToMany(() => Shop, (shop) => shop.games, {
-        cascade: [Cascade.ALL],
-        owner: true,
-    })
-    shops = new Collection<Shop>(this);
+    platforms = new Collection<Platform>(this)
 }
