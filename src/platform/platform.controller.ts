@@ -98,7 +98,7 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
 }
 
 function validateExists(req:Request, res:Response, next: NextFunction) {
-  const id = Number.parseInt(res.locals.id)
+  const id = Number.parseInt(req.params.id)
 
   if (Number.isNaN(id))
     return res.status(400).json({message: 'ID must be an integer'})
