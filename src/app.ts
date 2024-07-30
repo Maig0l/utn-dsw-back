@@ -9,6 +9,7 @@ import { gameRouter } from './game/game.routes.js';
 import { playlistRouter } from './playlist/playlist.routes.js'
 import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
+import cors from 'cors'
 
 export const app = express()
 
@@ -17,6 +18,8 @@ export const app = express()
 // Nota: En Postman usar body de tipo x-www-form-urlencoded
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
+// TODO: Configurar por seguridad
+app.use(cors())
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next)
