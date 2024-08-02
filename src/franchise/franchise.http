@@ -1,0 +1,35 @@
+GET http://localhost:8080/api/franchises/
+
+
+### obtener un tag
+GET http://localhost:8080/api/franchises/3
+
+
+### crear un nuevo tag
+POST http://localhost:8080/api/franchises
+Content-Type: application/json
+
+{
+  "name": "Star Wars"
+  
+}
+
+### borrar un tag
+DELETE http://localhost:8080/api/franchises/2
+
+###
+PUT  http://localhost:8080/api/franchises/3
+Content-Type: application/json
+
+{
+  "name": "Fallout"
+ 
+}
+
+###
+PATCH http://localhost:8080/api/franchises/3
+Content-Type: application/json
+
+{
+  "name": "test patched"
+}

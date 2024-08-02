@@ -4,12 +4,16 @@ import {
     ManyToMany,
     Cascade,
     Collection,
+    ManyToOne,
+    Rel
   } from '@mikro-orm/core'
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Studio } from '../studio/studio.entity.js';
 import { Shop } from '../shop/shop.entity.js';
 import { Platform } from '../platform/platform.entity.js';
+import { Franchise } from '../franchise/franchise.entity.js';
 import { User } from '../user/user.entity.js';
+import { Tag} from '../tag/tag.entity.js';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -31,6 +35,12 @@ export class Game extends BaseEntity {
     @Property()
     pictures!: string[]
 
+    @ManyToMany(() => Tag, (tag) => tag.games, {
+        cascade: [Cascade.ALL],
+        owner: true,
+    })
+    tag!: Tag[]
+
    @ManyToMany(() => Studio, (studio) => studio.games, {
         cascade: [Cascade.ALL],
         owner: true,
@@ -41,7 +51,10 @@ export class Game extends BaseEntity {
         cascade: [Cascade.ALL],
         owner: true,
     })
-    shop!: Shop[] 
+    shop!: Shop[]
+    
+    @ManyToOne(() => Franchise, { nullable: false })
+    franchise!: Rel<Franchise>
 
    @ManyToMany(() => Platform, (platform) => platform.games, {
         cascade: [Cascade.ALL],
