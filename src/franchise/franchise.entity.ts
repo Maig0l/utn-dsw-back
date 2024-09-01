@@ -21,7 +21,7 @@ export class Franchise extends BaseEntity {
         cascade: [Cascade.ALL],
         
       })
-    games!: Game[]
+    games = new Collection<Game>(this);
 
    
 }

@@ -14,6 +14,6 @@ export class Shop extends BaseEntity {
   @Property({unique: true})
   site!: string
 
-  @ManyToMany(() => Game, (game) => game.shop)
-  games = new Collection<Game>(this)
+  // @ManyToMany(() => Game, (game) => game.shop)
+  // games = new Collection<Game>(this)
 }

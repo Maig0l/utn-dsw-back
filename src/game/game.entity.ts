@@ -12,7 +12,6 @@ import { Studio } from '../studio/studio.entity.js';
 import { Shop } from '../shop/shop.entity.js';
 import { Platform } from '../platform/platform.entity.js';
 import { Franchise } from '../franchise/franchise.entity.js';
-import { User } from '../user/user.entity.js';
 import { Tag} from '../tag/tag.entity.js';
 
 @Entity()
@@ -39,27 +38,27 @@ export class Game extends BaseEntity {
         cascade: [Cascade.ALL],
         owner: true,
     })
-    tag!: Tag[]
+    tag = new Collection<Tag>(this);
 
    @ManyToMany(() => Studio, (studio) => studio.games, {
         cascade: [Cascade.ALL],
         owner: true,
-    }) //Relacion muchos a muchos con la entidad Studio?
-    studio!: Studio[]
-
-    @ManyToMany(() => Shop, (shop) => shop.games, {
-        cascade: [Cascade.ALL],
-        owner: true,
     })
-    shop!: Shop[]
+    studios = new Collection<Studio>(this);
+
+    // @ManyToMany(() => Shop, (shop) => shop.games, {
+    //     cascade: [Cascade.ALL],
+    //     owner: true,
+    // })
+    // shop!: Shop[]
+    // TODO: Un juego no tiene shops, tiene Releases (con URL a la shop)
     
-    @ManyToOne(() => Franchise, { nullable: false })
-    franchise!: Rel<Franchise>
+    @ManyToOne(() => Franchise, { nullable: true })
+    franchise?: Rel<Franchise>
 
    @ManyToMany(() => Platform, (platform) => platform.games, {
         cascade: [Cascade.ALL],
         owner: true,
     })
-    platform!: Platform[]
+    platforms = new Collection<Platform>(this);
 }
-    //Proximamente propiedades de relaciones con otras entidades (menos User; ver comentario en User.entity.ts)

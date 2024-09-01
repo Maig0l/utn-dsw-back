@@ -1,5 +1,6 @@
 import { Collection, Entity, ManyToMany, OneToMany, Property } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
+import { Tag } from "../tag/tag.entity.js";
 import { Game } from "../game/game.entity.js";
 import { Playlist } from "../playlist/playlist.entity.js";
 
@@ -26,12 +27,8 @@ export class User extends BaseEntity {
   @OneToMany('Playlist', 'owner')
   playlists = new Collection<Playlist>(this)
 
-  // likedGames es una ManyToMany unidireccional; no debería haber una ManyToMany en Game apuntando a User.
-  // Nuestro scope no contempla ver a quienes le gustó un juego
-  // (no hay función de Amigos como para que sea relevante un "A Fulanito le gustó este juego")
-  // TODO: Revisar qué pasa con el Cascade
-  @ManyToMany('Game')
-  likedGames = new Collection<Game>(this)
+  @ManyToMany('Tag')
+  likedTags = new Collection<Tag>(this)
 
   // TODO: Implementar entidad Review
   // @OneToMany(Review)

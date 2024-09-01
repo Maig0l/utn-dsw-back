@@ -12,9 +12,4 @@ export class Tag extends BaseEntity {
 
     @ManyToMany(() => Game, (game) => game.tag)
     games = new Collection<Game>(this)
-
-
-
-   
 }
-

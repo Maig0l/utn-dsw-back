@@ -1,6 +1,7 @@
-import { Cascade, Entity, ManyToOne, Property } from "@mikro-orm/core";
+import { Cascade, Entity, ManyToOne, Property, Collection, ManyToMany } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { User } from "../user/user.entity.js";
+import { Game } from "../game/game.entity.js";
 
 @Entity()
 export class Playlist extends BaseEntity {
@@ -19,5 +20,8 @@ export class Playlist extends BaseEntity {
     })
     owner!: User
 
-    // TODO: Relacion n..m con Game. Ver Rel<entidadX> en vid 68
+    // CONSULTA: Hay muchas playlists. Una playlist conoce qué juegos tiene. Los juegos no necesitan saber en qué playlists están
+    // Se usa esto?
+    @ManyToMany(() => Game)
+    games = new Collection<Game>(this);
 }
