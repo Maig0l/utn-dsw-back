@@ -61,7 +61,7 @@ export class Game extends BaseEntity {
     })
     platforms = new Collection<Platform>(this)
 
-    @OneToMany(() => Review, (review) => review.game, {
+    @ManyToMany(() => Review, (review) => review.game, {
         cascade: [Cascade.ALL],
     })
     reviews = new Collection<Review>(this)

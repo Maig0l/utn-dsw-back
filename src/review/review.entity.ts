@@ -11,7 +11,7 @@ export class Review extends BaseEntity {
   @Property()
   createdAt: Date = new Date();
 
-  @ManyToOne()
+  @ManyToMany()
   game!: Game
 
   @Property()
@@ -25,5 +25,4 @@ export class Review extends BaseEntity {
 
   @ManyToMany('Tag', undefined, {nullable: true})
   suggestedTags = new Collection<Tag>(this)
-
 }
