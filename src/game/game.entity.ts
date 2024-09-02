@@ -13,6 +13,7 @@ import { Platform } from '../platform/platform.entity.js';
 import { Franchise } from '../franchise/franchise.entity.js';
 import { Tag } from '../tag/tag.entity.js';
 import { Review } from '../review/review.entity.js';
+import { Tag } from '../tag/tag.entity.js';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -65,4 +66,7 @@ export class Game extends BaseEntity {
         cascade: [Cascade.ALL],
     })
     reviews = new Collection<Review>(this)
+
+    @ManyToMany('Tag', 'games')
+    tags = new Collection<Tag>(this)
 }

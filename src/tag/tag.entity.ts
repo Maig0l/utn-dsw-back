@@ -4,12 +4,12 @@ import { Game } from '../game/game.entity.js';
 
 @Entity()
 export class Tag extends BaseEntity {
-    @Property({nullable: false, unique: true})
+    @Property({ nullable: false, unique: true })
     name!: string
-    
+
     @Property()
     description!: string
 
-    @ManyToMany(() => Game, (game) => game.tag)
+    @ManyToMany(() => Game, (game) => game.tags)
     games = new Collection<Game>(this)
 }
