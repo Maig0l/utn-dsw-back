@@ -3,6 +3,8 @@ import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Tag } from "../tag/tag.entity.js";
 import { Game } from "../game/game.entity.js";
 import { Playlist } from "../playlist/playlist.entity.js";
+import { Review } from "../review/review.entity.js";
+import { Tag } from "../tag/tag.entity.js";
 
 @Entity()
 export class User extends BaseEntity {
@@ -31,6 +33,9 @@ export class User extends BaseEntity {
   likedTags = new Collection<Tag>(this)
 
   // TODO: Implementar entidad Review
-  // @OneToMany(Review)
-  // reviews!: Review[]
+  @OneToMany('Review', 'author', {nullable: true})
+  reviews!: Review[]
+
+  @ManyToMany('Tag', undefined, {nullable: true})
+  likedTags = new Collection<Tag>(this)
 }

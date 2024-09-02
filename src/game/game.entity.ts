@@ -4,8 +4,7 @@ import {
     ManyToMany,
     Cascade,
     Collection,
-    ManyToOne,
-    Rel
+    OneToMany,
 } from '@mikro-orm/core'
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Studio } from '../studio/studio.entity.js';
@@ -13,6 +12,7 @@ import { Shop } from '../shop/shop.entity.js';
 import { Platform } from '../platform/platform.entity.js';
 import { Franchise } from '../franchise/franchise.entity.js';
 import { Tag } from '../tag/tag.entity.js';
+import { Review } from '../review/review.entity.js';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -60,4 +60,9 @@ export class Game extends BaseEntity {
         owner: true,
     })
     platforms = new Collection<Platform>(this)
+
+    @OneToMany(() => Review, (review) => review.game, {
+        cascade: [Cascade.ALL],
+    })
+    reviews = new Collection<Review>(this)
 }
