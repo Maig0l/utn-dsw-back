@@ -30,7 +30,7 @@ async function findOne(req: Request, res: Response) {
 async function add(req:Request, res: Response) {
   // TODO: Validar formatos (?)
   try {
-    
+    const review = em.create(Review, res.locals.sanitizedInput)
   } catch(e) {
 
   }

@@ -18,6 +18,8 @@
 
 - [ ] Persistencia
 
+  - WIP en [orm-integration](https://github.com/Maig0l/utn-dsw-back/tree/orm-integration)
+
   - [x] **Platform** (WIP)
   - [x] Shop
   - [x] **Studio** (WIP)
