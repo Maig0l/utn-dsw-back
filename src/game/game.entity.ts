@@ -11,6 +11,7 @@ import { Studio } from '../studio/studio.entity.js';
 import { Shop } from '../shop/shop.entity.js';
 import { Platform } from '../platform/platform.entity.js';
 import { Review } from '../review/review.entity.js';
+import { Release} from '../release/release.entity.js';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -54,5 +55,10 @@ export class Game extends BaseEntity {
         cascade: [Cascade.ALL],
     })  
     reviews = new Collection<Review>(this)
+
+    @OneToMany(() => Release, (release) => release.game, {
+        cascade: [Cascade.ALL],
+    })
+    releases = new Collection<Release>(this)
 }
     //Proximamente propiedades de relaciones con otras entidades (menos User; ver comentario en User.entity.ts)

@@ -1,6 +1,7 @@
 import { Entity, Property, ManyToMany, Collection } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Game } from "../game/game.entity.js";
+import { Release} from '../release/release.entity.js';
 
 @Entity()
 export class Platform extends BaseEntity {
@@ -12,5 +13,7 @@ export class Platform extends BaseEntity {
 
     @ManyToMany(() => Game, (game) => game.platforms)
     games = new Collection<Game>(this)
-    //Deberia estar bien
+
+    @ManyToMany(() => Release, (release) => release.platforms)
+    releases = new Collection<Release>(this)
 }
