@@ -3,8 +3,7 @@ import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import sanitizeHtml from 'sanitize-html'
 import { orm } from "../shared/db/orm.js";
 import { User } from "./user.entity.js";
-import { userRegistrationSchema, userLoginSchema } from "./user.schema.js";
-import { parse as vbParse, safeParse as vbSafeParse } from 'valibot'
+import { validateLogin, validateRegistration } from "./user.schema.js";
 import bcrypt from 'bcrypt';
 import { randomBytes } from "crypto";
 
@@ -53,25 +52,24 @@ async function add(req: Request, res: Response) {
   if (!hasCreationParams(req.body, true))
     return res.status(400).json({message: ERR_PARAMS_CREATE})
 
-  let newUserData;
-  try {
-    newUserData = vbParse(userRegistrationSchema, req.body)
-  } catch(e) {
-    console.log(e)
-    return res.status(400).json({message: "Bad data format.", data: e})
-  }
+  // let newUserData;
+  const incoming = await validateRegistration(res.locals.sanitizedInput)
+  if (!incoming.success)
+    return res.status(400).json({message: incoming.issues})
+  const newUserData = incoming.output
 
+  // TODO: Chequear que el usuario/email ya existe
   // await returnIfIdentifierIsUsed(res, {email: newUserData.email, nick: newUserData.nick})
   newUserData.password = hashPassword(newUserData.password)
 
   try {
     const user = await em.create(User, newUserData)
-    await em.flush()
 
     res.status(201).json({message: "User created successfully", data: user})
   } catch (e) {
     handleOrmError(res, e)
   }
+  await em.flush()
 }
 
 async function update(req: Request, res: Response) {
@@ -109,26 +107,26 @@ async function remove(req: Request, res: Response) {
 async function login(req: Request, res: Response) {
   const ERR_LOGIN_BAD_CREDS = "Invalid user/pass"
 
-  let inputParse = vbSafeParse(userLoginSchema, res.locals.sanitizedInput)
-  if (!inputParse.success)
+  const incoming = await validateRegistration(res.locals.sanitizedInput)
+  if (!incoming.success)
     return res.status(400).json({message: ERR_LOGIN_BAD_CREDS})
-  const saneInput = inputParse.output
+  const loginData = incoming.output
 
   // Uso findOne y no findOneOrFail para devolver el error LOGIN_BAD_CREDS, no un ERR_404 del handleOrmError
   let user;
   try {
-    user = await em.findOne(User, {nick: saneInput.nick})
+    user = await em.findOne(User, {nick: loginData.nick})
   } catch(e) {
     throw500(res, e)
   }
   if (!user)
     return res.status(400).json({message: ERR_LOGIN_BAD_CREDS})
 
-  const passwdIsCorrect = await bcrypt.compare(saneInput.password, user.password)
+  const passwdIsCorrect = await bcrypt.compare(loginData.password, user.password)
   if (!passwdIsCorrect)
     return res.status(400).json({message: ERR_LOGIN_BAD_CREDS})
 
-  // TODO: Reemplazar con una función de verdad que genere un token de auth
+  // TODO: Reemplazar con un generador de JWT
   res.json({message: "Login successful", data: {sessionToken: randomBytes(20).toString('hex')}})
 }
 
