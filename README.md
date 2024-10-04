@@ -18,9 +18,29 @@
 
 - [ ] Persistencia
 
-  - [x] **Platform** (WIP)
-  - [x] Shop
-  - [x] **Studio** (WIP)
-  - [ ] Tag
-  - [x] **User** (WIP)
-  - [ ] Review
+  - [x] **Platform** (WIP) - indep
+  - [x] Shop - indep
+  - [x] **Studio** (WIP) - indep
+  - [ ] Tag - indep
+  - [x] **User** (WIP) - indep
+  - [x] Game - indep
+  - [ ] Review - req: user, game
+  - [ ] Playlist - req: user
+  - [ ] Franchise - req: game
+
+## Casos de uso
+
+### Prioritarios
+
+- Crear usuario
+- Inicio de sesión
+- ADMIN: Listado y Carga de datos (CRUD platform, game, tag, shop, franchise)
+- Escribir una review de un juego
+- Búsqueda de juegos
+
+### Secundarios
+
+- Cambiar datos de usuario (ej. contraseña)
+- Crear una playlist
+- Sugerir una tag como usuario
+- Votación de reviews para añadido de tags
