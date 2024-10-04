@@ -5,23 +5,20 @@ import { Game } from "../game/game.entity.js";
 
 @Entity()
 export class Playlist extends BaseEntity {
-    @Property({nullable: false, unique: true})
+    @Property({ nullable: false, unique: true })
     name!: string
-    
+
     @Property()
     description!: string
 
     @Property()
-    is_private!: boolean
-    // "is_private" un buen nombre? CONSULTA
+    isPrivate!: boolean
 
     @ManyToOne('User', {
         cascade: [Cascade.ALL]
     })
     owner!: User
 
-    // CONSULTA: Hay muchas playlists. Una playlist conoce qué juegos tiene. Los juegos no necesitan saber en qué playlists están
-    // Se usa esto?
     @ManyToMany(() => Game)
     games = new Collection<Game>(this);
 }
