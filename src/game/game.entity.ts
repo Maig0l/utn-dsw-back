@@ -23,16 +23,16 @@ export class Game extends BaseEntity {
     @Property()
     synopsis!: string
 
-    @Property({ nullable: false })
+    @Property()
     releaseDate!: Date //debe usarse en formato date?
 
     @Property()
     portrait!: string
 
-    @Property()
+    @Property({ nullable: true })
     banner!: string
 
-    @Property()
+    @Property({ nullable: true })
     pictures!: string[]
 
     @ManyToMany(() => Tag, (tag) => tag.games, {
@@ -53,8 +53,8 @@ export class Game extends BaseEntity {
     })
     shops = new Collection<Shop>(this)
 
-    @ManyToOne(() => Franchise)
-    franchise?: Franchise
+    @ManyToOne(() => Franchise, { nullable: true })
+    franchise!: Franchise
 
     @ManyToMany(() => Platform, (platform) => platform.games, {
         cascade: [Cascade.ALL],
