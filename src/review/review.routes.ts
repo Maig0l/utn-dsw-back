@@ -1,12 +1,12 @@
 import { Router } from "express";
-import * as c from "./review.controller.js"
+import * as ctl from "./review.controller.js"
 
 export const reviewRouter = Router()
 
-reviewRouter.use(c.sanitizeInput)
+reviewRouter.get('/', ctl.findAll)
+reviewRouter.post('/', ctl.sanitizeInput, ctl.add)
 
-reviewRouter.get('/', c.findAll)
-reviewRouter.post('/', c.add)
-
-reviewRouter.use('/:id')
-reviewRouter.get('')
+reviewRouter.get('/:id', ctl.findOne)
+reviewRouter.put('/:id', ctl.sanitizeInput, ctl.update)
+reviewRouter.patch('/:id', ctl.sanitizeInput, ctl.update)
+reviewRouter.delete('/:id', ctl.remove)
