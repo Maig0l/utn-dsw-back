@@ -15,7 +15,7 @@ const score = v.pipe(
 )
 
 const reviewSchema = v.object({
-  author: id,
+  author: id, // TODO: Borrar. Esto tiene que venir inferido por el Header de Autenticación
   game: id,
   score: score,
   title: v.optional(v.string()),
@@ -23,4 +23,15 @@ const reviewSchema = v.object({
   suggestedTags: v.optional(v.array(id))
 })
 
+// La review se edita mediante PATCH => Admite Objeto parcial
+const reviewEditSchema = v.partial(
+  v.object({
+    score: score,
+    title: v.string(),
+    body: v.string(),
+    suggestedTags: v.array(id)
+  })
+)
+
 export const validateNewReview = v.safeParserAsync(reviewSchema)
+export const validateReviewEdit = v.safeParserAsync(reviewEditSchema)

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../shared/db/orm.js";
 import { Review } from "./review.entity.js";
-import { validateNewReview } from "./review.schema.js";
+import { validateNewReview, validateReviewEdit } from "./review.schema.js";
 import sanitizeHtml from "sanitize-html"
 
 // Mensajes
@@ -41,12 +41,20 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
-  res.status(501).json({ message: "Not implemented" })
+  try {
+    // TODO
+    let review = await em.findOneOrFail(Review, { id: res.locals.id })
+    review = { ...review, ...res.locals.newReview }
+    console.log(review)
+    return res.status(418).json({ data: review })
+  } catch (e) {
+    handleOrmError(res, e)
+  }
 }
 
 async function remove(req: Request, res: Response) {
   try {
-    const review = em.findOneOrFail(Review, { id: res.locals.id })
+    const review = await em.findOneOrFail(Review, { id: res.locals.id })
     await em.removeAndFlush(review)
     res.json({ message: "Review deleted successfully", data: review })
   } catch (e) {
@@ -67,12 +75,25 @@ async function validateExists(req: Request, res: Response, next: NextFunction) {
 }
 
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
-  const incoming = await validateNewReview(req.body)
-  if (!incoming.success)
-    return res.status(400).json({ message: incoming.issues[0].message })
+  let incoming;
+  switch (req.method) {
+    case "PATCH":
+      incoming = await validateReviewEdit(req.body)
+      break
+    case "POST":
+    default:
+      incoming = await validateNewReview(req.body)
+      break
+  }
+
+  if (!incoming.success) {
+    console.log(incoming.issues[0])
+    return res.status(400).json({ message: `: ${incoming.issues[0].message}` })
+  }
   const newReview = incoming.output
 
-  newReview.score = roundToNextHalf(newReview.score)
+  if (newReview.score)
+    newReview.score = roundToNextHalf(newReview.score)
   if (newReview.title)
     newReview.title = sanitizeHtml(newReview.title)
   if (newReview.body)
