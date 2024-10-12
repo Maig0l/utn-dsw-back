@@ -5,6 +5,7 @@ import {
     Cascade,
     Collection,
     ManyToOne,
+    OneToMany,
 } from '@mikro-orm/core'
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Studio } from '../studio/studio.entity.js';
@@ -61,11 +62,9 @@ export class Game extends BaseEntity {
     })
     platforms = new Collection<Platform>(this)
 
-    @ManyToMany(() => Review, (review) => review.game, {
-        cascade: [Cascade.ALL],
-    })
+    @OneToMany('Review', 'game')
     reviews = new Collection<Review>(this)
 
-    @ManyToMany('Tag', 'games')
+    @ManyToMany('Tag')
     tags = new Collection<Tag>(this)
 }

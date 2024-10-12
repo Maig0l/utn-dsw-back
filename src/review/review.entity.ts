@@ -1,9 +1,10 @@
-import { ManyToMany, ManyToOne, OneToMany, Property, Collection, DateType } from "@mikro-orm/core";
+import { ManyToMany, ManyToOne, OneToMany, Property, Collection, DateType, Cascade, Entity, DecimalType } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Game } from "../game/game.entity.js";
 import { Tag } from "../tag/tag.entity.js";
 import { User } from "../user/user.entity.js";
 
+@Entity()
 export class Review extends BaseEntity {
   @ManyToOne()
   author!: User
@@ -11,18 +12,18 @@ export class Review extends BaseEntity {
   @Property()
   createdAt: Date = new Date();
 
-  @ManyToMany()
+  @ManyToOne()
   game!: Game
 
-  @Property()
+  @Property({ type: DecimalType, scale: 1 })
   score!: number
 
-  @Property({nullable: true})
+  @Property({ nullable: true })
   title!: string
 
-  @Property({nullable: true})
+  @Property({ nullable: true })
   body!: string
 
-  @ManyToMany('Tag', undefined, {nullable: true})
+  @ManyToMany('Tag', undefined, { nullable: true })
   suggestedTags = new Collection<Tag>(this)
 }
