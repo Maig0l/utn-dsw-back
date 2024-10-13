@@ -22,6 +22,7 @@ export class Game extends BaseEntity {
 
     @Property()
     synopsis!: string
+    //TODO ojo el limite de caracteres, nos estamos quedando cortos
 
     @Property()
     releaseDate!: Date //debe usarse en formato date?
@@ -33,7 +34,8 @@ export class Game extends BaseEntity {
     banner!: string
 
     @Property({ nullable: true })
-    pictures!: string[]
+    pictures!: string
+    //TODO cambiar a array
 
     @ManyToMany(() => Tag, (tag) => tag.games, {
         cascade: [Cascade.ALL],

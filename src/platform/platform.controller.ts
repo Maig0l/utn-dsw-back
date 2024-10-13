@@ -124,7 +124,7 @@ function handleOrmError(res: Response, err: any) {
   else {
     switch (err.name) {
       case "NotFoundError":
-        res.status(404).json({message: `Shop not found for ID ${res.locals.id}`})
+        res.status(404).json({message: `Platform not found for ID ${res.locals.id}`})
         break
       default:
         console.error("\n--- ORM ERROR ---")

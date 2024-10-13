@@ -13,7 +13,7 @@ export class Studio extends BaseEntity {
   name!: string
 
   @Property()
-  type!: string[]
+  type!: string
 
   @Property({unique: true})
   site!: string
