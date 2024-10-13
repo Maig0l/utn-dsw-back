@@ -23,6 +23,6 @@ export class Studio extends BaseEntity {
 }
 
 export enum StudioType {
-  Developer = "Desarrollador",
-  Publisher = "Editor"
+  Developer = "Developer",
+  Publisher = "Publisher",
 }

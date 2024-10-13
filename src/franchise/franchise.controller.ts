@@ -1,27 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
-
 import { Franchise } from './franchise.entity.js'
 import { orm } from "../shared/db/orm.js";
-import { paramCheckFromList } from '../shared/paramCheckFromList.js';
+import { validateFranchise } from './franchise.schema.js';
 
+// Mensajes
+const ERR_500 = "Oops! Something went wrong. This is our fault."
 
-const VALID_PARAMS = "name description".split(' ')
-const hasParams = paramCheckFromList(VALID_PARAMS)
 const em = orm.em
-
-
-function sanitizeFranchiseInput(req: Request, res: Response, next: NextFunction) {
-  req.body.sanitizedInput = {
-    name: req.body.name,
-  }
-  Object.keys(req.body.sanitizedInput).forEach((key)=>{
-    if(req.body.sanitizedInput[key]=== undefined) 
-      delete req.body.sanitizedInput[key]
-  })
-  next()
-}
-
-
 
 async function findAll(req: Request,res: Response) {
   try{
@@ -31,8 +16,6 @@ async function findAll(req: Request,res: Response) {
         handleOrmError(res, err)
     }
 }
-
-
 
 async function findOne(req: Request ,res:Response) {
   try{
@@ -49,8 +32,8 @@ async function add(req:Request,res:Response) {
     const franchise = em.create(Franchise, req.body)
     await em.flush()
     res.status(201).json({message: 'Franchise created', data: franchise})
-  }  catch  (error: any){
-    res.status(500).json({message: error.message})
+  }  catch  (err){
+    handleOrmError(res, err)
   }  
 }
 
@@ -61,8 +44,8 @@ async function update (req:Request,res:Response) {
     em.assign(franchise, req.body)
     await em.flush()
     res.status(200).json({message: 'Franchise updated', data: franchise})
-  }  catch  (error: any){
-    res.status(500).json({message: error.message})
+  }  catch  (err){
+    handleOrmError(res, err)
   }   
 }
 
@@ -78,20 +61,29 @@ async function remove (req:Request,res:Response) {
   }
   }
 
+  //// *** Middlewarez *** ////
+
   function validateExists(req:Request, res:Response, next: NextFunction) {
     const id = Number.parseInt(req.params.id)
   
     if (Number.isNaN(id))
       return res.status(400).json({message: 'ID must be an integer'})
-  
-   
-  
+    
     res.locals.id = id
 
     next()
   }
 
+async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
+    const incoming = await validateFranchise(req.body)
+    if (!incoming.success)
+        return res.status(400).json({message: incoming.issues[0].message})
+      const newFranchise = incoming.output
 
+      res.locals.newTag = newFranchise
+      
+    next()
+  }
 
 
 
@@ -121,4 +113,4 @@ function handleOrmError(res: Response, err: any) {
   }
 }
 
-export { sanitizeFranchiseInput, findAll, findOne, add, update, remove, validateExists }
+export { sanitizeInput, findAll, findOne, add, update, remove, validateExists }

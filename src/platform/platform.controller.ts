@@ -1,10 +1,9 @@
 import {NextFunction, Request, Response} from 'express'
-import { paramCheckFromList } from '../shared/paramCheckFromList.js';
+import { validatePlatform } from './platform.schema.js';
 import { Platform } from './platform.entity.js'
 import { orm } from '../shared/db/orm.js'
 
-const VALID_PARAMS = "name img".split(' ')
-const hasParams = paramCheckFromList(VALID_PARAMS)
+const ERR_500 = "Oops! Something went wrong. This is our fault."
 
 const em = orm.em
 
@@ -67,20 +66,25 @@ async function remove (req:Request,res:Response) {
   }
 
 
-
-function sanitizeInput(req:Request, res:Response, next:NextFunction) {
-  if (["POST", "PUT"].includes(req.method) && !hasParams(req.body, true))
-    return res.status(400)
-      .json({message: "Must provide all attributes"})
-
-  if ("PATCH" == req.method && !hasParams(req.body, false))
-    return res.status(400)
-      .json({message: "Must provide at least one valid attribute"})
-
-  res.locals.sanitizedInput = {
-    name: req.body.name,
-    img: req.body.img,
+  function validateExists(req:Request, res:Response, next: NextFunction) {
+    const id = Number.parseInt(req.params.id)  
+    if (Number.isNaN(id))
+      return res.status(400).json({message: 'ID must be an integer'})
+   
+    res.locals.id = id
+  
+    next()
   }
+
+async function sanitizeInput(req:Request, res:Response, next:NextFunction) {
+  const incoming = await validatePlatform(req.body)
+  if (!incoming.success)
+    return res.status(400).json({message: incoming.issues[0].message})
+  const newPlatform = incoming.output 
+
+  res.locals.newPlatform = newPlatform
+
+  next()
   
   // https://stackoverflow.com/a/3809435
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
@@ -97,17 +101,6 @@ function sanitizeInput(req:Request, res:Response, next:NextFunction) {
   next()
 }
 
-function validateExists(req:Request, res:Response, next: NextFunction) {
-  const id = Number.parseInt(req.params.id)
-
-  if (Number.isNaN(id))
-    return res.status(400).json({message: 'ID must be an integer'})
-
-  
-  res.locals.id = id
-
-  next()
-}
 
 function handleOrmError(res: Response, err: any) {
   if (err.code) {

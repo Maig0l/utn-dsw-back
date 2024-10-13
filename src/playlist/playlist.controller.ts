@@ -1,13 +1,13 @@
 import {NextFunction, Request, Response} from 'express'
-import { paramCheckFromList } from '../shared/paramCheckFromList.js';
+import { validatePlaylist } from './playlist.schema.js';
 import { Playlist } from './playlist.entity.js'
 import { orm } from '../shared/db/orm.js'
+import { i } from 'vitest/dist/reporters-yx5ZTtEV.js';
 
-const VALID_PARAMS = "name description is_private".split(' ')
-const hasParams = paramCheckFromList(VALID_PARAMS)
+// Mensajes
+const ERR_500 = "Oops! Something went wrong. This is our fault."
 
 const em = orm.em
-
 
 async function findAll(req: Request,res: Response) {
   try{
@@ -66,38 +66,6 @@ async function remove (req:Request,res:Response) {
   }  
 }
 
-
-
-function sanitizeInput(req:Request, res:Response, next:NextFunction) {
-  if (["POST", "PUT"].includes(req.method) && !hasParams(req.body, true))
-    return res.status(400)
-      .json({message: "Must provide all attributes"})
-
-  if ("PATCH" == req.method && !hasParams(req.body, false))
-    return res.status(400)
-      .json({message: "Must provide at least one valid attribute"})
-
-  res.locals.sanitizedInput = {
-    name: req.body.name,
-    description: req.body.description,
-    is_private: req.body.is_private
-  }
-  
-  // https://stackoverflow.com/a/3809435
-  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
-  if (req.body.site && !urlRegex.test(req.body.site))
-    return res.status(400).json({message: "Invalid Site attribute (Should be a URL)"})
-
-  // TODO: Revisar que no haya sanitización silenciosa
-  Object.keys(res.locals.sanitizedInput).forEach((k) => {
-    if (res.locals.sanitizedInput[k] === undefined) {
-      delete res.locals.sanitizedInput[k]
-    }
-  })
-
-  next()
-}
-
 function validateExists(req:Request, res:Response, next: NextFunction) {
   const id = Number.parseInt(req.params.id)
 
@@ -106,6 +74,16 @@ function validateExists(req:Request, res:Response, next: NextFunction) {
 
   
   res.locals.id = id
+
+  next()
+}
+async function sanitizeInput(req:Request, res:Response, next:NextFunction) {
+  const incoming = await validatePlaylist(req.body)
+  if (!incoming.success)
+    return res.status(400).json({message: incoming.issues[0].message})
+  const newPlaylist = incoming.output
+
+  res.locals.newPlaylist = newPlaylist
 
   next()
 }

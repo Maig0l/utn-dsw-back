@@ -1,11 +1,11 @@
 import { Router } from 'express'
-import { sanitizeTagInput, findAll, findOne, add, update, remove, validateExists } from "./tag.controler.js";
+import { sanitizeInput, findAll, findOne, add, update, remove, validateExists } from "./tag.controler.js";
 
 export const tagRouter = Router()
 
 tagRouter.get('/', findAll)
 tagRouter.get('/:id',validateExists, findOne)
-tagRouter.post('/', sanitizeTagInput, add)
-tagRouter.put('/:id', validateExists, sanitizeTagInput, update)
-tagRouter.patch('/:id', validateExists, sanitizeTagInput, update)
+tagRouter.post('/', sanitizeInput, add)
+tagRouter.put('/:id', validateExists, sanitizeInput, update)
+tagRouter.patch('/:id', validateExists, sanitizeInput, update)
 tagRouter.delete('/:id',validateExists, remove)

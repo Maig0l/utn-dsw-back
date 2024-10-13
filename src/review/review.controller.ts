@@ -124,5 +124,5 @@ function throw500(res: Response, err: any) {
 }
 
 export {
-  findAll, findOne, remove, add, sanitizeInput, validateExists, update
+  findAll, findOne, remove, add, sanitizeInput, validateExists, handleOrmError, update
 }
