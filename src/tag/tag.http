@@ -33,5 +33,5 @@ PATCH http://localhost:8080/api/tags/6
 Content-Type: application/json
 
 {
-  "name": "test patched"
+  "tags" : [6]
 }
