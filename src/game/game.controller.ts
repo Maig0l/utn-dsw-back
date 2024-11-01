@@ -3,7 +3,7 @@ import { Game } from "./game.entity.js";
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import { orm } from "../shared/db/orm.js";
 
-const validParams = "title synopsis releaseDate portrait banner pictures tags".split(' ')
+const validParams = "title synopsis releaseDate portrait banner pictures tags studios shops platforms reviews".split(' ')
 const hasParams = paramCheckFromList(validParams)
 
 const em = orm.em
@@ -79,7 +79,11 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
         portrait: req.body.portrait,
         banner: req.body.banner,
         pictures: req.body.pictures,
-        tags: req.body.tags
+        tags: req.body.tags,
+        studios: req.body.studios,
+        shops: req.body.shops,
+        platforms: req.body.platforms,
+        reviews: req.body.reviews
     }
     const sanitizedInput = res.locals.sanitizedInput
     
