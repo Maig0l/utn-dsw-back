@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express"
 import { Game } from "./game.entity.js";
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import { orm } from "../shared/db/orm.js";
+import { populate } from "dotenv";
 
 const validParams = "title synopsis releaseDate portrait banner pictures tags studios shops platforms reviews".split(' ')
 const hasParams = paramCheckFromList(validParams)
@@ -10,7 +11,7 @@ const em = orm.em
 
 async function findAll(req: Request, res: Response) {
     try {
-        const games = await em.find(Game, {})
+        const games = await em.find(Game, {}, { populate: ['tags','shops','platforms','studios','reviews'] })
         res.json({data: games})
     } catch (err) {
         handleOrmError(res, err)
@@ -63,11 +64,11 @@ async function remove(req: Request, res: Response) {
 
 function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 
-    if (["POST", "PUT"].includes(req.method) && !hasParams(req.body, true))
+    if (["PUT"].includes(req.method) && !hasParams(req.body, true))
         return res.status(400)
             .json({message: "Must provide all attributes"})
 
-    if ("PATCH" == req.method && !hasParams(req.body, false))
+    if (["POST", "PATCH"].includes(req.method) && !hasParams(req.body, false))
         return res.status(400)
             .json({message: "Must provide at least one valid attribute"})
           
