@@ -11,7 +11,7 @@ const em = orm.em
 
 async function findAll(req: Request, res: Response) {
     try {
-        const games = await em.find(Game, {}, { populate: ['tags','shops','platforms','studios','reviews'] })
+        const games = await em.find(Game, {}, { populate: ['tags','shops','platforms','studios','reviews','franchise'] })
         res.json({data: games})
     } catch (err) {
         handleOrmError(res, err)
@@ -20,7 +20,7 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
     try {
-      const game = await em.findOneOrFail(Game, {id: res.locals.id})
+      const game = await em.findOneOrFail(Game, {id: res.locals.id}, { populate: ['tags','platforms','studios','franchise'] })
       res.json({data: game})
     } catch(err) {
       handleOrmError(res, err)
