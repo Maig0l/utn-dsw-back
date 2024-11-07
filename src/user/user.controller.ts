@@ -6,8 +6,10 @@ import { User } from "./user.entity.js";
 import { validateLogin, validateRegistration } from "./user.schema.js";
 import bcrypt from 'bcrypt';
 import { randomBytes } from "crypto";
+import jwt from 'jsonwebtoken';
 
 const PASSWD_SALT_ROUNDS = 10
+const JWT_SECRET = "secret"
 
 // Mensajes de error
 const ERR_500 = "Something went horribly wrong. Oops (this is our fault)"
@@ -126,8 +128,14 @@ async function login(req: Request, res: Response) {
   if (!passwdIsCorrect)
     return res.status(400).json({message: ERR_LOGIN_BAD_CREDS})
 
-  // TODO: Reemplazar con un generador de JWT
-  res.json({message: "Login successful", data: {sessionToken: randomBytes(20).toString('hex')}})
+   // Generar JWT con el ID del usuario y otros datos que quieras incluir
+   const token = jwt.sign({ id: user.id, nick: user.nick }, JWT_SECRET, { expiresIn: '1h' });
+
+   res.json({ message: "Login successful", token });  // Devolver el token JWT en lugar de `sessionToken`
+ }
+
+async function logout(req: Request, res: Response) {
+
 }
 
 /* *** Helper functions ***
@@ -222,4 +230,31 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
-export {findAll, findOne, add, update, remove, validateExists, sanitizeInput, login }
+function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Failed to authenticate token" });
+    }
+
+    if (decoded && typeof decoded === 'object' && 'id' in decoded) {
+      res.locals.userId = decoded.id;
+    }  {
+      return res.status(403).json({ message: "Failed to authenticate token" });
+    }
+   
+  });
+  next();
+}
+
+
+
+
+export {findAll, findOne, add, update, remove, validateExists, sanitizeInput, login, authMiddleware}
