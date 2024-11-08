@@ -23,4 +23,13 @@ const reviewSchema = v.object({
   suggestedTags: v.optional(v.array(id))
 })
 
+// Schema a usar cuando el game/user id vienen codificados en la request (url/header)
+const reviewSchemaNoId = v.object({
+  score: score,
+  title: v.optional(v.string()),
+  body: v.optional(v.string()),
+  suggestedTags: v.optional(v.array(id))
+})
+
 export const validateNewReview = v.safeParserAsync(reviewSchema)
+export const validateNewReviewFromRequest = v.safeParserAsync(reviewSchemaNoId)
