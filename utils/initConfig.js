@@ -1,6 +1,9 @@
+import { randomBytes } from "crypto";
+
 const configVars = {
   General: {
     baseDir: '/api\t# No trailing slash',
+    apiSecret: crypto.randomBytes(32),
   },
   Database: {
     dbHost: 'localhost',
