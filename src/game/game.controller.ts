@@ -67,6 +67,16 @@ async function remove(req: Request, res: Response) {
     }
 }
 
+async function listReviews(req: Request, res: Response) {
+    try {
+        const game = await em.findOneOrFail(Game, { id: res.locals.id })
+        const reviews = await game.reviews.loadItems()
+        res.json({ message: `Listing ${game.reviews.count()} reviews for ${game.title}`, data: reviews })
+    } catch (e) {
+        return handleOrmError(res, e)
+    }
+}
+
 async function createReview(req: Request, res: Response) {
     // traer una referencia del gameId
     let gameReference: Game;
@@ -206,4 +216,4 @@ function handleOrmError(res: Response, err: any) {
     }
 }
 
-export { findAll, findOne, add, update, remove, sanitizeInput, handleOrmError, validateExists, createReview }
+export { findAll, findOne, add, update, remove, sanitizeInput, handleOrmError, validateExists, createReview, listReviews }
