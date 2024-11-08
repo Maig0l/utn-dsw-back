@@ -27,7 +27,7 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
     try {
-        const game = await em.findOneOrFail(Game, { id: res.locals.id }, { populate: ['tags', 'platforms', 'studios', 'franchise'] })
+        const game = await em.findOneOrFail(Game, { id: res.locals.id }, { populate: ['tags', 'platforms', 'studios', 'franchise', 'reviews'] })
         res.json({ data: game })
     } catch (err) {
         handleOrmError(res, err)
