@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { sanitizeTagInput, findAll, findOne, add, update, remove, validateExists } from "./tag.controler.js";
+import { sanitizeTagInput, findAll, findOne, add, update, remove, validateExists } from "./tag.controller.js";
 
 export const tagRouter = Router()
 
