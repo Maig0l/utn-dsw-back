@@ -5,30 +5,6 @@ import { validateNewTag, validateUpdateTag } from './tag.schema.js';
 
 const em = orm.em
 
-async function sanitizeTagInput(req: Request, res: Response, next: NextFunction) {
-  const incoming = await validateNewTag(req.body)
-  if (!incoming.success)
-    return res.status(400).json({ message: incoming.issues[0].message })
-  const newTag = incoming.output
-
-  res.locals.sanitizedInput = newTag
-
-  next()
-}
-
-async function sanitizePartialTagInput(req: Request, res: Response, next: NextFunction) {
-  const incoming = await validateUpdateTag(req.body)
-  if (!incoming.success)
-    return res.status(400).json({ message: incoming.issues[0].message })
-  const newTag = incoming.output
-
-  res.locals.sanitizedInput = newTag
-
-  next()
-}
-
-
-
 async function findAll(req: Request, res: Response) {
   try {
     const tags = await em.find(Tag, {})
@@ -90,6 +66,28 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
 
 
   res.locals.id = id
+
+  next()
+}
+
+async function sanitizeTagInput(req: Request, res: Response, next: NextFunction) {
+  const incoming = await validateNewTag(req.body)
+  if (!incoming.success)
+    return res.status(400).json({ message: incoming.issues[0].message })
+  const newTag = incoming.output
+
+  res.locals.sanitizedInput = newTag
+
+  next()
+}
+
+async function sanitizePartialTagInput(req: Request, res: Response, next: NextFunction) {
+  const incoming = await validateUpdateTag(req.body)
+  if (!incoming.success)
+    return res.status(400).json({ message: incoming.issues[0].message })
+  const newTag = incoming.output
+
+  res.locals.sanitizedInput = newTag
 
   next()
 }
