@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { Tag } from './tag.entity.js'
 import { orm } from "../shared/db/orm.js";
-import { validateNewTag } from './tag.schema.js';
+import { validateNewTag, validateUpdateTag } from './tag.schema.js';
 
 const em = orm.em
 
@@ -15,6 +15,19 @@ async function sanitizeTagInput(req: Request, res: Response, next: NextFunction)
 
   next()
 }
+
+async function sanitizePartialTagInput(req: Request, res: Response, next: NextFunction) {
+  const incoming = await validateUpdateTag(req.body)
+  if (!incoming.success)
+    return res.status(400).json({ message: incoming.issues[0].message })
+  const newTag = incoming.output
+
+  res.locals.sanitizedInput = newTag
+
+  next()
+}
+
+
 
 async function findAll(req: Request, res: Response) {
   try {
@@ -107,4 +120,4 @@ function handleOrmError(res: Response, err: any) {
   }
 }
 
-export { sanitizeTagInput, findAll, findOne, add, update, remove, validateExists }
+export { sanitizeTagInput, sanitizePartialTagInput, findAll, findOne, add, update, remove, validateExists }

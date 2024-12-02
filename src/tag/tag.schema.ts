@@ -20,4 +20,7 @@ const tagSchema = v.object({
     description: description
 })
 
+const tagOptional= v.partial(tagSchema)
+
 export const validateNewTag = v.safeParserAsync(tagSchema)
+export const validateUpdateTag = v.safeParserAsync(tagOptional)
