@@ -5,6 +5,18 @@ import { validateNewTag, validateUpdateTag } from './tag.schema.js';
 
 const em = orm.em
 
+//doesn't work
+//takes in a partial name and returns all tags LIKE that name
+async function findByName(req: Request, res: Response) {
+  console.log(req.params.name)
+  try {
+    const tags = await em.find(Tag, { name: { $like: req.params.name }  })
+    res.json({ data: tags })
+  } catch (err) {
+    handleOrmError(res, err)
+  }
+} 
+
 async function findAll(req: Request, res: Response) {
   try {
     const tags = await em.find(Tag, {})
@@ -59,14 +71,9 @@ async function remove(req: Request, res: Response) {
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = Number.parseInt(req.params.id)
-
   if (Number.isNaN(id))
     return res.status(400).json({ message: 'ID must be an integer' })
-
-
-
   res.locals.id = id
-
   next()
 }
 
@@ -118,4 +125,4 @@ function handleOrmError(res: Response, err: any) {
   }
 }
 
-export { sanitizeTagInput, sanitizePartialTagInput, findAll, findOne, add, update, remove, validateExists }
+export { sanitizeTagInput, sanitizePartialTagInput,findByName, findAll, findOne, add, update, remove, validateExists }
