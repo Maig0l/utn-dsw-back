@@ -1,0 +1,23 @@
+GET http://localhost:8080/api/shops/
+
+
+### crear un nuevo tag
+POST http://localhost:8080/api/shops
+Content-Type: application/json
+
+{
+    "name": "Epic",
+    "img": "https://store.epcipowered.com",
+    "site": "https://store.epicpowered.com"
+}
+
+###
+
+PATCH http://localhost:8080/api/shops/15
+Content-Type: application/json
+
+{
+  "name": "Steam"
+}
+
+

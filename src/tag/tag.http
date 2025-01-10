@@ -1,8 +1,8 @@
-GET http://localhost:8080/api/tags/
+GET http://localhost:8080/api/tags
 
 
 ### obtener un tag
-GET http://localhost:8080/api/tags/5
+GET http://localhost:8080/api/tags/1
 
 
 ### crear un nuevo tag
@@ -10,28 +10,39 @@ POST http://localhost:8080/api/tags
 Content-Type: application/json
 
 {
-  "name": "Sci Fi",
-  "description": "Ships and planets"
+  "name": "Fantasy",
+  "description": "Magic and more things"
+  
+}
+
+### crear un nuevo studio
+POST http://localhost:8080/api/studios
+Content-Type: application/json
+
+{
+  "name": "Fantasy",
+  "type": "Publisher",
+  "site": "https://store.steampowered.com"
   
 }
 
 ### borrar un tag
-DELETE http://localhost:8080/api/tags/5
+DELETE http://localhost:8080/api/tags/2
 
 ###
-PUT  http://localhost:8080/api/tags/5
+PUT  http://localhost:8080/api/tags/3
 Content-Type: application/json
 
 {
-  "name": "Studio Skibidi",
+  "name": "Fantasy yyy",
   "description": "Cosos"
  
 }
 
 ###
-PATCH http://localhost:8080/api/tags/6
+PATCH http://localhost:8080/api/tags/3
 Content-Type: application/json
 
 {
-  "tags" : [6]
+  "name": "Action",
 }
