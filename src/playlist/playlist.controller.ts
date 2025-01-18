@@ -2,6 +2,7 @@ import {NextFunction, Request, Response} from 'express'
 import { paramCheckFromList } from '../shared/paramCheckFromList.js';
 import { Playlist } from './playlist.entity.js'
 import { orm } from '../shared/db/orm.js'
+import { validatePlaylist } from './playlist.schema.js';
 
 const VALID_PARAMS = "name description is_private".split(' ')
 const hasParams = paramCheckFromList(VALID_PARAMS)
@@ -32,6 +33,7 @@ async function findOne(req: Request ,res:Response) {
 
 
 async function add(req:Request,res:Response) {
+  //validar con schema
   try{
     const playlist = em.create(Playlist, req.body)
     await em.flush()

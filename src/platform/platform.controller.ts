@@ -2,12 +2,12 @@ import {NextFunction, Request, Response} from 'express'
 import { paramCheckFromList } from '../shared/paramCheckFromList.js';
 import { Platform } from './platform.entity.js'
 import { orm } from '../shared/db/orm.js'
+import { validatePlatform } from './platform.schema.js';
 
 const VALID_PARAMS = "name img".split(' ')
 const hasParams = paramCheckFromList(VALID_PARAMS)
 
 const em = orm.em
-
 
 async function findAll(req: Request,res: Response) {
   try{
@@ -16,9 +16,7 @@ async function findAll(req: Request,res: Response) {
   } catch(err) {
     handleOrmError(res, err)
   }
-   
 }
-
 
 async function findOne(req: Request ,res:Response) {
   try{
@@ -32,13 +30,18 @@ async function findOne(req: Request ,res:Response) {
 
 
 async function add(req:Request,res:Response) {
+  const incoming = await validatePlatform(res.locals.sanitizedInput)
+  if (!incoming.success)
+    return res.status(400).json({message: incoming.issues})
+  const newPlatform = incoming.output
   try{
-    const platform = em.create(Platform, req.body)
+    const platform = em.create(Platform, newPlatform)
     await em.flush()
     res.status(201).json({message: 'platform created', data: platform})
   }  catch(err) {
     handleOrmError(res, err)
   }
+  await em.flush()
 }
 
 
