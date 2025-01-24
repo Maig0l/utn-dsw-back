@@ -1,0 +1,43 @@
+GET http://localhost:8080/api/games/
+
+
+### obtener un tag
+GET http://localhost:8080/api/games/15
+
+
+### crear un nuevo tag
+POST http://localhost:8080/api/games
+Content-Type: application/json
+
+{
+    "title": "Fallout 77",
+    "synopsis": "Apocalipsis",
+    "releaseDate": "2020-09-06T00:00:00.000Z",
+    "portrait": "regfd",
+    "banner": "rergfd",
+    "pictures": "asf",
+    "franchise": 1 ,
+    "tags" : [10, 6] 
+  
+}
+
+### borrar un tag
+DELETE http://localhost:8080/api/games/5
+
+###
+PUT  http://localhost:8080/api/games/5
+Content-Type: application/json
+
+{
+  "name": "Studio Skibidi",
+  "description": "Cosos"
+ 
+}
+
+###
+PATCH http://localhost:8080/api/games/15
+Content-Type: application/json
+
+{
+  "tags" : [6]
+}

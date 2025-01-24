@@ -10,7 +10,7 @@ export class Review extends BaseEntity {
   author!: User
 
   @Property()
-  createdAt: Date = new Date();
+  readonly createdAt: Date = new Date();
 
   @ManyToOne()
   game!: Game

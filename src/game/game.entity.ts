@@ -14,6 +14,7 @@ import { Platform } from '../platform/platform.entity.js';
 import { Franchise } from '../franchise/franchise.entity.js';
 import { Tag } from '../tag/tag.entity.js';
 import { Review } from '../review/review.entity.js';
+import { nullable } from 'valibot';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -22,24 +23,26 @@ export class Game extends BaseEntity {
 
     @Property()
     synopsis!: string
+    //TODO ojo el limite de caracteres, nos estamos quedando cortos
 
-    @Property({ nullable: false })
+    @Property({nullable: true})
     releaseDate!: Date //debe usarse en formato date?
 
-    @Property()
+    @Property({nullable: true})
     portrait!: string
 
-    @Property()
+    @Property({ nullable: true })
     banner!: string
 
-    @Property()
-    pictures!: string[]
+    @Property({ nullable: true })
+    pictures!: string
+    //TODO cambiar a array
 
     @ManyToMany(() => Tag, (tag) => tag.games, {
         cascade: [Cascade.ALL],
         owner: true,
     })
-    tag = new Collection<Tag>(this);
+    tags = new Collection<Tag>(this);
 
     @ManyToMany(() => Studio, (studio) => studio.games, {
         cascade: [Cascade.ALL],
@@ -53,8 +56,8 @@ export class Game extends BaseEntity {
     })
     shops = new Collection<Shop>(this)
 
-    @ManyToOne(() => Franchise)
-    franchise?: Franchise
+    @ManyToOne(() => Franchise, { nullable: true })
+    franchise!: Franchise
 
     @ManyToMany(() => Platform, (platform) => platform.games, {
         cascade: [Cascade.ALL],
@@ -65,6 +68,5 @@ export class Game extends BaseEntity {
     @OneToMany('Review', 'game')
     reviews = new Collection<Review>(this)
 
-    @ManyToMany('Tag')
-    tags = new Collection<Tag>(this)
+  
 }

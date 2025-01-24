@@ -1,8 +1,8 @@
-GET http://localhost:8080/api/franchises/
+GET http://localhost:8080/api/franchises
 
 
 ### obtener un tag
-GET http://localhost:8080/api/franchises/3
+GET http://localhost:8080/api/franchises/1
 
 
 ### crear un nuevo tag
@@ -10,7 +10,7 @@ POST http://localhost:8080/api/franchises
 Content-Type: application/json
 
 {
-  "name": "Star Wars"
+  "name": "Persona"
   
 }
 
@@ -18,16 +18,16 @@ Content-Type: application/json
 DELETE http://localhost:8080/api/franchises/2
 
 ###
-PUT  http://localhost:8080/api/franchises/3
+PUT  http://localhost:8080/api/franchises/14
 Content-Type: application/json
 
 {
-  "name": "Fallout"
+  "name": "Persona"
  
 }
 
 ###
-PATCH http://localhost:8080/api/franchises/3
+PATCH http://localhost:8080/api/franchises/14
 Content-Type: application/json
 
 {

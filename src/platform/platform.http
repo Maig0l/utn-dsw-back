@@ -2,7 +2,7 @@
 POST http://localhost:8080/restart
 
 ###
-GET http://localhost:8080/api/platforms/
+GET http://localhost:8080/api/
 
 ###
 POST http://localhost:8080/api/platforms
@@ -11,6 +11,17 @@ Content-Type: application/json
 {
   "name": "PlayStation1",
   "img": "imgPS1"
+}
+
+###
+POST http://localhost:8080/api/shops
+Content-Type: application/json
+
+{
+  "name": "steam",
+  "img": "imgstream",
+  "site": "https://store.steampowered.com/"
+
 }
 
 #@id = {{createPlatform.response.body.data.id}}

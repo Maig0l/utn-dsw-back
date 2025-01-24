@@ -13,7 +13,7 @@ export class Studio extends BaseEntity {
   name!: string
 
   @Property()
-  type!: string[]
+  type!: string
 
   @Property({unique: true})
   site!: string
@@ -23,6 +23,7 @@ export class Studio extends BaseEntity {
 }
 
 export enum StudioType {
-  Developer = "Desarrollador",
-  Publisher = "Editor"
+  Developer = "Developer",
+  Publisher = "Publisher",
+  Both = "Both"
 }
