@@ -33,5 +33,5 @@ const reviewEditSchema = v.partial(
   })
 )
 
-export const validateNewReview = v.safeParserAsync(reviewSchema)
+export const validateReviewNew = v.safeParserAsync(reviewSchema)
 export const validateReviewEdit = v.safeParserAsync(reviewEditSchema)

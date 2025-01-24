@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../shared/db/orm.js";
 import { Review } from "./review.entity.js";
-import { validateNewReview, validateReviewEdit } from "./review.schema.js";
+import {validateReviewNew, validateReviewEdit } from "./review.schema.js";
 import sanitizeHtml from "sanitize-html"
 
 // Mensajes
@@ -82,7 +82,7 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
       break
     case "POST":
     default:
-      incoming = await validateNewReview(req.body)
+      incoming = await validateReviewNew(req.body)
       break
   }
 

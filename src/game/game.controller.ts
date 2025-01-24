@@ -5,7 +5,7 @@ import { orm } from "../shared/db/orm.js";
 import { populate } from "dotenv";
 import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
 import { User } from "../user/user.entity.js";
-import { validateNewReviewFromRequest } from "../review/review.schema.js";
+import { validateReviewNew } from "../review/review.schema.js";
 import { Review } from "../review/review.entity.js";
 import { Tag } from "../tag/tag.entity.js";
 
@@ -112,7 +112,7 @@ async function createReview(req: Request, res: Response) {
     }
 
     // crear la entidad review y cargarla a la db
-    let incoming = await validateNewReviewFromRequest(req.body)
+    let incoming = await validateReviewNew(req.body)
     if (!incoming.success)
         return res.status(400).json({ message: "Invalid input: " + incoming.issues[0].message })
     const review: any = { ...incoming.output }
