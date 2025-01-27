@@ -5,11 +5,11 @@ import { orm } from "../shared/db/orm.js";
 import { User } from "./user.entity.js";
 import { validateLogin, validateRegistration } from "./user.schema.js";
 import bcrypt from 'bcrypt';
-import { randomBytes } from "crypto";
 import jwt from 'jsonwebtoken';
 
+// TODO: I know this is sloppy, but there's no time
+const API_SECRET = process.env.apiSecret ?? ''
 const PASSWD_SALT_ROUNDS = 10
-const JWT_SECRET = "secret"
 
 // Mensajes de error
 const ERR_500 = "Something went horribly wrong. Oops (this is our fault)"
@@ -129,7 +129,7 @@ async function login(req: Request, res: Response) {
     return res.status(400).json({ message: ERR_LOGIN_BAD_CREDS })
 
   // Generar JWT con el ID del usuario y otros datos que quieras incluir
-  const token = jwt.sign({ id: user.id, nick: user.nick }, JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ id: user.id, nick: user.nick }, API_SECRET, { expiresIn: '1h' });
 
   res.json({ message: "Login successful", data: { token: token } });  // Devolver el token JWT en lugar de `sessionToken`
 }
@@ -239,7 +239,7 @@ function authMiddleware(req: Request, res: Response, next: NextFunction) {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, API_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ message: "Failed to authenticate token" });
     }

@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express'
 import { paramCheckFromList } from '../shared/paramCheckFromList.js';
 import { orm } from '../shared/db/orm.js';
 import { Shop } from './shop.entity.js';
+import { validateNewShop, validateUpdateShop } from "./shop.schema.js";
+
 
 // Registrar parámetros válidos para un post/put/patch
 const VALID_PARAMS = "name img site".split(' ')
@@ -70,35 +72,30 @@ async function remove(req: Request, res: Response) {
  * que trabajen con los valores guardados en res.locals!
  * TODO: (Code Convention para el equipo)
  */
-function sanitizeInput(req:Request, res:Response, next:NextFunction) {
-  if (["POST", "PUT"].includes(req.method) && !hasParams(req.body, true))
-    return res.status(400)
-      .json({message: "Must provide all attributes"})
+//middleware
 
-  if ("PATCH" == req.method && !hasParams(req.body, false))
-    return res.status(400)
-      .json({message: "Must provide at least one valid attribute"})
+async function sanitizeInput(req:Request, res:Response, next:NextFunction) {
+  const incoming = await validateNewShop(req.body)
+  if  (!incoming.success)
+      return res.status(400).json({message: incoming.issues[0].message})
+  const newShop = incoming.output
 
-  res.locals.sanitizedInput = {
-    name: req.body.name,
-    img: req.body.img,
-    site: req.body.site
-  }
-  
-  // https://stackoverflow.com/a/3809435
-  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
-  if (req.body.site && !urlRegex.test(req.body.site))
-    return res.status(400).json({message: "Invalid Site attribute (Should be a URL)"})
-
-  // TODO: Revisar que no haya sanitización silenciosa
-  Object.keys(res.locals.sanitizedInput).forEach((k) => {
-    if (res.locals.sanitizedInput[k] === undefined) {
-      delete res.locals.sanitizedInput[k]
-    }
-  })
+  res.locals.sanitizedInput = newShop
 
   next()
 }
+
+async function sanitizePartialInput(req:Request, res:Response, next:NextFunction) {
+  const incoming = await validateUpdateShop(req.body)
+  if  (!incoming.success)
+      return res.status(400).json({message: incoming.issues[0].message})
+  const newShop = incoming.output
+
+  res.locals.sanitizedInput = newShop
+
+  next()
+}
+
 
 /**
  * Se supone que sea pasado al router antes de las funciones que buscan por ID
@@ -146,4 +143,4 @@ function handleOrmError(res: Response, err: any) {
   }
 }
 
-export {findAll, findOne, add, update, remove, sanitizeInput, validateExists}
+export {findAll, findOne, add, update, remove, sanitizeInput, sanitizePartialInput, validateExists}

@@ -3,23 +3,14 @@ import { Request, Response, NextFunction } from 'express'
 import { Franchise } from './franchise.entity.js'
 import { orm } from "../shared/db/orm.js";
 import { paramCheckFromList } from '../shared/paramCheckFromList.js';
+import { validateNewFranchise, validateUpdateFranchise } from "./franchise.schema.js";
+
 
 
 const VALID_PARAMS = "name description".split(' ')
 const hasParams = paramCheckFromList(VALID_PARAMS)
 const em = orm.em
 
-
-function sanitizeFranchiseInput(req: Request, res: Response, next: NextFunction) {
-  req.body.sanitizedInput = {
-    name: req.body.name,
-  }
-  Object.keys(req.body.sanitizedInput).forEach((key)=>{
-    if(req.body.sanitizedInput[key]=== undefined) 
-      delete req.body.sanitizedInput[key]
-  })
-  next()
-}
 
 
 
@@ -78,7 +69,32 @@ async function remove (req:Request,res:Response) {
   }
   }
 
-  function validateExists(req:Request, res:Response, next: NextFunction) {
+//middleware
+
+async function sanitizeInput(req:Request, res:Response, next:NextFunction) {
+  const incoming = await validateNewFranchise(req.body)
+  if  (!incoming.success)
+      return res.status(400).json({message: incoming.issues[0].message})
+  const newFranchise = incoming.output
+
+  res.locals.sanitizedInput = newFranchise
+
+  next()
+}
+
+async function sanitizePartialInput(req:Request, res:Response, next:NextFunction) {
+  const incoming = await validateUpdateFranchise(req.body)
+  if  (!incoming.success)
+      return res.status(400).json({message: incoming.issues[0].message})
+  const newFranchise = incoming.output
+
+  res.locals.sanitizedInput = newFranchise
+
+  next()
+}
+
+
+function validateExists(req:Request, res:Response, next: NextFunction) {
     const id = Number.parseInt(req.params.id)
   
     if (Number.isNaN(id))
@@ -121,4 +137,4 @@ function handleOrmError(res: Response, err: any) {
   }
 }
 
-export { sanitizeFranchiseInput, findAll, findOne, add, update, remove, validateExists }
+export { findAll, findOne, add, update, remove, sanitizeInput, sanitizePartialInput, validateExists }

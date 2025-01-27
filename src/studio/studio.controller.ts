@@ -1,10 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { Studio } from "./studio.entity.js";
-import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import { orm } from "../shared/db/orm.js";
-
-const validParams = "name type site".split(' ')
-const hasParams = paramCheckFromList(validParams)
+import { validateNewStudio, validateUpdateStudio } from "./studio.schema.js";
 
 const em = orm.em
 
@@ -61,40 +58,26 @@ async function remove(req: Request, res: Response) {
 
 //middleware
 
-function sanitizeInput(req:Request, res:Response, next:NextFunction) {
+async function sanitizeInput(req:Request, res:Response, next:NextFunction) {
+    const incoming = await validateNewStudio(req.body)
+    if  (!incoming.success)
+        return res.status(400).json({message: incoming.issues[0].message})
+    const newStudio = incoming.output
 
-    if (["POST", "PUT"].includes(req.method) && !hasParams(req.body, true))
-        return res.status(400)
-            .json({message: "Must provide all attributes"})
+    res.locals.sanitizedInput = newStudio
 
-    if ("PATCH" == req.method && !hasParams(req.body, false))
-        return res.status(400)
-            .json({message: "Must provide at least one valid attribute"})
-          
+    next()
+}
 
-    res.locals.sanitizedInput = {
-        name: req.body.name,
-        type: req.body.type,
-        site: req.body.site
-    }
+async function sanitizePartialInput(req:Request, res:Response, next:NextFunction) {
+    const incoming = await validateUpdateStudio(req.body)
+    if  (!incoming.success)
+        return res.status(400).json({message: incoming.issues[0].message})
+    const newStudio = incoming.output
 
-    const sanitizedInput = res.locals.sanitizedInput
-    
-    const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
-    if(!urlRegex.test(req.body.site))
-        sanitizedInput.site = undefined
+    res.locals.sanitizedInput = newStudio
 
-    if (!urlRegex.test(req.body.site))
-        sanitizedInput.site = undefined
-    
-
-    Object.keys(sanitizedInput).forEach((key) => {
-        if (sanitizedInput[key] === undefined) {
-            delete sanitizedInput[key];
-        }
-    });
-    
-    next();
+    next()
 }
 
 // santizacion del tipo
@@ -137,4 +120,4 @@ function handleOrmError(res: Response, err: any) {
     }
   }
     
-export { findAll, findOne, add, update, remove, sanitizeInput, validateExists };
+export { findAll, findOne, add, update, remove, sanitizeInput, sanitizePartialInput, validateExists };

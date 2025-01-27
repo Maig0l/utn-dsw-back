@@ -1,20 +1,21 @@
 import { Request, Response, NextFunction } from 'express'
 import { Tag } from './tag.entity.js'
 import { orm } from "../shared/db/orm.js";
+import { validateNewTag, validateUpdateTag } from './tag.schema.js';
 
 const em = orm.em
 
-function sanitizeTagInput(req: Request, res: Response, next: NextFunction) {
-  req.body.sanitizedInput = {
-    name: req.body.name,
-    description: req.body.description
+//doesn't work
+//takes in a partial name and returns all tags LIKE that name
+async function findByName(req: Request, res: Response) {
+  console.log(req.params.name)
+  try {
+    const tags = await em.find(Tag, { name: { $like: req.params.name }  })
+    res.json({ data: tags })
+  } catch (err) {
+    handleOrmError(res, err)
   }
-  Object.keys(req.body.sanitizedInput).forEach((key) => {
-    if (req.body.sanitizedInput[key] === undefined)
-      delete req.body.sanitizedInput[key]
-  })
-  next()
-}
+} 
 
 async function findAll(req: Request, res: Response) {
   try {
@@ -70,13 +71,30 @@ async function remove(req: Request, res: Response) {
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = Number.parseInt(req.params.id)
-
   if (Number.isNaN(id))
     return res.status(400).json({ message: 'ID must be an integer' })
-
-
-
   res.locals.id = id
+  next()
+}
+
+async function sanitizeTagInput(req: Request, res: Response, next: NextFunction) {
+  const incoming = await validateNewTag(req.body)
+  if (!incoming.success)
+    return res.status(400).json({ message: incoming.issues[0].message })
+  const newTag = incoming.output
+
+  res.locals.sanitizedInput = newTag
+
+  next()
+}
+
+async function sanitizePartialTagInput(req: Request, res: Response, next: NextFunction) {
+  const incoming = await validateUpdateTag(req.body)
+  if (!incoming.success)
+    return res.status(400).json({ message: incoming.issues[0].message })
+  const newTag = incoming.output
+
+  res.locals.sanitizedInput = newTag
 
   next()
 }
@@ -107,4 +125,4 @@ function handleOrmError(res: Response, err: any) {
   }
 }
 
-export { sanitizeTagInput, findAll, findOne, add, update, remove, validateExists }
+export { sanitizeTagInput, sanitizePartialTagInput,findByName, findAll, findOne, add, update, remove, validateExists }
