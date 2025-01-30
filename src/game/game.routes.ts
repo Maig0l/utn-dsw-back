@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction, Router } from "express";
-import { findAll, findOne, add, update, remove, sanitizeInput, validateExists, createReview, listReviews } from "./game.controller.js";
+import { findGamesByTitle,findAll, findOne, add, update, remove, sanitizeInput, validateExists, createReview, listReviews } from "./game.controller.js";
 
 
 export const gameRouter = Router();
 
+gameRouter.get("/search", findGamesByTitle); //create middleware?
 gameRouter.get("/", findAll);
 gameRouter.post("/", sanitizeInput, add);
 

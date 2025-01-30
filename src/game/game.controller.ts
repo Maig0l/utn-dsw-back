@@ -34,6 +34,18 @@ async function findOne(req: Request, res: Response) {
     }
 }
 
+async function findGamesByTitle(req: Request, res: Response) {
+    console.log(res.locals)
+    try {
+        const title = req.query.title as string;
+        const games = await em.find(Game, { title: { $like: `%${title}%` } })
+        res.json({ data: games })
+    } catch (err) {
+        console.error(err);
+        handleOrmError(res, err)
+    }
+}
+
 async function add(req: Request, res: Response) {
     try {
         const game = em.create(Game, res.locals.sanitizedInput)
@@ -216,4 +228,4 @@ function handleOrmError(res: Response, err: any) {
     }
 }
 
-export { findAll, findOne, add, update, remove, sanitizeInput, handleOrmError, validateExists, createReview, listReviews }
+export { findGamesByTitle,findAll, findOne, add, update, remove, sanitizeInput, handleOrmError, validateExists, createReview, listReviews }
