@@ -26,7 +26,15 @@ async function findAll(req: Request, res: Response) {
       Game,
       {},
       {
-        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'],
+        populate: [
+          'tags',
+          'shops',
+          'platforms',
+          'studios',
+          'reviews',
+          'franchise',
+          'pictures',
+        ],
       }
     );
     res.json({ data: games });
@@ -40,7 +48,17 @@ async function findOne(req: Request, res: Response) {
     const game = await em.findOneOrFail(
       Game,
       { id: res.locals.id },
-      { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] }
+      {
+        populate: [
+          'tags',
+          'shops',
+          'platforms',
+          'studios',
+          'reviews',
+          'franchise',
+          'pictures',
+        ],
+      }
     );
     res.json({ data: game });
   } catch (err) {
@@ -64,7 +82,8 @@ async function add(req: Request, res: Response) {
   try {
     console.log('sanitized inputs', res.locals.sanitizedInput);
     const game = em.create(Game, res.locals.sanitizedInput);
-    const urls = res.locals.sanitizedInput.pictures;
+    //SAQUE LAS PICTURES DE ACÁ Y DE LA SANITIZACIÓN
+    /*const urls = res.locals.sanitizedInput.pictures;
     console.log('url length', urls.length);
     for (let i = 1; i < urls.length; i++) {
       console.log('url', urls[i]);
@@ -73,9 +92,9 @@ async function add(req: Request, res: Response) {
         url: urls[i],
         game: game,
       });
-    }
+    }*/
     await em.flush();
-    res.status(201).json({ message: 'Game created successfully', data: { game, urls } });
+    res.status(201).json(game);
   } catch (err) {
     handleOrmError(res, err);
   }
@@ -153,7 +172,9 @@ async function createReview(req: Request, res: Response) {
   // crear la entidad review y cargarla a la db
   let incoming = await validateNewReviewFromRequest(req.body);
   if (!incoming.success)
-    return res.status(400).json({ message: 'Invalid input: ' + incoming.issues[0].message });
+    return res
+      .status(400)
+      .json({ message: 'Invalid input: ' + incoming.issues[0].message });
   const review: any = { ...incoming.output };
   review.author = userReference;
   review.game = gameReference;
@@ -168,30 +189,6 @@ async function createReview(req: Request, res: Response) {
   res.status(201).json({ message: 'Review created!', data: loadedReview });
 }
 
-async function addPicture(req: Request, res: Response) {
-  try {
-    const game = await em.findOneOrFail(Game, { id: res.locals.id });
-    const picture = em.create(GamePicture, res.locals.sanitizedInput.picture);
-    game.pictures.add(picture);
-    await em.flush();
-    res.json({ message: 'Picture added', data: picture });
-  } catch (err) {
-    handleOrmError(res, err);
-  }
-}
-
-async function removePicture(req: Request, res: Response) {
-  try {
-    const game = await em.findOneOrFail(Game, { id: res.locals.id });
-    const picture = await em.findOneOrFail(GamePicture, { id: res.locals.picture.id });
-    game.pictures.remove(picture);
-    await em.flush();
-    res.json({ message: 'Picture removed', data: picture });
-  } catch (err) {
-    handleOrmError(res, err);
-  }
-}
-
 //middleware
 
 function sanitizeInput(req: Request, res: Response, next: NextFunction) {
@@ -199,7 +196,9 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json({ message: 'Must provide all attributes' });
 
   if (['POST', 'PATCH'].includes(req.method) && !hasParams(req.body, false))
-    return res.status(400).json({ message: 'Must provide at least one valid attribute' });
+    return res
+      .status(400)
+      .json({ message: 'Must provide at least one valid attribute' });
 
   res.locals.sanitizedInput = {
     title: req.body.title,
@@ -207,7 +206,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
     releaseDate: req.body.releaseDate,
     portrait: req.body.portrait,
     banner: req.body.banner,
-    pictures: req.body.pictures,
+    //pictures: req.body.pictures,
     tags: req.body.tags,
     studios: req.body.studios,
     shops: req.body.shops,
@@ -236,7 +235,8 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
 
-  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id))
+    return res.status(400).json({ message: 'ID must be an integer' });
 
   res.locals.id = id;
 
@@ -251,7 +251,9 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case 'ER_DUP_ENTRY':
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        res.status(400).json({ message: `A game with that name/site already exists.` });
+        res
+          .status(400)
+          .json({ message: `A game with that name/site already exists.` });
         break;
       case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
@@ -260,10 +262,14 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res.status(404).json({ message: `game not found for ID ${res.locals.id}` });
+        res
+          .status(404)
+          .json({ message: `game not found for ID ${res.locals.id}` });
         break;
       default:
-        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
+        res
+          .status(500)
+          .json({ message: 'Oops! Something went wrong. This is our fault.' });
         break;
     }
   }
@@ -281,6 +287,4 @@ export {
   validateExists,
   createReview,
   listReviews,
-  addPicture,
-  removePicture,
 };
