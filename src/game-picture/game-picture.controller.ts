@@ -11,14 +11,16 @@ async function addPicture(req: Request, res: Response) {
     const game = await em.findOneOrFail(Game, {
       id: res.locals.sanitizedInput.game_id,
     });
-    for (let i = 0; i < res.locals.sanitizeInput.urls.length; i++) {
+    console.log('JUEGO: ', game);
+    console.log('SANITIZED: ', res.locals.sanitizedInput);
+    for (let i = 0; i < res.locals.sanitizedInput.urls.length; i++) {
       const picture = em.create(GamePicture, {
-        url: res.locals.sanitizeInput.urls[i],
+        url: res.locals.sanitizedInput.urls[i],
         game: game,
       });
       await em.flush();
     }
-    res.json({ message: 'Picture added', data: res.locals.sanitizeInput.urls });
+    res.json({ message: 'Picture added', data: res.locals.sanitizedInput.urls });
   } catch (err) {
     handleOrmError(res, err);
   }
@@ -29,10 +31,7 @@ async function removePicture(req: Request, res: Response) {
     const picture = await em.findOneOrFail(GamePicture, {
       id: res.locals.sanitizedInput.pic_id,
     });
-    const pictureRef = em.getReference(
-      GamePicture,
-      res.locals.sanitizedInput.pic_id
-    );
+    const pictureRef = em.getReference(GamePicture, res.locals.sanitizedInput.pic_id);
     await em.removeAndFlush(pictureRef);
 
     res.json({ message: 'Picture deleted successfully', data: picture });
@@ -42,6 +41,7 @@ async function removePicture(req: Request, res: Response) {
 }
 
 function sanitizeInput(req: Request, res: Response, next: NextFunction) {
+  console.log('req.body__________', req.body);
   res.locals.sanitizedInput = {
     pic_id: req.body.pic_id,
     game_id: req.body.game_id,
@@ -60,8 +60,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
 
-  if (Number.isNaN(id))
-    return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
 
   res.locals.id = id;
 
@@ -81,14 +80,10 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res
-          .status(404)
-          .json({ message: `game not found for ID ${res.locals.id}` });
+        res.status(404).json({ message: `game not found for ID ${res.locals.id}` });
         break;
       default:
-        res
-          .status(500)
-          .json({ message: 'Oops! Something went wrong. This is our fault.' });
+        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
         break;
     }
   }
