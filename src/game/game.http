@@ -10,14 +10,15 @@ POST http://localhost:8080/api/games
 Content-Type: application/json
 
 {
-    "title": "Fallout 77",
+    "title": "Fallout 79",
     "synopsis": "Apocalipsis",
     "releaseDate": "2020-09-06T00:00:00.000Z",
-    "portrait": "regfd",
-    "banner": "rergfd",
-    "pictures": "asf",
-    "franchise": 1 ,
-    "tags" : [10, 6] 
+    "portrait": "https://en.wikipedia.org/wiki/File:Fallout.jpg",
+    "banner": "https://en.wikipedia.org/wiki/File:Fallout.jpg",
+    "pictures": {
+        "url": "https://en.wikipedia.org/wiki/File:Fallout.jpg"
+    },
+    "tags" : [] 
   
 }
 
@@ -40,4 +41,12 @@ Content-Type: application/json
 
 {
   "tags" : [6]
+}
+
+###
+PUT http://localhost:8080/api/games/1/add-picture
+Content-Type: application/json
+
+{
+  "url": "https://upload.wikimedia.org/wikipedia/en/e/e1/The_Binding_of_Issac_Rebirth_cover.jpg"
 }
