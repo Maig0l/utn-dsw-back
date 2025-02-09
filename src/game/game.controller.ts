@@ -8,7 +8,6 @@ import { User } from '../user/user.entity.js';
 import { validateNewReviewFromRequest } from '../review/review.schema.js';
 import { Review } from '../review/review.entity.js';
 import { Tag } from '../tag/tag.entity.js';
-import { GamePicture } from '../game-picture/game-picture.entity.js';
 
 const API_SECRET = process.env.apiSecret ?? '';
 
@@ -64,6 +63,10 @@ async function findGamesByTitle(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    console.log('SANITIZED INPUT', res.locals.sanitizedInput);
+    if (res.locals.sanitizedInput.franchise === 0) {
+      delete res.locals.sanitizedInput.franchise;
+    }
     const game = em.create(Game, res.locals.sanitizedInput);
     await em.flush();
     res.status(201).json(game);
@@ -180,6 +183,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
     shops: req.body.shops,
     platforms: req.body.platforms,
     reviews: req.body.reviews,
+    franchise: req.body.franchise,
   };
   const sanitizedInput = res.locals.sanitizedInput;
 
