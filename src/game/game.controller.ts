@@ -77,6 +77,10 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
+    console.log('SANITIZED INPUT', res.locals.sanitizedInput);
+    if (res.locals.sanitizedInput.franchise === 0) {
+      delete res.locals.sanitizedInput.franchise;
+    }
     const game = await em.findOneOrFail(Game, { id: res.locals.id });
     em.assign(game, res.locals.sanitizedInput);
     await em.flush();
