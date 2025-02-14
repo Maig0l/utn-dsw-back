@@ -6,6 +6,7 @@ import { User } from "./user.entity.js";
 import { validateLogin, validateRegistration } from "./user.schema.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import {UserAuthObject} from "../auth/userAuthObject.interface";
 
 // TODO: I know this is sloppy, but there's no time
 const API_SECRET = process.env.apiSecret ?? ''
@@ -129,9 +130,21 @@ async function login(req: Request, res: Response) {
     return res.status(400).json({ message: ERR_LOGIN_BAD_CREDS })
 
   // Generar JWT con el ID del usuario y otros datos que quieras incluir
-  const token = jwt.sign({ id: user.id, nick: user.nick }, API_SECRET, { expiresIn: '1h' });
 
-  res.json({ message: "Login successful", data: { token: token } });  // Devolver el token JWT en lugar de `sessionToken`
+  // user.id es number|undefined, pero en este caso el id debería estar sí o sí
+  if (!user.id)
+    return res.status(500).json({ message: "Unknown error" })
+
+  const tokenData: UserAuthObject = {
+    iss: "Wellplayed.gg",
+    sub: "UserDataToken",
+    id: user.id,
+    nick: user.nick,
+    isAdmin: false //TODO: add admin property
+  }
+  const token = jwt.sign(tokenData, API_SECRET, { expiresIn: '1h' });
+
+  res.json({ message: "Login successful", data: { token: token } });
 }
 
 async function logout(req: Request, res: Response) {

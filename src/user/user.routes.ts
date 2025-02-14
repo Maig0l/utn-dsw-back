@@ -5,7 +5,7 @@ export const userRouter = Router()
 
 userRouter.get('/', findAll)
 userRouter.post('/', sanitizeInput, add)
-userRouter.post('/login', sanitizeInput, login)
+userRouter.post('/login', sanitizeInput, login) // TODO: Move to an /auth endpoint
 
 // Todas las rutas /:id usan el validateExists
 userRouter.use('/:id', validateExists)
