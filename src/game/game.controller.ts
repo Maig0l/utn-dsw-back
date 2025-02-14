@@ -8,6 +8,11 @@ import { User } from "../user/user.entity.js";
 import { validateReviewNew } from "../review/review.schema.js";
 import { Review } from "../review/review.entity.js";
 import { Tag } from "../tag/tag.entity.js";
+import sanitizeHtml from "sanitize-html";
+import {
+    AuthError,
+    getUserReferenceFromAuthHeader,
+} from "../auth/auth.middleware.js";
 
 const API_SECRET = process.env.apiSecret ?? ''
 
@@ -67,71 +72,13 @@ async function remove(req: Request, res: Response) {
     }
 }
 
-async function listReviews(req: Request, res: Response) {
-    try {
-        const game = await em.findOneOrFail(Game, { id: res.locals.id })
-        const reviews = await game.reviews.loadItems()
-        res.json({ message: `Listing ${game.reviews.count()} reviews for ${game.title}`, data: reviews })
-    } catch (e) {
-        return handleOrmError(res, e)
-    }
-}
-
-async function createReview(req: Request, res: Response) {
-    // traer una referencia del gameId
-    let gameReference: Game;
-    try {
-        gameReference = await em.getReference(Game, res.locals.id)
-    } catch (err) {
-        return handleOrmError(res, err)
-    }
-
-    // Verificar que trae el auth header
-    if (!req.headers.authorization)
-        return res.status(401).json({ message: "Gotta log in for that!" })
-    let token = req.headers.authorization
-    // Tenemos que explicitar que el tokenData extraído es any porque si no TS se queja de que puede ser string o JwtPayload
-    // Pero sabemos por "regla de negocio" que en el payload viene un objeto con id...
-    // TODO: Debería explicitarse eso en el código con una interfaz but anyways
-    let tokenData: any;
-    try {
-        tokenData = await jwt.verify(token, API_SECRET)
-    } catch (e) {
-        return res.status(400).json({ message: "Invalid session token" })
-    }
-
-    // extraer el user id del jwt y traer una *referencia* de la db
-    let userReference;
-    if (!('id' in tokenData)) {
-        return res.status(500).json({ message: "Invalid session token" })
-    }
-    try {
-        userReference = em.getReference(User, tokenData.id)
-    } catch (e) {
-        return handleOrmError(res, e)
-    }
-
-    // crear la entidad review y cargarla a la db
-    let incoming = await validateReviewNew(req.body)
-    if (!incoming.success)
-        return res.status(400).json({ message: "Invalid input: " + incoming.issues[0].message })
-    const review: any = { ...incoming.output }
-    review.author = userReference
-    review.game = gameReference
-
-    let loadedReview;
-    try {
-        loadedReview = em.create(Review, review)
-        await em.flush()
-    } catch (e) {
-        return handleOrmError(res, e)
-    }
-    res.status(201).json({ message: "Review created!", data: loadedReview })
-}
 
 
 //middleware
 
+/**
+ * @deprecated in favor of Valibot
+ */
 function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 
     if (["PUT"].includes(req.method) && !hasParams(req.body, true))
@@ -216,4 +163,4 @@ function handleOrmError(res: Response, err: any) {
     }
 }
 
-export { findAll, findOne, add, update, remove, sanitizeInput, handleOrmError, validateExists, createReview, listReviews }
+export { findAll, findOne, add, update, remove, sanitizeInput, handleOrmError, validateExists}
