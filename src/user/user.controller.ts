@@ -52,21 +52,20 @@ async function findOne(req: Request, res: Response) {
 
 // *** A.K.A: Register ***
 async function add(req: Request, res: Response) {
-  if (!hasCreationParams(req.body, true))
-    return res.status(400).json({message: ERR_PARAMS_CREATE})
-
-  // let newUserData;
   const incoming = await validateRegistration(res.locals.sanitizedInput)
   if (!incoming.success)
     return res.status(400).json({message: incoming.issues})
   const newUserData = incoming.output
 
-  // TODO: Chequear que el usuario/email ya existe
-  // await returnIfIdentifierIsUsed(res, {email: newUserData.email, nick: newUserData.nick})
+  const matchingUser = await em.findOne(User, {$or: [{nick: newUserData.nick}, {email: newUserData.email}]})
+  if (matchingUser)
+    return res.status(400).json({message: "Nick or email already in use"})
+
   newUserData.password = hashPassword(newUserData.password)
 
   try {
-    const user = await em.create(User, newUserData)
+    const user = em.create(User, newUserData)
+    await em.flush()
 
     res.status(201).json({message: "User created successfully", data: user})
   } catch (e) {
