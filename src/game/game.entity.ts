@@ -1,20 +1,19 @@
 import {
-  Entity,
-  Property,
-  ManyToMany,
-  Cascade,
-  Collection,
-  ManyToOne,
-  OneToMany,
-} from '@mikro-orm/core';
-import { BaseEntity } from '../shared/db/baseEntity.entity.js';
+    Entity,
+    Property,
+    ManyToMany,
+    Cascade,
+    Collection,
+    ManyToOne,
+    OneToMany,
+} from '@mikro-orm/core'
+import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Studio } from '../studio/studio.entity.js';
 import { Shop } from '../shop/shop.entity.js';
 import { Platform } from '../platform/platform.entity.js';
 import { Franchise } from '../franchise/franchise.entity.js';
 import { Tag } from '../tag/tag.entity.js';
 import { Review } from '../review/review.entity.js';
-import { nullable } from 'valibot';
 import { GamePicture } from '../game-picture/game-picture.entity.js';
 
 @Entity()
@@ -68,6 +67,8 @@ export class Game extends BaseEntity {
   })
   platforms = new Collection<Platform>(this);
 
-  @OneToMany('Review', 'game')
-  reviews = new Collection<Review>(this);
+    @OneToMany('Review', 'game')
+    reviews = new Collection<Review>(this)
+
+
 }

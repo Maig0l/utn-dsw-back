@@ -14,22 +14,23 @@ const score = v.pipe(
   v.maxValue(5, ERR_SCORE_RANGE),
 )
 
+// El author y gameId vienen en el Header de Autenticación y el parámetro de URL
 const reviewSchema = v.object({
-  author: id,
-  game: id,
   score: score,
   title: v.optional(v.string()),
   body: v.optional(v.string()),
   suggestedTags: v.optional(v.array(id))
 })
 
-// Schema a usar cuando el game/user id vienen codificados en la request (url/header)
-const reviewSchemaNoId = v.object({
-  score: score,
-  title: v.optional(v.string()),
-  body: v.optional(v.string()),
-  suggestedTags: v.optional(v.array(id))
-})
+// La review se edita mediante PATCH => Admite Objeto parcial
+const reviewEditSchema = v.partial(
+  v.object({
+    score: score,
+    title: v.string(),
+    body: v.string(),
+    suggestedTags: v.array(id)
+  })
+)
 
-export const validateNewReview = v.safeParserAsync(reviewSchema)
-export const validateNewReviewFromRequest = v.safeParserAsync(reviewSchemaNoId)
+export const validateReviewNew = v.safeParserAsync(reviewSchema)
+export const validateReviewEdit = v.safeParserAsync(reviewEditSchema)

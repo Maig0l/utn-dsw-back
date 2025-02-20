@@ -1,12 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../shared/db/orm.js";
 import { Review } from "./review.entity.js";
-import { validateNewReview } from "./review.schema.js";
+import {validateReviewNew, validateReviewEdit } from "./review.schema.js";
 import sanitizeHtml from "sanitize-html"
+import {AuthError, getUserReferenceFromAuthHeader} from "../auth/auth.middleware.js";
+import {Game} from "../game/game.entity.js";
+import {User} from "../user/user.entity.js";
+import {Tag} from "../tag/tag.entity.js";
 
 // Mensajes
 const ERR_500 = "Oops! Something went wrong. This is our fault."
 
+const REVIEW_PAGE_SIZE = 100
 const em = orm.em
 
 //// *** CRUD *** ////
@@ -29,6 +34,9 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+/**
+ * @deprecated in favor of createReview
+ */
 async function add(req: Request, res: Response) {
   try {
     const review = await em.create(Review, res.locals.newReview)
@@ -41,12 +49,20 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
-  res.status(501).json({ message: "Not implemented" })
+  try {
+    // TODO
+    let review = await em.findOneOrFail(Review, { id: res.locals.id })
+    review = { ...review, ...res.locals.newReview }
+    console.log(review)
+    return res.status(418).json({ data: review })
+  } catch (e) {
+    handleOrmError(res, e)
+  }
 }
 
 async function remove(req: Request, res: Response) {
   try {
-    const review = em.findOneOrFail(Review, { id: res.locals.id })
+    const review = await em.findOneOrFail(Review, { id: res.locals.id })
     await em.removeAndFlush(review)
     res.json({ message: "Review deleted successfully", data: review })
   } catch (e) {
@@ -54,6 +70,96 @@ async function remove(req: Request, res: Response) {
   }
 }
 
+
+async function listReviews(req: Request, res: Response) {
+  // Guardar los Parámetros de búsqueda
+  const pageNo = Number.parseInt(req.query['page']?.toString() ?? '0')
+  const showOnlyOwnedReviews = 'mine' in req.query
+
+  // Relegar autenticación al middleware
+  // Notar que no estamos llamando al middleware desde el router, si no manualmente acá
+  let userRef;
+  if (showOnlyOwnedReviews) {
+    try{
+      userRef = getUserReferenceFromAuthHeader(req.headers.authorization)
+    } catch (e) {
+      if (e instanceof Error)
+        res.status(500).json({ message: e.message })
+      if (e instanceof AuthError)
+        res.status(401).json({ message: e.message })
+    }
+  }
+
+  // traer una referencia del gameId
+  let gameReference: Game = em.getReference(Game, res.locals.id)
+
+  let data: Review[] = [];
+  try {
+    if (showOnlyOwnedReviews) {
+      data = await em.find(Review,
+          {game: gameReference, author: userRef})
+    }
+    else {
+      data = await em.find(Review,
+          {game: gameReference},
+          {limit: REVIEW_PAGE_SIZE, offset: pageNo*REVIEW_PAGE_SIZE})
+    }
+  } catch (e) {
+    return handleOrmError(res, e)
+  }
+  res.json({
+    message: `Showing ${REVIEW_PAGE_SIZE} reviews (page ${pageNo})`,
+    data,
+  })
+}
+
+async function createReview(req: Request, res: Response) {
+  // traer una referencia del gameId
+  let gameReference: Game = em.getReference(Game, res.locals.id)
+
+  let userReference: User;
+  try {
+    userReference = getUserReferenceFromAuthHeader(req.headers.authorization)
+  } catch (e) {
+    if (e instanceof AuthError)
+      return res.status(401).json({ message: e.message })
+    else if (e instanceof Error)
+      return res.status(500).json({ message: e.message })
+    else {
+      return res.status(500).json({ message: "Unknown error" })
+    }
+  }
+
+  // crear la entidad review y cargarla a la db
+  let incoming = await validateReviewNew(req.body)
+  if (!incoming.success)
+    return res.status(400).json({ message: "Invalid input: " + incoming.issues[0].message })
+  const reviewInput = incoming.output;
+
+  const tagArray: Tag[] = []
+  if (reviewInput.suggestedTags) {
+    for (const tagId of reviewInput.suggestedTags) {
+      tagArray.push(em.getReference(Tag, tagId))
+    }
+  }
+
+  const review = new Review()
+  review.game = gameReference
+  review.author = userReference
+  review.title = sanitizeHtml(reviewInput.title || "")
+  review.body = sanitizeHtml(reviewInput.body || "")
+  review.score = reviewInput.score
+  review.suggestedTags.add(tagArray)
+
+  let loadedReview;
+  try {
+    loadedReview = em.create(Review, review)
+    await em.flush()
+    res.status(201).json({ message: "Review created!", data: loadedReview })
+  } catch (e) {
+    return handleOrmError(res, e)
+  }
+}
 //// *** Middlewarez *** ////
 
 async function validateExists(req: Request, res: Response, next: NextFunction) {
@@ -67,12 +173,25 @@ async function validateExists(req: Request, res: Response, next: NextFunction) {
 }
 
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
-  const incoming = await validateNewReview(req.body)
-  if (!incoming.success)
-    return res.status(400).json({ message: incoming.issues[0].message })
+  let incoming;
+  switch (req.method) {
+    case "PATCH":
+      incoming = await validateReviewEdit(req.body)
+      break
+    case "POST":
+    default:
+      incoming = await validateReviewNew(req.body)
+      break
+  }
+
+  if (!incoming.success) {
+    console.log(incoming.issues[0])
+    return res.status(400).json({ message: `: ${incoming.issues[0].message}` })
+  }
   const newReview = incoming.output
 
-  newReview.score = roundToNextHalf(newReview.score)
+  if (newReview.score)
+    newReview.score = roundToNextHalf(newReview.score)
   if (newReview.title)
     newReview.title = sanitizeHtml(newReview.title)
   if (newReview.body)
@@ -124,5 +243,6 @@ function throw500(res: Response, err: any) {
 }
 
 export {
-  findAll, findOne, remove, add, sanitizeInput, validateExists, update
+  findAll, findOne, remove, add, sanitizeInput, validateExists, update,
+    createReview, listReviews
 }

@@ -18,8 +18,8 @@ Content-Type: application/json
     "pictures": {
         "url": "https://en.wikipedia.org/wiki/File:Fallout.jpg"
     },
-    "tags" : [] 
-  
+    "tags" : []
+
 }
 
 ### borrar un tag

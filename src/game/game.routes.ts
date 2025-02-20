@@ -1,16 +1,16 @@
-import { Request, Response, NextFunction, Router } from 'express';
+import { Request, Response, NextFunction, Router } from "express";
 import {
-  findGamesByTitle,
-  findAll,
-  findOne,
-  add,
-  update,
-  remove,
-  sanitizeInput,
-  validateExists,
-  createReview,
-  listReviews,
-} from './game.controller.js';
+    findAll,
+    findOne,
+    add,
+    update,
+    remove,
+    sanitizeInput,
+    validateExists,
+    findGamesByTitle
+} from "./game.controller.js";
+import { listReviews, createReview } from "../review/review.controller.js"
+
 
 export const gameRouter = Router();
 
@@ -18,10 +18,11 @@ gameRouter.get('/search', findGamesByTitle); //create middleware?
 gameRouter.get('/', findAll);
 gameRouter.post('/', sanitizeInput, add);
 
-gameRouter.get('/:id', validateExists, findOne);
-gameRouter.put('/:id', validateExists, sanitizeInput, update);
-gameRouter.patch('/:id', validateExists, sanitizeInput, update);
-gameRouter.delete('/:id', validateExists, remove);
+// (\\d+) es una regex para que Express acepte sólo números para la variable id
+gameRouter.get("/:id(\\d+)", validateExists, findOne);
+gameRouter.put("/:id(\\d+)", validateExists, sanitizeInput, update);
+gameRouter.patch("/:id(\\d+)", validateExists, sanitizeInput, update);
+gameRouter.delete("/:id(\\d+)", validateExists, remove);
 
-gameRouter.get('/:id/reviews', validateExists, listReviews);
-gameRouter.post('/:id/reviews', validateExists, createReview);
+gameRouter.get('/:id(\\d+)/reviews', validateExists, listReviews)
+gameRouter.post('/:id(\\d+)/reviews', validateExists,  createReview)

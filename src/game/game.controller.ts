@@ -1,16 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
-import { Game } from './game.entity.js';
-import { paramCheckFromList } from '../shared/paramCheckFromList.js';
-import { orm } from '../shared/db/orm.js';
-import { populate } from 'dotenv';
-import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
-import { User } from '../user/user.entity.js';
-import { validateNewReviewFromRequest } from '../review/review.schema.js';
-import { Review } from '../review/review.entity.js';
-import { Tag } from '../tag/tag.entity.js';
+import { Request, Response, NextFunction } from "express"
+import { Game } from "./game.entity.js";
+import { paramCheckFromList } from "../shared/paramCheckFromList.js";
+import { orm } from "../shared/db/orm.js";
 
-const API_SECRET = process.env.apiSecret ?? '';
+const API_SECRET = process.env.apiSecret ?? ''
 
+// TODO: Lo de validParams lo tiene que reemplazar Valibot
 const validParams =
   'title synopsis releaseDate portrait banner pictures tags studios shops platforms reviews'.split(
     ' '
@@ -20,49 +15,38 @@ const hasParams = paramCheckFromList(validParams);
 const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
-  try {
-    const games = await em.find(
-      Game,
-      {},
-      {
-        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'],
-      }
-    );
-    res.json({ data: games });
-  } catch (err) {
-    handleOrmError(res, err);
-  }
+    try {
+        const games = await em.find(Game, {}, { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] })
+        res.json({ data: games })
+    } catch (err) {
+        handleOrmError(res, err)
+    }
 }
 
 async function findOne(req: Request, res: Response) {
-  try {
-    const game = await em.findOneOrFail(
-      Game,
-      { id: res.locals.id },
-      {
-        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'],
-      }
-    );
-    res.json({ data: game });
-  } catch (err) {
-    handleOrmError(res, err);
-  }
+    try {
+        const game = await em.findOneOrFail(Game, { id: res.locals.id }, { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] })
+        res.json({ data: game })
+    } catch (err) {
+        handleOrmError(res, err)
+    }
 }
 
 async function findGamesByTitle(req: Request, res: Response) {
-  console.log(res.locals);
-  try {
-    const title = req.query.title as string;
-    const games = await em.find(Game, { title: { $like: `%${title}%` } });
-    res.json({ data: games });
-  } catch (err) {
-    console.error(err);
-    handleOrmError(res, err);
-  }
+    console.log(res.locals);
+    try {
+        const title = req.query.title as string;
+        const games = await em.find(Game, { title: { $like: `%${title}%` } });
+        res.json({ data: games });
+    } catch (err) {
+        console.error(err);
+        handleOrmError(res, err);
+    }
 }
 
 async function add(req: Request, res: Response) {
   try {
+      // TODO: Por qué hacemos esto?
     console.log('SANITIZED INPUT', res.locals.sanitizedInput);
     if (res.locals.sanitizedInput.franchise === 0) {
       delete res.locals.sanitizedInput.franchise;
@@ -91,83 +75,22 @@ async function update(req: Request, res: Response) {
 }
 
 async function remove(req: Request, res: Response) {
-  try {
-    const game = await em.findOneOrFail(Game, { id: res.locals.id });
-    const gameRef = em.getReference(Game, res.locals.id);
-    await em.removeAndFlush(gameRef);
+    try {
+        const game = await em.findOneOrFail(Game, {id: res.locals.id})
+        const gameRef = em.getReference(Game, res.locals.id)
+        await em.removeAndFlush(gameRef)
 
-    res.json({ message: 'Game deleted successfully', data: game });
-  } catch (err) {
-    handleOrmError(res, err);
-  }
-}
-
-async function listReviews(req: Request, res: Response) {
-  try {
-    const game = await em.findOneOrFail(Game, { id: res.locals.id });
-    const reviews = await game.reviews.loadItems();
-    res.json({
-      message: `Listing ${game.reviews.count()} reviews for ${game.title}`,
-      data: reviews,
-    });
-  } catch (e) {
-    return handleOrmError(res, e);
-  }
-}
-
-async function createReview(req: Request, res: Response) {
-  // traer una referencia del gameId
-  let gameReference: Game;
-  try {
-    gameReference = await em.getReference(Game, res.locals.id);
-  } catch (err) {
-    return handleOrmError(res, err);
-  }
-  // Verificar que trae el auth header
-  if (!req.headers.authorization)
-    return res.status(401).json({ message: 'Gotta log in for that!' });
-  let token = req.headers.authorization;
-  // Tenemos que explicitar que el tokenData extraído es any porque si no TS se queja de que puede ser string o JwtPayload
-  // Pero sabemos por "regla de negocio" que en el payload viene un objeto con id...
-  // TODO: Debería explicitarse eso en el código con una interfaz but anyways
-  let tokenData: any;
-  try {
-    tokenData = await jwt.verify(token, API_SECRET);
-  } catch (e) {
-    return res.status(400).json({ message: 'Invalid session token' });
-  }
-
-  // extraer el user id del jwt y traer una *referencia* de la db
-  let userReference;
-  if (!('id' in tokenData)) {
-    return res.status(500).json({ message: 'Invalid session token' });
-  }
-  try {
-    userReference = em.getReference(User, tokenData.id);
-  } catch (e) {
-    return handleOrmError(res, e);
-  }
-
-  // crear la entidad review y cargarla a la db
-  let incoming = await validateNewReviewFromRequest(req.body);
-  if (!incoming.success)
-    return res.status(400).json({ message: 'Invalid input: ' + incoming.issues[0].message });
-  const review: any = { ...incoming.output };
-  review.author = userReference;
-  review.game = gameReference;
-
-  let loadedReview;
-  try {
-    loadedReview = em.create(Review, review);
-    await em.flush();
-  } catch (e) {
-    return handleOrmError(res, e);
-  }
-  res.status(201).json({ message: 'Review created!', data: loadedReview });
+        res.json({message: "Game deleted successfully", data: game})
+    }   catch(err) {
+        handleOrmError(res, err)
+    }
 }
 
 //middleware
 
+/**
+ * @deprecated in favor of Valibot
+ */
 function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   if (['PUT'].includes(req.method) && !hasParams(req.body, true))
     return res.status(400).json({ message: 'Must provide all attributes' });
@@ -211,11 +134,13 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
 
-  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
+    if (Number.isNaN(id))
+        return res.status(400).json({ message: "ID must be an integer" })
 
-  res.locals.id = id;
 
-  next();
+    res.locals.id = id
+
+    next();
 }
 
 function handleOrmError(res: Response, err: any) {
@@ -254,6 +179,4 @@ export {
   sanitizeInput,
   handleOrmError,
   validateExists,
-  createReview,
-  listReviews,
 };
