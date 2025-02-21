@@ -7,6 +7,7 @@ import {AuthError, getUserReferenceFromAuthHeader} from "../auth/auth.middleware
 import {Game} from "../game/game.entity.js";
 import {User} from "../user/user.entity.js";
 import {Tag} from "../tag/tag.entity.js";
+import {FilterQuery} from "@mikro-orm/core";
 
 // Mensajes
 const ERR_500 = "Oops! Something went wrong. This is our fault."
@@ -16,6 +17,7 @@ const em = orm.em
 
 //// *** CRUD *** ////
 
+/** @deprecated */
 async function findAll(req: Request, res: Response) {
   try {
     const reviews = await em.find(Review, {})
@@ -73,7 +75,8 @@ async function remove(req: Request, res: Response) {
 
 async function listReviews(req: Request, res: Response) {
   // Guardar los Parámetros de búsqueda
-  const pageNo = Number.parseInt(req.query['page']?.toString() ?? '0')
+  const pageNo =
+      Number.parseInt(req.query['page']?.toString() ?? '0')
   const showOnlyOwnedReviews = 'mine' in req.query
 
   // Relegar autenticación al middleware
@@ -90,25 +93,31 @@ async function listReviews(req: Request, res: Response) {
     }
   }
 
+  let criteria: FilterQuery<Review> = {}
+
   // traer una referencia del gameId
-  let gameReference: Game = em.getReference(Game, res.locals.id)
+  if (res.locals.id) {
+    let gameReference: Game = em.getReference(Game, res.locals.id)
+    criteria.game = gameReference
+  }
+  if (showOnlyOwnedReviews)
+    criteria.author = userRef
 
   let data: Review[] = [];
   try {
-    if (showOnlyOwnedReviews) {
-      data = await em.find(Review,
-          {game: gameReference, author: userRef})
-    }
-    else {
-      data = await em.find(Review,
-          {game: gameReference},
-          {limit: REVIEW_PAGE_SIZE, offset: pageNo*REVIEW_PAGE_SIZE})
-    }
+    data = await em.find(Review,
+      criteria,
+      {
+        limit: REVIEW_PAGE_SIZE,
+        offset: pageNo*REVIEW_PAGE_SIZE,
+        populate: ['author', 'game']
+      }
+    )
   } catch (e) {
     return handleOrmError(res, e)
   }
   res.json({
-    message: `Showing ${REVIEW_PAGE_SIZE} reviews (page ${pageNo})`,
+    message: `Showing ${data.length} reviews (page ${pageNo})`,
     data,
   })
 }
