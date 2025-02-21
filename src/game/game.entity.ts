@@ -55,6 +55,7 @@ export class Game extends BaseEntity {
   @ManyToMany(() => Shop, (shop) => shop.games, {
     cascade: [Cascade.ALL],
     owner: true,
+    lazy: true,
   })
   shops = new Collection<Shop>(this);
 
@@ -64,11 +65,10 @@ export class Game extends BaseEntity {
   @ManyToMany(() => Platform, (platform) => platform.games, {
     cascade: [Cascade.ALL],
     owner: true,
+    lazy:true,
   })
   platforms = new Collection<Platform>(this);
 
-    @OneToMany('Review', 'game')
-    reviews = new Collection<Review>(this)
-
-
+  @OneToMany('Review', 'game', { lazy: true })
+  reviews = new Collection<Review>(this)
 }
