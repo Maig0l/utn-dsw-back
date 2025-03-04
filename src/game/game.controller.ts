@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import { Game } from "./game.entity.js";
+import { validateGame, validateUpdateGame } from "./game.schema.js";
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import { orm } from "../shared/db/orm.js";
 

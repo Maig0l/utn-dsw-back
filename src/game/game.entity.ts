@@ -26,7 +26,7 @@ export class Game extends BaseEntity {
   //TODO ojo el limite de caracteres, nos estamos quedando cortos
 
   @Property({ nullable: true })
-  releaseDate!: Date; //debe usarse en formato date?
+  releaseDate!: string; //Mepa que es más facil enviar un string y que valibot haga lo suyo
 
   @Property({ nullable: true })
   portrait!: string;
