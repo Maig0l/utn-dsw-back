@@ -6,6 +6,8 @@ const TYPE = StudioType
 const ERR_URL = 'URL must be a valid URL'
 const ERR_TYPE = 'Type must be either "Developer", "Publisher, or "Both"'
 const ERR_URL_EMPTY = 'URL cannot be empty'
+const URL_START = ['http://', 'https://']
+const ERR_URL_START = `The url must start with http:// or https://`
 const URL_END = ['.com', '.net', '.org', '.io']
 const ERR_URL_END = `URL must end with ${Object.values(URL_END).join(', ')}`
 
@@ -24,6 +26,7 @@ const site = v.pipe(
     v.string(),
     v.nonEmpty(ERR_URL_EMPTY),
     v.url(ERR_URL),
+    v.custom((value: unknown) => typeof value === 'string' && URL_START.some((start) => value.startsWith(start)), ERR_URL_START),
     v.custom((value: unknown) => typeof value === 'string' && URL_END.some((end) => value.endsWith(end)), ERR_URL_END)
     )
 
