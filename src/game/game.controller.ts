@@ -6,13 +6,6 @@ import { orm } from "../shared/db/orm.js";
 
 const API_SECRET = process.env.apiSecret ?? ''
 
-// TODO: Lo de validParams lo tiene que reemplazar Valibot
-const validParams =
-  'title synopsis releaseDate portrait banner pictures tags studios shops platforms reviews'.split(
-    ' '
-  );
-const hasParams = paramCheckFromList(validParams);
-
 const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
@@ -89,47 +82,6 @@ async function remove(req: Request, res: Response) {
 
 //middleware
 
-/**
- * @deprecated in favor of Valibot
- */
-function sanitizeInput(req: Request, res: Response, next: NextFunction) {
-  if (['PUT'].includes(req.method) && !hasParams(req.body, true))
-    return res.status(400).json({ message: 'Must provide all attributes' });
-
-  if (['POST', 'PATCH'].includes(req.method) && !hasParams(req.body, false))
-    return res.status(400).json({ message: 'Must provide at least one valid attribute' });
-
-  res.locals.sanitizedInput = {
-    title: req.body.title,
-    synopsis: req.body.synopsis,
-    releaseDate: req.body.releaseDate,
-    portrait: req.body.portrait,
-    banner: req.body.banner,
-    //pictures: req.body.pictures,
-    tags: req.body.tags,
-    studios: req.body.studios,
-    shops: req.body.shops,
-    platforms: req.body.platforms,
-    reviews: req.body.reviews,
-    franchise: req.body.franchise,
-  };
-  const sanitizedInput = res.locals.sanitizedInput;
-
-  const urlRegex =
-    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
-  if (!urlRegex.test(req.body.site)) sanitizedInput.site = undefined;
-
-  if (!urlRegex.test(req.body.site)) sanitizedInput.site = undefined;
-
-  Object.keys(sanitizedInput).forEach((key) => {
-    if (sanitizedInput[key] === undefined) {
-      delete sanitizedInput[key];
-    }
-  });
-
-  next();
-}
-
 // santizacion del tipo
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
@@ -142,6 +94,28 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
     res.locals.id = id
 
     next();
+}
+
+async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
+  let incoming;
+  switch (req.method) {
+    case 'PATCH':
+      incoming = await validateUpdateGame(req.body);
+      break;
+    case 'POST':
+    default:
+      incoming = await validateGame(req.body);
+      break;
+  }
+
+  if (!incoming.success) {
+    console.log(incoming.issues[0]);
+    return res.status(400).json({ message: `: ${incoming.issues[0].message}` });
+  }
+  const Game = incoming.output;
+
+  res.locals.sanitizedInput = Game;
+  next();
 }
 
 function handleOrmError(res: Response, err: any) {
