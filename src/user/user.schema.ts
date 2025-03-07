@@ -68,10 +68,18 @@ const loginSchema = v.object({
   password: password
 })
 
-const schemaUser = v.object({
-  // TODO: hacer
+const ModificationSchema = v.object({
+  nick: nick,
+  email: email,
+  password: password,
+  profileImg: v.nullish(profileImg),
+  bioText: v.nullish(bioText),
+  linkedAccounts: v.nullish(linkedAccounts)
 })
 
-export const validateRegistration = v.safeParserAsync(registrationSchema)
+export const userModificationSchema = v.partial(ModificationSchema)
 
+export const validateRegistration = v.safeParserAsync(registrationSchema)
 export const validateLogin = v.safeParserAsync(loginSchema)
+export const validateUserModification = v.safeParserAsync(userModificationSchema)
+

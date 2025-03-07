@@ -3,7 +3,7 @@ import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import sanitizeHtml from 'sanitize-html'
 import { orm } from "../shared/db/orm.js";
 import { User } from "./user.entity.js";
-import { validateLogin, validateRegistration } from "./user.schema.js";
+import { validateLogin, validateRegistration, validateUserModification } from "./user.schema.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {UserAuthObject} from "../auth/userAuthObject.interface";
@@ -161,9 +161,14 @@ function handleOrmError(res: Response, err: any) {
   if (err.code) {
     switch (err.code) {
       case "ER_DUP_ENTRY":
+        if (err.message.includes("nick"))
+          res.status(400).json({message: ERR_USED_NICK})
+        else if (err.message.includes("email"))
+          res.status(400).json({message: ERR_USED_EMAIL})
+        else
+          res.status(400).json({message: `A user with those attributes already exists.`})
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        // TODO: Devolver un error dinámico que indique que el email o nick ya está usado, no cualquier atributo
-        res.status(400).json({message: `A user with those attributes already exists.`})
+        // TODO: Devolver un error dinámico que indique que el email o nick ya está usado, no cualquier atributo)
         break
       case "ER_DATA_TOO_LONG":
         res.status(400).json({message: `Data too long.`})
@@ -209,25 +214,15 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
 
 // Se ejecuta al crear o modificar un registro
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
-  res.locals.sanitizedInput = {
-    nick: req.body.nick,
-    email: req.body.email,
-    password: req.body.password,
-    profilePic: req.body.profilePic,
-    bioText: req.body.bioText,
-    likes: req.body.likes,
-    linkedAccounts: req.body.linkedAccounts,
-    createdPlaylists: req.body.createdPlaylists,
-    reviews: req.body.reviews,
-  }
-  const sanIn = res.locals.sanitizedInput
+  const incoming = await validateUserModification(req.body)
+  if (!incoming.success)
+    return res.status(400).json({message: incoming.issues[0].message})
+  const userModifications = incoming.output
 
-  // Se borran todos los códigos HTML que el usuario ingrese, dejándo sólo los
-  //   válidos para formatear un poco la bio
-  // TODO: El frontend debe admitir un editor de bbText o MD y transformar los
-  //   *, **, []() a HTML válido
-  if (sanIn.bio)
-    sanIn.bioText = sanitizeHtml(sanIn.bioText, {
+  res.locals.sanitizedInput = userModifications
+
+  if (userModifications.bioText)
+    userModifications.bioText = sanitizeHtml(userModifications.bioText, {
       allowedTags: ['b', 'i', 'em', 'strong', 'a'],
       allowedAttributes: {
         'a': ['href']
