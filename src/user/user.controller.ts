@@ -14,16 +14,10 @@ const PASSWD_SALT_ROUNDS = 10
 
 // Mensajes de error
 const ERR_500 = "Something went horribly wrong. Oops (this is our fault)"
-const ERR_PARAMS_CREATE = 'Must provide all attributes for creation for creation'
 const ERR_PARAMS_PATCH = 'Must provide at least one valid attribute to update'
 const ERR_PARAMS_MODIFY_PUT = 'Must update all attributes'
 const ERR_USED_NICK = 'Nickname already in use'
 const ERR_USED_EMAIL = 'Email address already in use'
-
-const REQ_PARAMS = "nick email password".split(' ')
-const VALID_PARAMS = "nick email password profilePic bio".split(' ')
-const hasCreationParams = paramCheckFromList(REQ_PARAMS)
-const hasAnyParams = paramCheckFromList(VALID_PARAMS)
 
 const em = orm.em
 
@@ -76,10 +70,10 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   // TODO: Tal vez pedir también la contraseña para cambiar atributos como el email o passwd
-  if (req.method === "PATCH" && !hasAnyParams(req.body, false))
+  if (req.method === "PATCH" && !validateUserModification(req.body))
     return res.status(400).json({message: ERR_PARAMS_PATCH})
 
-  if (req.method === "PUT" && !hasCreationParams(req.body, true))
+  if (req.method === "PUT" && !validateRegistration(req.body))
     return res.status(400).json({message: ERR_PARAMS_MODIFY_PUT})
 
   try {
