@@ -5,7 +5,7 @@ import { orm } from '../shared/db/orm.js';
 import { validatePlaylist } from './playlist.schema.js';
 import { User } from '../user/user.entity.js';
 
-const VALID_PARAMS = 'name description is_private'.split(' ');
+const VALID_PARAMS = 'name description isPrivate games'.split(' ');
 const hasParams = paramCheckFromList(VALID_PARAMS);
 
 const em = orm.em;
@@ -43,6 +43,8 @@ async function getPlaylistsByOwner(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   //validar con schema
   try {
+    console.log('BODY: ', req.body);
+    console.log('sanit: ', res.locals.sanitizedInput);
     const playlist = em.create(Playlist, req.body);
     await em.flush();
     res.status(201).json({ message: 'playlist created', data: playlist });
@@ -84,7 +86,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   res.locals.sanitizedInput = {
     name: req.body.name,
     description: req.body.description,
-    is_private: req.body.is_private,
+    isPrivate: req.body.isPrivate,
     owner: req.body.owner,
   };
 
