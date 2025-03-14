@@ -1,46 +1,53 @@
-import { Request, Response, NextFunction } from "express"
-import { Game } from "./game.entity.js";
-import { validateGame, validateUpdateGame } from "./game.schema.js";
-import { paramCheckFromList } from "../shared/paramCheckFromList.js";
-import { orm } from "../shared/db/orm.js";
+import { Request, Response, NextFunction } from 'express';
+import { Game } from './game.entity.js';
+import { validateGame, validateUpdateGame } from './game.schema.js';
+import { paramCheckFromList } from '../shared/paramCheckFromList.js';
+import { orm } from '../shared/db/orm.js';
 
-const API_SECRET = process.env.apiSecret ?? ''
+const API_SECRET = process.env.apiSecret ?? '';
 
 const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
-    try {
-        const games = await em.find(Game, {}, { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] })
-        res.json({ data: games })
-    } catch (err) {
-        handleOrmError(res, err)
-    }
+  try {
+    const games = await em.find(
+      Game,
+      {},
+      { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] }
+    );
+    res.json({ data: games });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
 }
 
 async function findOne(req: Request, res: Response) {
-    try {
-        const game = await em.findOneOrFail(Game, { id: res.locals.id }, { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] })
-        res.json({ data: game })
-    } catch (err) {
-        handleOrmError(res, err)
-    }
+  try {
+    const game = await em.findOneOrFail(
+      Game,
+      { id: res.locals.id },
+      { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] }
+    );
+    res.json({ data: game });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
 }
 
 async function findGamesByTitle(req: Request, res: Response) {
-    console.log(res.locals);
-    try {
-        const title = req.query.title as string;
-        const games = await em.find(Game, { title: { $like: `%${title}%` } });
-        res.json({ data: games });
-    } catch (err) {
-        console.error(err);
-        handleOrmError(res, err);
-    }
+  try {
+    const title = req.query.title as string;
+    const games = await em.find(Game, { title: { $like: `%${title}%` } });
+    res.json({ data: games });
+  } catch (err) {
+    console.error(err);
+    handleOrmError(res, err);
+  }
 }
 
 async function add(req: Request, res: Response) {
   try {
-      // TODO: Por qué hacemos esto?
+    // TODO: Por qué hacemos esto?
     console.log('SANITIZED INPUT', res.locals.sanitizedInput);
     if (res.locals.sanitizedInput.franchise === 0) {
       delete res.locals.sanitizedInput.franchise;
@@ -69,15 +76,15 @@ async function update(req: Request, res: Response) {
 }
 
 async function remove(req: Request, res: Response) {
-    try {
-        const game = await em.findOneOrFail(Game, {id: res.locals.id})
-        const gameRef = em.getReference(Game, res.locals.id)
-        await em.removeAndFlush(gameRef)
+  try {
+    const game = await em.findOneOrFail(Game, { id: res.locals.id });
+    const gameRef = em.getReference(Game, res.locals.id);
+    await em.removeAndFlush(gameRef);
 
-        res.json({message: "Game deleted successfully", data: game})
-    }   catch(err) {
-        handleOrmError(res, err)
-    }
+    res.json({ message: 'Game deleted successfully', data: game });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
 }
 
 //middleware
@@ -86,14 +93,9 @@ async function remove(req: Request, res: Response) {
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
-
-    if (Number.isNaN(id))
-        return res.status(400).json({ message: "ID must be an integer" })
-
-
-    res.locals.id = id
-
-    next();
+  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
+  res.locals.id = id;
+  next();
 }
 
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
