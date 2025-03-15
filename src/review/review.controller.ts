@@ -8,6 +8,7 @@ import {Game} from "../game/game.entity.js";
 import {User} from "../user/user.entity.js";
 import {Tag} from "../tag/tag.entity.js";
 import {FilterQuery} from "@mikro-orm/core";
+import { populate } from "dotenv";
 
 // Mensajes
 const ERR_500 = "Oops! Something went wrong. This is our fault."
@@ -20,7 +21,7 @@ const em = orm.em
 /** @deprecated */
 async function findAll(req: Request, res: Response) {
   try {
-    const reviews = await em.find(Review, {})
+    const reviews = await em.find(Review, {}, { populate: ['author', 'game'] })
     res.json({ data: reviews })
   } catch (e) {
     handleOrmError(res, e)
@@ -29,7 +30,7 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
-    const review = await em.findOneOrFail(Review, { id: res.locals.id })
+    const review = await em.findOneOrFail(Review, { id: res.locals.id }, { populate: ['author', 'game'] })
     res.json({ data: review })
   } catch (e) {
     handleOrmError(res, e)
