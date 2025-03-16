@@ -69,12 +69,17 @@ async function remove(req: Request, res: Response) {
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
-  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id))
+    return res.status(400).json({ message: 'ID must be an integer' });
   res.locals.id = id;
   next();
 }
 
-async function sanitizeTagInput(req: Request, res: Response, next: NextFunction) {
+async function sanitizeTagInput(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   let incoming;
   switch (req.method) {
     case 'PATCH':
@@ -101,7 +106,9 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case 'ER_DUP_ENTRY':
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        res.status(400).json({ message: `A tag with that name/site already exists.` });
+        res
+          .status(400)
+          .json({ message: `A tag with that name/site already exists.` });
         break;
       case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
@@ -110,15 +117,28 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res.status(404).json({ message: `tag not found for ID ${res.locals.id}` });
+        res
+          .status(404)
+          .json({ message: `tag not found for ID ${res.locals.id}` });
         break;
       default:
         console.error('\n--- ORM ERROR ---');
         console.error(err.message);
-        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
+        res
+          .status(500)
+          .json({ message: 'Oops! Something went wrong. This is our fault.' });
         break;
     }
   }
 }
 
-export { sanitizeTagInput, findTagsByName, findAll, findOne, add, update, remove, validateExists };
+export {
+  sanitizeTagInput,
+  findTagsByName,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  validateExists,
+};
