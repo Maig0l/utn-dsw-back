@@ -34,20 +34,20 @@ async function getPlaylistsByOwner(req: Request, res: Response) {
     const owner_id = Number.parseInt(req.query.owner as string);
     const owner: User = await em.findOneOrFail(User, { id: owner_id });
     const playlists = await em.find(Playlist, { owner: owner });
-    res.status(200).json({ message: 'found playlists by owner', data: playlists });
+    res
+      .status(200)
+      .json({ message: 'found playlists by owner', data: playlists });
   } catch (err) {
     handleOrmError(res, err);
   }
 }
 
 async function add(req: Request, res: Response) {
-  //validar con schema
+  //TODO validar con schema
   try {
-    console.log('BODY: ', req.body);
-    console.log('sanit: ', res.locals.sanitizedInput);
-    const playlist = em.create(Playlist, req.body);
+    const playlist = em.create(Playlist, res.locals.sanitizedInput);
     await em.flush();
-    res.status(201).json({ message: 'playlist created', data: playlist });
+    res.status(201).json(playlist);
   } catch (err) {
     handleOrmError(res, err);
   }
@@ -81,20 +81,25 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json({ message: 'Must provide all attributes' });
 
   if ('PATCH' == req.method && !hasParams(req.body, false))
-    return res.status(400).json({ message: 'Must provide at least one valid attribute' });
+    return res
+      .status(400)
+      .json({ message: 'Must provide at least one valid attribute' });
 
   res.locals.sanitizedInput = {
     name: req.body.name,
     description: req.body.description,
     isPrivate: req.body.isPrivate,
     owner: req.body.owner,
+    games: req.body.games,
   };
 
   // https://stackoverflow.com/a/3809435
   const urlRegex =
     /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
   if (req.body.site && !urlRegex.test(req.body.site))
-    return res.status(400).json({ message: 'Invalid Site attribute (Should be a URL)' });
+    return res
+      .status(400)
+      .json({ message: 'Invalid Site attribute (Should be a URL)' });
 
   // TODO: Revisar que no haya sanitización silenciosa
   Object.keys(res.locals.sanitizedInput).forEach((k) => {
@@ -109,7 +114,8 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = Number.parseInt(req.params.id);
 
-  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id))
+    return res.status(400).json({ message: 'ID must be an integer' });
 
   res.locals.id = id;
 
@@ -121,7 +127,9 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case 'ER_DUP_ENTRY':
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        res.status(400).json({ message: `A shop with that name/site already exists.` });
+        res
+          .status(400)
+          .json({ message: `A shop with that name/site already exists.` });
         break;
       case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
@@ -130,12 +138,16 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res.status(404).json({ message: `Shop not found for ID ${res.locals.id}` });
+        res
+          .status(404)
+          .json({ message: `Shop not found for ID ${res.locals.id}` });
         break;
       default:
         console.error('\n--- ORM ERROR ---');
         console.error(err.message);
-        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
+        res
+          .status(500)
+          .json({ message: 'Oops! Something went wrong. This is our fault.' });
         break;
     }
   }
