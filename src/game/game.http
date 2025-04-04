@@ -5,6 +5,8 @@ GET http://localhost:8080/api/games/
 GET http://localhost:8080/api/games/15
 
 
+http://localhost:8080/api/games/search?title=fa
+
 ### crear un nuevo tag
 POST http://localhost:8080/api/games
 Content-Type: application/json
@@ -18,7 +20,7 @@ Content-Type: application/json
     "pictures": {
         "url": "https://en.wikipedia.org/wiki/File:Fallout.jpg"
     },
-    "tags" : []
+    "tags" : [0,1,5,4,8]
 
 }
 
@@ -40,7 +42,7 @@ PATCH http://localhost:8080/api/games/15
 Content-Type: application/json
 
 {
-  "tags" : [6]
+  "tags" : [6,5]
 }
 
 ###

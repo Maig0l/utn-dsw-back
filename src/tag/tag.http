@@ -15,6 +15,10 @@ Content-Type: application/json
   
 }
 
+
+http://localhost:8080/api/tags/search?name=fan
+
+
 ### crear un nuevo studio
 POST http://localhost:8080/api/studios
 Content-Type: application/json

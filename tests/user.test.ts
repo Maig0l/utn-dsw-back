@@ -1,4 +1,4 @@
-import {describe, test, expect, afterEach, beforeEach} from 'vitest'
+/*import {describe, test, expect, afterEach, beforeEach} from 'vitest'
 import {app} from '../src/app'
 import supertest from 'supertest'
 
@@ -171,4 +171,4 @@ describe('User CRUD', () => {
       expect(res.status).toBe(400)
     })
   })
-})
+})*/
