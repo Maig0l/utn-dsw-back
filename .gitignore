@@ -4,3 +4,4 @@ src/restart.ts
 .env
 .vscode/settings.json
 utn-dsw-back-db.session.sql
+uploads

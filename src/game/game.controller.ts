@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
-import { Game } from './game.entity.js';
-import { validateGame, validateUpdateGame } from './game.schema.js';
-import { paramCheckFromList } from '../shared/paramCheckFromList.js';
-import { orm } from '../shared/db/orm.js';
+import { Request, Response, NextFunction } from "express";
+import { Game } from "./game.entity.js";
+import { validateGame, validateUpdateGame } from "./game.schema.js";
+import { paramCheckFromList } from "../shared/paramCheckFromList.js";
+import { orm } from "../shared/db/orm.js";
 
-const API_SECRET = process.env.apiSecret ?? '';
+const API_SECRET = process.env.apiSecret ?? "";
 
 const em = orm.em;
 
@@ -13,7 +13,17 @@ async function findAll(req: Request, res: Response) {
     const games = await em.find(
       Game,
       {},
-      { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] }
+      {
+        populate: [
+          "tags",
+          "shops",
+          "platforms",
+          "studios",
+          "reviews",
+          "franchise",
+          "pictures",
+        ],
+      }
     );
     res.json({ data: games });
   } catch (err) {
@@ -26,7 +36,17 @@ async function findOne(req: Request, res: Response) {
     const game = await em.findOneOrFail(
       Game,
       { id: res.locals.id },
-      { populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'] }
+      {
+        populate: [
+          "tags",
+          "shops",
+          "platforms",
+          "studios",
+          "reviews",
+          "franchise",
+          "pictures",
+        ],
+      }
     );
     res.json({ data: game });
   } catch (err) {
@@ -48,7 +68,7 @@ async function findGamesByTitle(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   try {
     // TODO: Por qué hacemos esto?
-    console.log('SANITIZED INPUT', res.locals.sanitizedInput);
+    console.log("SANITIZED INPUT", res.locals.sanitizedInput);
     if (res.locals.sanitizedInput.franchise === 0) {
       delete res.locals.sanitizedInput.franchise;
     }
@@ -62,18 +82,54 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
-    console.log('SANITIZED INPUT', res.locals.sanitizedInput);
+    console.log("SANITIZED INPUT", res.locals.sanitizedInput);
     if (res.locals.sanitizedInput.franchise === 0) {
       delete res.locals.sanitizedInput.franchise;
     }
     const game = await em.findOneOrFail(Game, { id: res.locals.id });
     em.assign(game, res.locals.sanitizedInput);
     await em.flush();
-    res.json({ message: 'Game updated', data: game });
+    res.json({ message: "Game updated", data: game });
   } catch (err) {
     handleOrmError(res, err);
   }
 }
+
+async function uploadPortrait(req: Request, res: Response) {
+  const gameId = Number(req.params.id);
+  const portrait = req.file?.filename;
+
+  if (!portrait) {
+    return res.status(400).json({ message: "No se subió ninguna imagen" });
+  }
+
+  const game = await orm.em.findOne(Game, { id: gameId });
+  if (!game) return res.status(404).json({ message: "Juego no encontrado" });
+
+  game.portrait = `/uploads/${portrait}`;
+  await orm.em.flush();
+
+  res.status(200).json({ message: "Portrait subido", portrait: game.portrait });
+}
+
+async function uploadBanner(req: Request, res: Response) {
+  const gameId = Number(req.params.id);
+  const banner = req.file?.filename;
+
+  if (!banner) {
+    return res.status(400).json({ message: "No se subió ninguna imagen" });
+  }
+
+  const game = await orm.em.findOne(Game, { id: gameId });
+  if (!game) return res.status(404).json({ message: "Juego no encontrado" });
+
+  game.banner = `/uploads/${banner}`;
+  await orm.em.flush();
+
+  res.status(200).json({ message: "Banner subido", banner: game.banner });
+}
+
+// Podria ser 1 funcion que se bifurque, pero no me funcaba (?)
 
 async function remove(req: Request, res: Response) {
   try {
@@ -81,7 +137,7 @@ async function remove(req: Request, res: Response) {
     const gameRef = em.getReference(Game, res.locals.id);
     await em.removeAndFlush(gameRef);
 
-    res.json({ message: 'Game deleted successfully', data: game });
+    res.json({ message: "Game deleted successfully", data: game });
   } catch (err) {
     handleOrmError(res, err);
   }
@@ -93,7 +149,8 @@ async function remove(req: Request, res: Response) {
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
-  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id))
+    return res.status(400).json({ message: "ID must be an integer" });
   res.locals.id = id;
   next();
 }
@@ -101,10 +158,10 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   let incoming;
   switch (req.method) {
-    case 'PATCH':
+    case "PATCH":
       incoming = await validateUpdateGame(req.body);
       break;
-    case 'POST':
+    case "POST":
     default:
       incoming = await validateGame(req.body);
       break;
@@ -121,26 +178,32 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 }
 
 function handleOrmError(res: Response, err: any) {
-  console.error('\n--- ORM ERROR ---');
+  console.error("\n--- ORM ERROR ---");
   console.error(err.message);
 
   if (err.code) {
     switch (err.code) {
-      case 'ER_DUP_ENTRY':
+      case "ER_DUP_ENTRY":
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        res.status(400).json({ message: `A game with that name/site already exists.` });
+        res
+          .status(400)
+          .json({ message: `A game with that name/site already exists.` });
         break;
-      case 'ER_DATA_TOO_LONG':
+      case "ER_DATA_TOO_LONG":
         res.status(400).json({ message: `Data too long.` });
         break;
     }
   } else {
     switch (err.name) {
-      case 'NotFoundError':
-        res.status(404).json({ message: `game not found for ID ${res.locals.id}` });
+      case "NotFoundError":
+        res
+          .status(404)
+          .json({ message: `game not found for ID ${res.locals.id}` });
         break;
       default:
-        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
+        res
+          .status(500)
+          .json({ message: "Oops! Something went wrong. This is our fault." });
         break;
     }
   }
@@ -156,4 +219,6 @@ export {
   sanitizeInput,
   handleOrmError,
   validateExists,
+  uploadPortrait,
+  uploadBanner,
 };
