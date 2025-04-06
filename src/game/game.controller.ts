@@ -72,6 +72,22 @@ async function add(req: Request, res: Response) {
     if (res.locals.sanitizedInput.franchise === 0) {
       delete res.locals.sanitizedInput.franchise;
     }
+
+    const input = res.locals.sanitizedInput;
+
+    const files = req.files as {
+      portrait?: Express.Multer.File[];
+      banner?: Express.Multer.File[];
+    };
+
+    if (files.portrait?.[0]) {
+      input.portrait = "/uploads/" + files.portrait[0].filename;
+    }
+
+    if (files.banner?.[0]) {
+      input.banner = "/uploads/" + files.banner[0].filename;
+    }
+
     const game = em.create(Game, res.locals.sanitizedInput);
     await em.flush();
     res.status(201).json(game);
