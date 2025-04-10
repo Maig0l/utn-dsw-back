@@ -101,7 +101,7 @@ async function update(req: Request, res: Response) {
     profile_img?: Express.Multer.File[];
   };
 
-  if (image.profile_img?.[0]) {
+  if (image?.profile_img?.[0]) {
     input.profile_img = "/uploads/" + image.profile_img[0].filename;
   }
 

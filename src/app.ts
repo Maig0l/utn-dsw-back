@@ -35,6 +35,7 @@ app.use((req, res, next) => {
 
 // Registrar routers para entidades
 app.use("/api/users", userRouter);
+app.use("/api/users/:id(\\d+)/uploads", express.static("uploads")); // TODO: Cambiar a un bucket de S3 o similar
 app.use("/api/shops", shopRouter);
 app.use("/api/studios", studioRouter);
 app.use("/api/franchises", franchiseRouter);

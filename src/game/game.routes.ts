@@ -20,10 +20,10 @@ gameRouter.get("/search", findGamesByTitle); //create middleware?
 gameRouter.get("/", findAll);
 gameRouter.post(
   "/",
-  upload.fields([
-    { name: "portrait", maxCount: 1 },
-    { name: "banner", maxCount: 1 },
-  ]),
+  //upload.fields([
+  //  { name: "portrait", maxCount: 1 },
+  //  { name: "banner", maxCount: 1 },
+  //]),
   sanitizeInput,
   add
 );
