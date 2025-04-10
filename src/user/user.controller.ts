@@ -94,18 +94,49 @@ async function update(req: Request, res: Response) {
   if (req.method === "PUT" && !validateRegistration(req.body))
     return res.status(400).json({ message: ERR_PARAMS_MODIFY_PUT });
 
+  const input = res.locals.sanitizedInput;
+  // Esto va acá?
+  // Esto deberia ir en el patch
+  const image = req.files as {
+    profile_img?: Express.Multer.File[];
+  };
+
+  if (image.profile_img?.[0]) {
+    input.profile_img = "/uploads/" + image.profile_img[0].filename;
+  }
+
   try {
     // TODO: Qué pasa si en el input viene para cambiar el id?
     // Debería sacarlo la sanitización?
 
     const user = await em.findOneOrFail(User, { id: res.locals.id });
     em.assign(user, res.locals.sanitizedInput);
+
     await em.flush();
 
     res.json({ message: "User updated", data: user });
   } catch (e) {
     handleOrmError(res, e);
   }
+}
+
+async function uploadImg(req: Request, res: Response) {
+  const userId = Number(req.params.id); // Aca deberia el token (Creo)
+  const profile_img = req.file?.filename;
+
+  if (!profile_img) {
+    return res.status(400).json({ message: "No picture uploaded" });
+  }
+
+  const user = await orm.em.findOne(User, { id: userId });
+  if (!user) return res.status(404).json({ message: "User not finded" });
+
+  user.profile_img = `/uploads/${profile_img}`;
+  await orm.em.flush();
+
+  res
+    .status(200)
+    .json({ message: "Profile pic uploaded", profile_img: user.profile_img });
 }
 
 async function remove(req: Request, res: Response) {
@@ -261,4 +292,5 @@ export {
   validateExists,
   sanitizeInput,
   login,
+  uploadImg,
 };

@@ -42,7 +42,7 @@ const password = v.pipe(
     ERR_BAD_PASS
   )
 );
-const profileImg = v.string();
+const profile_img = v.string();
 const bioText = v.string();
 const linkedAccounts = v.array(v.string());
 const likedTags = v.array(v.pipe(v.number(), v.integer()));
@@ -51,7 +51,7 @@ const registrationSchema = v.object({
   nick: nick,
   email: email,
   password: password,
-  profileImg: v.nullish(profileImg),
+  profileImg: v.nullish(profile_img),
 });
 
 const loginSchema = v.object({
@@ -63,7 +63,7 @@ const ModificationSchema = v.object({
   nick: nick,
   email: email,
   password: password,
-  profile_img: v.nullish(profileImg),
+  profile_img: v.nullish(profile_img),
   bio_text: v.nullish(bioText),
   linked_accounts: v.nullish(linkedAccounts),
   likedTags: v.nullish(likedTags),
