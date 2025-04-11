@@ -1,4 +1,4 @@
-import * as v from 'valibot';
+import * as v from "valibot";
 
 const [GAME_TITLE_MIN, GAME_TITLE_MAX] = [1, 180];
 const [GAME_SYN_MIN, GAME_SYN_MAX] = [10, 512];
@@ -8,8 +8,8 @@ const ERR_GAME_SYN_MIN = `The game synopsis need at least ${GAME_SYN_MIN} charac
 const ERR_GAME_SYN_MAX = `The game synopsis is too long, try to be more concise`;
 const ERR_DATE = `The date must be in a valid format`;
 const ERR_URL = `The url is not valid`;
-const URL_END = ['.png', '.jpg', 'jpeg', 'webp'];
-const ERR_URL_END = `URL must end with ${Object.values(URL_END).join(', ')}`;
+const URL_END = [".png", ".jpg", "jpeg", "webp"];
+const ERR_URL_END = `URL must end with ${Object.values(URL_END).join(", ")}`;
 
 const gameName = v.pipe(
   v.string(),
@@ -27,29 +27,29 @@ const gameReleaseDate = v.pipe(v.string(), v.isoDate(ERR_DATE));
 
 const gamePortrait = v.pipe(
   v.string(),
-  v.url(ERR_URL),
-  v.custom(
+  v.url(ERR_URL)
+  /* v.custom(
     (value: unknown) => typeof value === 'string' && URL_END.some((end) => value.endsWith(end)),
     ERR_URL_END
   ) // Las validaciones de momento las realizamos asi
-  // Cuando se implemente multer, capaz las cosas sean distintas
+  // Cuando se implemente multer, capaz las cosas sean distintas*/
 );
 
 const gameBanner = v.pipe(
   v.string(),
-  v.url(ERR_URL),
-  v.custom(
+  v.url(ERR_URL)
+  /*  v.custom(
     (value: unknown) => typeof value === 'string' && URL_END.some((end) => value.endsWith(end)),
     ERR_URL_END
-  )
+  )*/
 );
 
 export const gameSchema = v.object({
   title: gameName,
   synopsis: v.optional(gameSynopsis),
   releaseDate: v.optional(gameReleaseDate),
-  portrait: v.optional(gamePortrait),
-  banner: v.optional(gameBanner),
+  portrait: v.optional(v.string()),
+  banner: v.optional(v.string()),
   franchise: v.optional(v.number()),
   tags: v.optional(v.array(v.number())),
   shops: v.optional(v.array(v.number())),
