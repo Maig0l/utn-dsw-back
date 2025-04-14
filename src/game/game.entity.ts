@@ -34,6 +34,9 @@ export class Game extends BaseEntity {
   @Property({ nullable: true })
   banner!: string;
 
+  @Property({ nullable: true })
+  carrousel!: string[];
+
   @OneToMany("GamePicture", "game", {
     cascade: [Cascade.ALL],
     nullable: true,

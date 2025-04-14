@@ -35,14 +35,15 @@ app.use((req, res, next) => {
 
 // Registrar routers para entidades
 app.use("/api/users", userRouter);
-app.use("/api/users/:id(\\d+)/uploads", express.static("uploads")); // TODO: Cambiar a un bucket de S3 o similar
+app.use("/api/users/:id(\\d+)/uploads", express.static("uploads"));
 app.use("/api/shops", shopRouter);
 app.use("/api/studios", studioRouter);
 app.use("/api/franchises", franchiseRouter);
 app.use("/api/platforms", platformRouter);
 app.use("/api/tags", tagRouter);
 app.use("/api/games", gameRouter);
-app.use("/api/games/:id(\\d+)/uploads", express.static("uploads")); // TODO: Cambiar a un bucket de S3 o similar
+app.use("/api/games/:id(\\d+)/uploads", express.static("uploads"));
+//app.use("/api/games/:id(\\d+)/carrousel", express.static("uploads"));
 app.use("/api/playlists", playlistRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/game-picture", gamePictureRouter);

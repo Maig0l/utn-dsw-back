@@ -21,7 +21,7 @@ async function findAll(req: Request, res: Response) {
           "studios",
           "reviews",
           "franchise",
-          "pictures",
+          "carrousel",
         ],
       }
     );
@@ -44,7 +44,7 @@ async function findOne(req: Request, res: Response) {
           "studios",
           "reviews",
           "franchise",
-          "pictures",
+          "carrousel",
         ],
       }
     );
@@ -78,6 +78,7 @@ async function add(req: Request, res: Response) {
     const files = req.files as {
       portrait?: Express.Multer.File[];
       banner?: Express.Multer.File[];
+      carrousel?: Express.Multer.File[];
     };
 
     if (files.portrait?.[0]) {
@@ -86,6 +87,12 @@ async function add(req: Request, res: Response) {
 
     if (files.banner?.[0]) {
       input.banner = "/uploads/" + files.banner[0].filename;
+    }
+
+    if (files.carrousel) {
+      input.carrousel = files.carrousel.map(
+        (file) => "/uploads/" + file.filename
+      );
     }
 
     const game = em.create(Game, res.locals.sanitizedInput);
@@ -143,6 +150,22 @@ async function uploadBanner(req: Request, res: Response) {
   await orm.em.flush();
 
   res.status(200).json({ message: "Banner subido", banner: game.banner });
+}
+
+async function uploadCarrousel(req: Request, res: Response) {
+  const gameId = Number(req.params.id);
+  const carrousel = req.files as Express.Multer.File[];
+  const carrouselUrls = carrousel.map((file) => `/uploads/${file.filename}`);
+  if (carrousel.length === 0) {
+    return res.status(400).json({ message: "No se subió ninguna imagen" });
+  }
+  const game = await orm.em.findOne(Game, { id: gameId });
+  if (!game) return res.status(404).json({ message: "Juego no encontrado" });
+  game.carrousel = carrouselUrls;
+  await orm.em.flush();
+  res
+    .status(200)
+    .json({ message: "carrousel subidos", carrousel: game.carrousel });
 }
 
 // Podria ser 1 funcion que se bifurque, pero no me funcaba (?)
@@ -237,4 +260,5 @@ export {
   validateExists,
   uploadPortrait,
   uploadBanner,
+  uploadCarrousel,
 };

@@ -44,12 +44,16 @@ const gameBanner = v.pipe(
   )*/
 );
 
+const gamePictures = v.pipe(v.array(v.string()), v.maxLength(10));
+//Por ahora lo dejo asi
+
 export const gameSchema = v.object({
   title: gameName,
   synopsis: v.optional(gameSynopsis),
   releaseDate: v.optional(gameReleaseDate),
   portrait: v.optional(v.string()),
   banner: v.optional(v.string()),
+  carrousel: v.optional(gamePictures),
   franchise: v.optional(v.number()),
   tags: v.optional(v.array(v.number())),
   shops: v.optional(v.array(v.number())),

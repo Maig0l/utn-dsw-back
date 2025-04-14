@@ -10,6 +10,7 @@ import {
   findGamesByTitle,
   uploadPortrait,
   uploadBanner,
+  uploadCarrousel,
 } from "./game.controller.js";
 import { listReviews, createReview } from "../review/review.controller.js";
 import { upload } from "../shared/multer.js";
@@ -49,4 +50,14 @@ gameRouter.patch(
   validateExists,
   upload.single("banner"),
   uploadBanner
+);
+
+gameRouter.patch(
+  "/:id(\\d+)/uploads/carrousel",
+  validateExists,
+  upload.array("carrousel", 10),
+  (req: Request, res: Response, next: NextFunction) => {
+    res.status(200).json({ message: "ok" });
+  },
+  uploadCarrousel
 );
