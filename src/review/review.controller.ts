@@ -47,7 +47,13 @@ async function findOne(req: Request, res: Response) {
  */
 async function add(req: Request, res: Response) {
   try {
-    const review = await em.create(Review, res.locals.newReview);
+    console.log('body', req.body);
+    console.log('SANITIZED INPUT', res.locals.newReview);
+    // TODO newReview doen't contain author and gameId
+    const review = await em.create(Review, req.body);
+    // update the game's cumulative rating and review count
+    // TODO move to final version of createReview
+    await updateRating(req.body.game, req.body.score, em);
     await em.flush();
 
     res.status(201).json({ message: 'Review created successfully', data: review });
@@ -159,11 +165,6 @@ async function createReview(req: Request, res: Response) {
   let loadedReview;
   try {
     loadedReview = em.create(Review, review);
-    // update the game's cumulative rating and review count
-    // this if is always true if it made it to this point
-    if (gameReference.id) {
-      await updateRating(gameReference.id, reviewInput.score, em);
-    }
     await em.flush();
     res.status(201).json({ message: 'Review created!', data: loadedReview });
   } catch (e) {
