@@ -6,15 +6,15 @@ import {
   Collection,
   ManyToOne,
   OneToMany,
-} from "@mikro-orm/core";
-import { BaseEntity } from "../shared/db/baseEntity.entity.js";
-import { Studio } from "../studio/studio.entity.js";
-import { Shop } from "../shop/shop.entity.js";
-import { Platform } from "../platform/platform.entity.js";
-import { Franchise } from "../franchise/franchise.entity.js";
-import { Tag } from "../tag/tag.entity.js";
-import { Review } from "../review/review.entity.js";
-import { GamePicture } from "../game-picture/game-picture.entity.js";
+} from '@mikro-orm/core';
+import { BaseEntity } from '../shared/db/baseEntity.entity.js';
+import { Studio } from '../studio/studio.entity.js';
+import { Shop } from '../shop/shop.entity.js';
+import { Platform } from '../platform/platform.entity.js';
+import { Franchise } from '../franchise/franchise.entity.js';
+import { Tag } from '../tag/tag.entity.js';
+import { Review } from '../review/review.entity.js';
+import { GamePicture } from '../game-picture/game-picture.entity.js';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -34,7 +34,15 @@ export class Game extends BaseEntity {
   @Property({ nullable: true })
   banner!: string;
 
-  @OneToMany("GamePicture", "game", {
+  // total rating of the game, calculated as the sum of all ratings
+  @Property({ default: 0 })
+  cumulativeRating!: number;
+
+  // number of reviews that contributed to the cumulative rating
+  @Property({ default: 0 })
+  reviewCount!: number;
+
+  @OneToMany('GamePicture', 'game', {
     cascade: [Cascade.ALL],
     nullable: true,
   })
@@ -69,6 +77,6 @@ export class Game extends BaseEntity {
   })
   platforms = new Collection<Platform>(this);
 
-  @OneToMany("Review", "game", { lazy: true })
+  @OneToMany('Review', 'game', { lazy: true })
   reviews = new Collection<Review>(this);
 }

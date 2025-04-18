@@ -1,4 +1,4 @@
-import * as v from "valibot";
+import * as v from 'valibot';
 
 const [GAME_TITLE_MIN, GAME_TITLE_MAX] = [1, 180];
 const [GAME_SYN_MIN, GAME_SYN_MAX] = [10, 512];
@@ -8,8 +8,8 @@ const ERR_GAME_SYN_MIN = `The game synopsis need at least ${GAME_SYN_MIN} charac
 const ERR_GAME_SYN_MAX = `The game synopsis is too long, try to be more concise`;
 const ERR_DATE = `The date must be in a valid format`;
 const ERR_URL = `The url is not valid`;
-const URL_END = [".png", ".jpg", "jpeg", "webp"];
-const ERR_URL_END = `URL must end with ${Object.values(URL_END).join(", ")}`;
+const URL_END = ['.png', '.jpg', 'jpeg', 'webp'];
+const ERR_URL_END = `URL must end with ${Object.values(URL_END).join(', ')}`;
 
 const gameName = v.pipe(
   v.string(),
@@ -50,6 +50,8 @@ export const gameSchema = v.object({
   releaseDate: v.optional(gameReleaseDate),
   portrait: v.optional(v.string()),
   banner: v.optional(v.string()),
+  // do NOT include these in the schema, they are calculated fields
+  // cumulativeRating: v.number(), reviewCount: v.number(),
   franchise: v.optional(v.number()),
   tags: v.optional(v.array(v.number())),
   shops: v.optional(v.array(v.number())),

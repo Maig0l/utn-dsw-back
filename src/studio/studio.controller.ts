@@ -37,9 +37,7 @@ async function add(req: Request, res: Response) {
   try {
     const studio = em.create(Studio, res.locals.sanitizedInput);
     await em.flush();
-    res
-      .status(201)
-      .json({ message: 'Studio created successfully', data: studio });
+    res.status(201).json({ message: 'Studio created successfully', data: studio });
   } catch (err) {
     handleOrmError(res, err);
   }
@@ -72,8 +70,7 @@ async function remove(req: Request, res: Response) {
 
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   const incoming = await validateNewStudio(req.body);
-  if (!incoming.success)
-    return res.status(400).json({ message: incoming.issues[0].message });
+  if (!incoming.success) return res.status(400).json({ message: incoming.issues[0].message });
   const newStudio = incoming.output;
 
   res.locals.sanitizedInput = newStudio;
@@ -81,14 +78,9 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-async function sanitizePartialInput(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+async function sanitizePartialInput(req: Request, res: Response, next: NextFunction) {
   const incoming = await validateUpdateStudio(req.body);
-  if (!incoming.success)
-    return res.status(400).json({ message: incoming.issues[0].message });
+  if (!incoming.success) return res.status(400).json({ message: incoming.issues[0].message });
   const newStudio = incoming.output;
 
   res.locals.sanitizedInput = newStudio;
@@ -101,8 +93,7 @@ async function sanitizePartialInput(
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
 
-  if (Number.isNaN(id))
-    return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
 
   res.locals.id = id;
 
@@ -114,9 +105,7 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case 'ER_DUP_ENTRY':
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        res
-          .status(400)
-          .json({ message: `A studio with that name/site already exists.` });
+        res.status(400).json({ message: `A studio with that name/site already exists.` });
         break;
       case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
@@ -125,16 +114,12 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res
-          .status(404)
-          .json({ message: `Studio not found for ID ${res.locals.id}` });
+        res.status(404).json({ message: `Studio not found for ID ${res.locals.id}` });
         break;
       default:
         console.error('\n--- ORM ERROR ---');
         console.error(err.message);
-        res
-          .status(500)
-          .json({ message: 'Oops! Something went wrong. This is our fault.' });
+        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
         break;
     }
   }
