@@ -7,11 +7,11 @@ import {
   Cascade,
   Entity,
   DecimalType,
-} from '@mikro-orm/core';
-import { BaseEntity } from '../shared/db/baseEntity.entity.js';
-import { Game } from '../game/game.entity.js';
-import { Tag } from '../tag/tag.entity.js';
-import { User } from '../user/user.entity.js';
+} from "@mikro-orm/core";
+import { BaseEntity } from "../shared/db/baseEntity.entity.js";
+import { Game } from "../game/game.entity.js";
+import { Tag } from "../tag/tag.entity.js";
+import { User } from "../user/user.entity.js";
 
 @Entity()
 export class Review extends BaseEntity {
@@ -33,6 +33,6 @@ export class Review extends BaseEntity {
   @Property({ nullable: true })
   body!: string;
 
-  @ManyToMany('Tag', undefined, { nullable: true })
+  @ManyToMany("Tag", undefined, { nullable: true })
   suggestedTags = new Collection<Tag>(this);
 }

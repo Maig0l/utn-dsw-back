@@ -12,16 +12,21 @@ POST http://localhost:8080/api/games
 Content-Type: application/json
 
 {
-    "title": "Fallout 79",
-    "synopsis": "Apocalipsis",
-    "releaseDate": "2020-09-06T00:00:00.000Z",
-    "portrait": "https://en.wikipedia.org/wiki/File:Fallout.jpg",
-    "banner": "https://en.wikipedia.org/wiki/File:Fallout.jpg",
-    "pictures": {
-        "url": "https://en.wikipedia.org/wiki/File:Fallout.jpg"
-    },
-    "tags" : [0,1,5,4,8]
-
+  "title": "Fallout 79",
+  "synopsis": "Apocalipsis",
+  "releaseDate": "2020-09-06T00:00:00.000Z",
+  "portrait": "https://en.wikipedia.org/wiki/File:Fallout.jpg",
+  "banner": "https://en.wikipedia.org/wiki/File:Fallout.jpg",
+  "pictures": {
+    "url": "https://en.wikipedia.org/wiki/File:Fallout.jpg"
+  },
+  "tags": [
+    0,
+    1,
+    5,
+    4,
+    8
+  ]
 }
 
 ### borrar un tag
@@ -34,7 +39,6 @@ Content-Type: application/json
 {
   "name": "Studio Skibidi",
   "description": "Cosos"
- 
 }
 
 ###
@@ -42,7 +46,10 @@ PATCH http://localhost:8080/api/games/15
 Content-Type: application/json
 
 {
-  "tags" : [6,5]
+  "tags": [
+    6,
+    5
+  ]
 }
 
 ###

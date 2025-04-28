@@ -24,7 +24,7 @@ const nick = v.pipe(
   v.maxLength(NICK_LEN_MAX, ERR_NICK_LEN),
   v.regex(/^[^.].*[^.]$/, ERR_NICK_DOTS),
   v.regex(/^(?!.*\.\.).*$/, ERR_NICK_DOTDOT),
-  v.regex(/^[\w\.]+$/, ERR_BAD_NICK)
+  v.regex(/^[\w\.]+$/, ERR_BAD_NICK),
 );
 
 const email = v.pipe(v.string(), v.email(ERR_BAD_EMAIL));
@@ -39,8 +39,8 @@ const password = v.pipe(
   v.string(),
   v.regex(
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,50}$/,
-    ERR_BAD_PASS
-  )
+    ERR_BAD_PASS,
+  ),
 );
 const profile_img = v.string();
 const bioText = v.string();
@@ -74,5 +74,5 @@ export const userModificationSchema = v.partial(ModificationSchema);
 export const validateRegistration = v.safeParserAsync(registrationSchema);
 export const validateLogin = v.safeParserAsync(loginSchema);
 export const validateUserModification = v.safeParserAsync(
-  userModificationSchema
+  userModificationSchema,
 );

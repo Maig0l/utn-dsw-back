@@ -14,34 +14,34 @@ const ERR_URL_END = `URL must end with ${Object.values(URL_END).join(", ")}`;
 const gameName = v.pipe(
   v.string(),
   v.minLength(GAME_TITLE_MIN, ERR_GAME_TITLE_MIN),
-  v.maxLength(GAME_TITLE_MAX, ERR_GAME_TITLE_MAX)
+  v.maxLength(GAME_TITLE_MAX, ERR_GAME_TITLE_MAX),
 );
 
 const gameSynopsis = v.pipe(
   v.string(),
   v.minLength(GAME_SYN_MIN, ERR_GAME_SYN_MIN),
-  v.maxLength(GAME_SYN_MAX, ERR_GAME_SYN_MAX)
+  v.maxLength(GAME_SYN_MAX, ERR_GAME_SYN_MAX),
 );
 
 const gameReleaseDate = v.pipe(v.string(), v.isoDate(ERR_DATE));
 
 const gamePortrait = v.pipe(
   v.string(),
-  v.url(ERR_URL)
+  v.url(ERR_URL),
   /* v.custom(
-    (value: unknown) => typeof value === 'string' && URL_END.some((end) => value.endsWith(end)),
-    ERR_URL_END
-  ) // Las validaciones de momento las realizamos asi
-  // Cuando se implemente multer, capaz las cosas sean distintas*/
+      (value: unknown) => typeof value === 'string' && URL_END.some((end) => value.endsWith(end)),
+      ERR_URL_END
+    ) // Las validaciones de momento las realizamos asi
+    // Cuando se implemente multer, capaz las cosas sean distintas*/
 );
 
 const gameBanner = v.pipe(
   v.string(),
-  v.url(ERR_URL)
+  v.url(ERR_URL),
   /*  v.custom(
-    (value: unknown) => typeof value === 'string' && URL_END.some((end) => value.endsWith(end)),
-    ERR_URL_END
-  )*/
+      (value: unknown) => typeof value === 'string' && URL_END.some((end) => value.endsWith(end)),
+      ERR_URL_END
+    )*/
 );
 
 export const gameSchema = v.object({

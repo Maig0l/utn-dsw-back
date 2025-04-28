@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, Router } from 'express';
+import { Request, Response, NextFunction, Router } from "express";
 import {
   findOne,
   findAll,
@@ -9,15 +9,15 @@ import {
   sanitizeInput,
   sanitizePartialInput,
   findShopsByName,
-} from './shop.controller.js';
+} from "./shop.controller.js";
 
 export const shopRouter = Router();
 
-shopRouter.get('/search', findShopsByName);
-shopRouter.get('/', findAll);
-shopRouter.post('/', sanitizeInput, add);
+shopRouter.get("/search", findShopsByName);
+shopRouter.get("/", findAll);
+shopRouter.post("/", sanitizeInput, add);
 
-shopRouter.get('/:id', validateExists, findOne);
-shopRouter.put('/:id', validateExists, sanitizeInput, update);
-shopRouter.patch('/:id', validateExists, sanitizePartialInput, update);
-shopRouter.delete('/:id', validateExists, remove);
+shopRouter.get("/:id", validateExists, findOne);
+shopRouter.put("/:id", validateExists, sanitizeInput, update);
+shopRouter.patch("/:id", validateExists, sanitizePartialInput, update);
+shopRouter.delete("/:id", validateExists, remove);

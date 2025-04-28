@@ -6,11 +6,10 @@ POST http://localhost:8080/api/reviews
 Content-Type: application/json
 
 {
-    "author": 1,
-    "create_at": "2020-09-06T00:00:00.000Z",
-    "game": 6,
-    "score": 5,
-    "title": "asf",
-    "body": "Muy buen juego"
-  
+  "author": 1,
+  "create_at": "2020-09-06T00:00:00.000Z",
+  "game": 6,
+  "score": 5,
+  "title": "asf",
+  "body": "Muy buen juego"
 }

@@ -25,7 +25,7 @@ gameRouter.post(
   //  { name: "banner", maxCount: 1 },
   //]),
   sanitizeInput,
-  add
+  add,
 );
 
 // (\\d+) es una regex para que Express acepte sólo números para la variable id
@@ -41,12 +41,12 @@ gameRouter.patch(
   "/:id(\\d+)/uploads/portrait",
   validateExists,
   upload.single("portrait"),
-  uploadPortrait
+  uploadPortrait,
 );
 
 gameRouter.patch(
   "/:id(\\d+)/uploads/banner",
   validateExists,
   upload.single("banner"),
-  uploadBanner
+  uploadBanner,
 );

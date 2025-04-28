@@ -6,9 +6,9 @@ POST http://localhost:8080/api/shops
 Content-Type: application/json
 
 {
-    "name": "Epic",
-    "img": "https://store.epcipowered.com",
-    "site": "https://store.epicpowered.com"
+  "name": "Epic",
+  "img": "https://store.epcipowered.com",
+  "site": "https://store.epicpowered.com"
 }
 
 ###

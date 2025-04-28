@@ -23,7 +23,7 @@ async function findAll(req: Request, res: Response) {
           "franchise",
           "pictures",
         ],
-      }
+      },
     );
     res.json({ data: games });
   } catch (err) {
@@ -46,7 +46,7 @@ async function findOne(req: Request, res: Response) {
           "franchise",
           "pictures",
         ],
-      }
+      },
     );
     res.json({ data: game });
   } catch (err) {

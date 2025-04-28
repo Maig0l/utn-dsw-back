@@ -52,7 +52,7 @@ async function findOne(req: Request, res: Response) {
           "likedTags",
           "reviews",
         ],
-      }
+      },
     );
     res.json({ data: user });
   } catch (e) {
@@ -168,7 +168,7 @@ async function login(req: Request, res: Response) {
 
   const passwdIsCorrect = await bcrypt.compare(
     loginData.password,
-    user.password
+    user.password,
   );
   if (!passwdIsCorrect)
     return res.status(400).json({ message: ERR_LOGIN_BAD_CREDS });

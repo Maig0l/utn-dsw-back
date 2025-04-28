@@ -1,6 +1,13 @@
-import { Entity, Property, ManyToMany, OneToMany, Cascade, Collection } from '@mikro-orm/core';
-import { BaseEntity } from '../shared/db/baseEntity.entity.js';
-import { Game } from '../game/game.entity.js';
+import {
+  Entity,
+  Property,
+  ManyToMany,
+  OneToMany,
+  Cascade,
+  Collection,
+} from "@mikro-orm/core";
+import { BaseEntity } from "../shared/db/baseEntity.entity.js";
+import { Game } from "../game/game.entity.js";
 
 @Entity()
 export class Franchise extends BaseEntity {

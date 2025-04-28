@@ -30,5 +30,5 @@ userRouter.patch(
   "/:id(\\d+)/uploads/profile_img",
   validateExists,
   upload.single("profile_img"),
-  uploadImg
+  uploadImg,
 );

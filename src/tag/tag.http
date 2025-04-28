@@ -12,7 +12,6 @@ Content-Type: application/json
 {
   "name": "Fantasy",
   "description": "Magic and more things"
-  
 }
 
 
@@ -27,7 +26,6 @@ Content-Type: application/json
   "name": "Fantasy",
   "type": "Publisher",
   "site": "https://store.steampowered.com"
-  
 }
 
 ### borrar un tag
@@ -40,7 +38,6 @@ Content-Type: application/json
 {
   "name": "Fantasy yyy",
   "description": "Cosos"
- 
 }
 
 ###
