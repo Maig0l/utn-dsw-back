@@ -23,7 +23,7 @@ async function findAll(req: Request, res: Response) {
           "franchise",
           "pictures",
         ],
-      },
+      }
     );
     res.json({ data: games });
   } catch (err) {
@@ -46,7 +46,7 @@ async function findOne(req: Request, res: Response) {
           "franchise",
           "pictures",
         ],
-      },
+      }
     );
     res.json({ data: game });
   } catch (err) {
@@ -73,6 +73,21 @@ async function add(req: Request, res: Response) {
       delete res.locals.sanitizedInput.franchise;
     }
 
+    const game = em.create(Game, res.locals.sanitizedInput);
+    await em.flush();
+    res.status(201).json(game);
+  } catch (err) {
+    handleOrmError(res, err);
+  }
+}
+
+async function update(req: Request, res: Response) {
+  try {
+    console.log("SANITIZED INPUT", res.locals.sanitizedInput);
+    if (res.locals.sanitizedInput.franchise === 0) {
+      delete res.locals.sanitizedInput.franchise;
+    }
+
     const input = res.locals.sanitizedInput;
 
     const files = req.files as {
@@ -88,20 +103,6 @@ async function add(req: Request, res: Response) {
       input.banner = "/uploads/" + files.banner[0].filename;
     }
 
-    const game = em.create(Game, res.locals.sanitizedInput);
-    await em.flush();
-    res.status(201).json(game);
-  } catch (err) {
-    handleOrmError(res, err);
-  }
-}
-
-async function update(req: Request, res: Response) {
-  try {
-    console.log("SANITIZED INPUT", res.locals.sanitizedInput);
-    if (res.locals.sanitizedInput.franchise === 0) {
-      delete res.locals.sanitizedInput.franchise;
-    }
     const game = await em.findOneOrFail(Game, { id: res.locals.id });
     em.assign(game, res.locals.sanitizedInput);
     await em.flush();
