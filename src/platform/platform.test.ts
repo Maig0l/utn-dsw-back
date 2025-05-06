@@ -2,44 +2,44 @@ import request from "supertest";
 
 const url_base = "http://localhost:8080/api/";
 
-describe("tag test", () => {
-  it("get all, should return a list of tags", async () => {
-    const response = await request(url_base).get("tags/");
+describe("platform test", () => {
+  it("get all, should return a list of platforms", async () => {
+    const response = await request(url_base).get("platforms/");
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body.data)).toBe(true);
     expect(response.body.data.length).toBeGreaterThan(0);
     expect(response.body.data[0]).toHaveProperty("name");
   });
 
-  it("get one, should return only one tag", async () => {
-    const response = await request(url_base).get("tags/6");
+  it("get one, should return only one platform", async () => {
+    const response = await request(url_base).get("platforms/1");
     expect(response.status).toBe(200);
     expect(response.body.data).toHaveProperty("name");
     expect(!Array.isArray(response.body.data)).toBe(true);
   });
 
- /* it("post one tag, should create a tag", async () => {
-    const new_tag = {
-      name: "asdasd asasyy",
-      description: "Cosos asgdashdhhf",
+ /* it("post one platform, should create a platform", async () => {
+    const new_platform = {
+     name: "Star",
+     img: "sadsas"
     };
 
     const response = await request(url_base)
-      .post("tags")
-      .send(new_tag)
+      .post("platforms")
+      .send(new_platform)
       .set("Content-Type", "application/json");
     expect(response.status).toBe(201);
     expect(response.body.data).toHaveProperty("name");
   });
 
-  it("update, should update a tag", async () => {
+  it("update, should update a platform", async () => {
     const fields_to_update = {
-      name: "Fantasdasya asasyy",
-      description: "Cosos asgdashdhhf",
+        "name": "Play 9",
+        "img": "sadsas"
     };
 
     const response = await request(url_base)
-      .put(`tags/16`)
+      .put(`platforms/9`)
       .send(fields_to_update);
     expect(response.status).toBe(200);
   });
