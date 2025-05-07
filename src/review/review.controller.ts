@@ -12,6 +12,7 @@ import { User } from "../user/user.entity.js";
 import { Tag } from "../tag/tag.entity.js";
 import { FilterQuery } from "@mikro-orm/core";
 import { populate } from "dotenv";
+import { updateRating } from "../game/game.controller.js";
 
 // Mensajes
 const ERR_500 = "Oops! Something went wrong. This is our fault.";
@@ -36,7 +37,7 @@ async function findOne(req: Request, res: Response) {
     const review = await em.findOneOrFail(
       Review,
       { id: res.locals.id },
-      { populate: ["author", "game"] },
+      { populate: ["author", "game"] }
     );
     res.json({ data: review });
   } catch (e) {
@@ -49,7 +50,13 @@ async function findOne(req: Request, res: Response) {
  */
 async function add(req: Request, res: Response) {
   try {
-    const review = await em.create(Review, res.locals.newReview);
+    console.log("body", req.body);
+    console.log("SANITIZED INPUT", res.locals.newReview);
+    // TODO newReview doen't contain author and gameId
+    const review = await em.create(Review, req.body);
+    // update the game's cumulative rating and review count
+    // TODO move to final version of createReview
+    await updateRating(req.body.game, req.body.score, em);
     await em.flush();
 
     res

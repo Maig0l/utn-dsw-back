@@ -9,7 +9,7 @@ const id = v.pipe(v.number(ERR_ENTER_ID), v.integer(ERR_ENTER_ID));
 const score = v.pipe(
   v.number(),
   v.minValue(0, ERR_SCORE_RANGE),
-  v.maxValue(5, ERR_SCORE_RANGE),
+  v.maxValue(5, ERR_SCORE_RANGE)
 );
 
 // El author y gameId vienen en el Header de Autenticación y el parámetro de URL
@@ -27,7 +27,7 @@ const reviewEditSchema = v.partial(
     title: v.string(),
     body: v.string(),
     suggestedTags: v.array(id),
-  }),
+  })
 );
 
 export const validateReviewNew = v.safeParserAsync(reviewSchema);

@@ -3,6 +3,7 @@ import { Game } from "./game.entity.js";
 import { validateGame, validateUpdateGame } from "./game.schema.js";
 import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import { orm } from "../shared/db/orm.js";
+import { EntityAssigner, EntityManager } from "@mikro-orm/core";
 
 const API_SECRET = process.env.apiSecret ?? "";
 
@@ -65,14 +66,111 @@ async function findGamesByTitle(req: Request, res: Response) {
   }
 }
 
+async function findGamesByFilters(req: Request, res: Response) {
+  try {
+    const filters = req.query as Record<string, string>;
+    console.log("FILTERS", filters);
+    const filterQuery: Record<string, any> = {};
+
+    for (const key in filters) {
+      const value = filters[key];
+
+      if (key === "platform" && value) {
+        const platforms = value
+          .split(",")
+          .map(Number)
+          .filter((v) => v > 0);
+        if (platforms.length > 0) {
+          filterQuery.platforms = { $in: platforms };
+        }
+      } else if (key === "tags" && value) {
+        const tags = value
+          .split(",")
+          .map(Number)
+          .filter((v) => v > 0);
+        if (tags.length > 0) {
+          filterQuery.tags = { $in: tags };
+        }
+      } else if (key === "studio" && value) {
+        const studios = value
+          .split(",")
+          .map(Number)
+          .filter((v) => v > 0);
+        if (studios.length > 0) {
+          filterQuery.studios = { $in: studios };
+        }
+      } else if (key === "franchise" && value) {
+        const franchises = value
+          .split(",")
+          .map(Number)
+          .filter((v) => v > 0);
+        if (franchises.length > 0) {
+          filterQuery.franchise = { $in: franchises };
+        }
+      } else if (key === "startDate" && value) {
+        filterQuery.releaseDate = {
+          ...(filterQuery.releaseDate || {}),
+          $gte: value.split("T")[0],
+        };
+      } else if (key === "endDate" && value) {
+        filterQuery.releaseDate = {
+          ...(filterQuery.releaseDate || {}),
+          $lte: value.split("T")[0],
+        };
+      }
+    }
+
+    console.log("FILTER QUERY", filterQuery);
+
+    // Fetch games from the database
+    const games = await em.find(Game, filterQuery, {
+      populate: [
+        "tags",
+        "shops",
+        "platforms",
+        "studios",
+        "reviews",
+        "franchise",
+        "pictures",
+      ],
+    });
+
+    // Filter by starValue in memory
+    const minStarValue = filters.minStarValue
+      ? Number(filters.minStarValue)
+      : null;
+    const maxStarValue = filters.maxStarValue
+      ? Number(filters.maxStarValue)
+      : null;
+
+    const filteredGames = games.filter((game) => {
+      const starValue =
+        game.reviewCount > 0 ? game.cumulativeRating / game.reviewCount : 0;
+
+      if (minStarValue !== null && starValue < minStarValue) {
+        return false;
+      }
+      if (maxStarValue !== null && starValue > maxStarValue) {
+        return false;
+      }
+      return true;
+    });
+
+    console.log("FILTERED GAMES", filteredGames);
+
+    res.json({ data: filteredGames });
+  } catch (err) {
+    console.error(err);
+    handleOrmError(res, err);
+  }
+}
+
 async function add(req: Request, res: Response) {
   try {
-    // TODO: Por qué hacemos esto?
     console.log("SANITIZED INPUT", res.locals.sanitizedInput);
     if (res.locals.sanitizedInput.franchise === 0) {
       delete res.locals.sanitizedInput.franchise;
     }
-
     const game = em.create(Game, res.locals.sanitizedInput);
     await em.flush();
     res.status(201).json(game);
@@ -103,12 +201,39 @@ async function update(req: Request, res: Response) {
       input.banner = "/uploads/" + files.banner[0].filename;
     }
 
+    delete res.locals.cumulativeRating;
+    delete res.locals.reviewCount;
+    console.log("SANITIZED INPUT", res.locals.sanitizedInput);
+    if (res.locals.sanitizedInput.franchise === 0) {
+      delete res.locals.sanitizedInput.franchise;
+    }
     const game = await em.findOneOrFail(Game, { id: res.locals.id });
     em.assign(game, res.locals.sanitizedInput);
     await em.flush();
     res.json({ message: "Game updated", data: game });
   } catch (err) {
     handleOrmError(res, err);
+  }
+}
+
+async function updateRating(
+  gameId: number,
+  newRating: number,
+  em: EntityManager
+) {
+  try {
+    em.transactional(async (em) => {
+      const game = await em.findOneOrFail(Game, { id: gameId });
+      game.cumulativeRating += newRating;
+      game.reviewCount += 1;
+      await em.flush();
+    });
+  } catch (error) {
+    console.error("Failed to update game rating:", error);
+    console.log("Game ID:", gameId, "New Rating:", newRating);
+    console.log("EntityManager:", em);
+    console.log("Game ID", gameId);
+    throw new Error("Could not update game rating.");
   }
 }
 
@@ -238,4 +363,6 @@ export {
   validateExists,
   uploadPortrait,
   uploadBanner,
+  updateRating,
+  findGamesByFilters,
 };

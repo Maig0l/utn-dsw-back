@@ -84,7 +84,7 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 async function sanitizePartialInput(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const incoming = await validateUpdateStudio(req.body);
   if (!incoming.success)

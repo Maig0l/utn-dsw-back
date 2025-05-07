@@ -19,6 +19,8 @@ export const orm = await MikroORM.init({
   clientUrl: `mysql://${user}:${passwd}@${host}:${port}/${name}`,
   highlighter: new SqlHighlighter(),
   debug: true,
+  // TODO: not recommended in prod, bad for scoping and stuff
+  allowGlobalContext: true,
   schemaGenerator: {
     // TODO: Never in prod
     disableForeignKeys: true,
