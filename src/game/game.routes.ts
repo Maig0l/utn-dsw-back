@@ -10,6 +10,7 @@ import {
   findGamesByTitle,
   uploadPortrait,
   uploadBanner,
+  findGamesByFilters,
 } from "./game.controller.js";
 import { listReviews, createReview } from "../review/review.controller.js";
 import { upload } from "../shared/multer.js";
@@ -18,6 +19,7 @@ export const gameRouter = Router();
 
 gameRouter.get("/search", findGamesByTitle); //create middleware?
 gameRouter.get("/", findAll);
+gameRouter.get("/filter", findGamesByFilters);
 gameRouter.post(
   "/",
   //upload.fields([
