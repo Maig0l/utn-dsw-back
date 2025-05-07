@@ -50,6 +50,92 @@ async function findGamesByTitle(req: Request, res: Response) {
   }
 }
 
+async function findGamesByFilters(req: Request, res: Response) {
+  try {
+    const filters = req.query as Record<string, string>;
+    console.log('FILTERS', filters);
+    const filterQuery: Record<string, any> = {};
+
+    for (const key in filters) {
+      const value = filters[key];
+
+      if (key === 'platform' && value) {
+        const platforms = value
+          .split(',')
+          .map(Number)
+          .filter((v) => v > 0);
+        if (platforms.length > 0) {
+          filterQuery.platforms = { $in: platforms };
+        }
+      } else if (key === 'tags' && value) {
+        const tags = value
+          .split(',')
+          .map(Number)
+          .filter((v) => v > 0);
+        if (tags.length > 0) {
+          filterQuery.tags = { $in: tags };
+        }
+      } else if (key === 'studio' && value) {
+        const studios = value
+          .split(',')
+          .map(Number)
+          .filter((v) => v > 0);
+        if (studios.length > 0) {
+          filterQuery.studios = { $in: studios };
+        }
+      } else if (key === 'franchise' && value) {
+        const franchises = value
+          .split(',')
+          .map(Number)
+          .filter((v) => v > 0);
+        if (franchises.length > 0) {
+          filterQuery.franchise = { $in: franchises };
+        }
+      } else if (key === 'startDate' && value) {
+        filterQuery.releaseDate = {
+          ...(filterQuery.releaseDate || {}),
+          $gte: value.split('T')[0],
+        };
+      } else if (key === 'endDate' && value) {
+        filterQuery.releaseDate = {
+          ...(filterQuery.releaseDate || {}),
+          $lte: value.split('T')[0],
+        };
+      }
+    }
+
+    console.log('FILTER QUERY', filterQuery);
+
+    // Fetch games from the database
+    const games = await em.find(Game, filterQuery, {
+      populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'],
+    });
+
+    // Filter by starValue in memory
+    const minStarValue = filters.minStarValue ? Number(filters.minStarValue) : null;
+    const maxStarValue = filters.maxStarValue ? Number(filters.maxStarValue) : null;
+
+    const filteredGames = games.filter((game) => {
+      const starValue = game.reviewCount > 0 ? game.cumulativeRating / game.reviewCount : 0;
+
+      if (minStarValue !== null && starValue < minStarValue) {
+        return false;
+      }
+      if (maxStarValue !== null && starValue > maxStarValue) {
+        return false;
+      }
+      return true;
+    });
+
+    console.log('FILTERED GAMES', filteredGames);
+
+    res.json({ data: filteredGames });
+  } catch (err) {
+    console.error(err);
+    handleOrmError(res, err);
+  }
+}
+
 async function add(req: Request, res: Response) {
   try {
     console.log('SANITIZED INPUT', res.locals.sanitizedInput);
@@ -218,4 +304,5 @@ export {
   uploadPortrait,
   uploadBanner,
   updateRating,
+  findGamesByFilters,
 };
