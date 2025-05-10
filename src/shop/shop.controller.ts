@@ -134,6 +134,15 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case "ER_DUP_ENTRY":
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
+        if (err.message.includes("name"))
+          res
+            .status(400)
+            .json({ message: `A shop with that name already exists.` });
+        else if (err.message.includes("site"))
+          res
+            .status(400)
+            .json({ message: `A shop with that site already exists.` });
+        else
         res
           .status(400)
           .json({ message: `A shop with that name/site already exists.` });

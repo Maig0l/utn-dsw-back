@@ -1,15 +1,15 @@
 import * as v from "valibot";
 import { StudioType } from "./studio.entity.js";
 
-const ERR_NAME_LEN = "Description must be between 3 and 100 characters long";
+const ERR_NAME_LEN = "Name must be between 3 and 100 characters long";
 const TYPE = StudioType;
-const ERR_URL = "URL must be a valid URL";
+const ERR_SITE_URL = "Site URL must be a valid URL";
 const ERR_TYPE = 'Type must be either "Developer", "Publisher, or "Both"';
-const ERR_URL_EMPTY = "URL cannot be empty";
+const ERR_SITE_URL_EMPTY = "Site URL cannot be empty";
 const URL_START = ["http://", "https://"];
-const ERR_URL_START = `The url must start with http:// or https://`;
+const ERR_SITE_URL_START = `Site URL must start with http:// or https://`;
 const URL_END = [".com", ".net", ".org", ".io"];
-const ERR_URL_END = `URL must end with ${Object.values(URL_END).join(", ")}`;
+const ERR_SITE_URL_END = `Site URL must end with ${Object.values(URL_END).join(", ")}`;
 
 const name = v.pipe(
   v.string(),
@@ -21,18 +21,18 @@ const type = v.pipe(v.string(ERR_TYPE), v.enum(TYPE, ERR_TYPE));
 
 const site = v.pipe(
   v.string(),
-  v.nonEmpty(ERR_URL_EMPTY),
-  v.url(ERR_URL),
+  v.nonEmpty(ERR_SITE_URL_EMPTY),
+  v.url(ERR_SITE_URL),
   v.custom(
     (value: unknown) =>
       typeof value === "string" &&
       URL_START.some((start) => value.startsWith(start)),
-    ERR_URL_START,
+    ERR_SITE_URL_START,
   ),
   v.custom(
     (value: unknown) =>
       typeof value === "string" && URL_END.some((end) => value.endsWith(end)),
-    ERR_URL_END,
+    ERR_SITE_URL_END,
   ),
 );
 
