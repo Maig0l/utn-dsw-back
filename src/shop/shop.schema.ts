@@ -1,8 +1,9 @@
 import * as v from "valibot";
 
-const ERR_NAME_LEN = "Description must be between 3 and 100 characters long";
+const ERR_NAME_LEN = "NAME must be between 3 and 100 characters long";
 const ERR_URL = "URL must be a valid URL";
-const ERR_URL_EMPTY = "URL cannot be empty";
+const ERR_SITE_URL_EMPTY = "site URL cannot be empty";
+const ERR_IMG_URL_EMPTY = "img URL cannot be empty";
 const ERR_URL_END = "URL must end with .com";
 
 const name = v.pipe(
@@ -13,13 +14,13 @@ const name = v.pipe(
 
 const img = v.pipe(
   v.string(),
-  v.nonEmpty(ERR_URL_EMPTY),
+  v.nonEmpty(ERR_IMG_URL_EMPTY),
   //v.url(ERR_URL) TODO imagenes de pintrest terminan en .jpg y esto molesta xd
 );
 
 const site = v.pipe(
   v.string(),
-  v.nonEmpty(ERR_URL_EMPTY),
+  v.nonEmpty(ERR_SITE_URL_EMPTY),
   v.url(ERR_URL),
   v.endsWith(".com", ERR_URL_END),
 );
