@@ -12,7 +12,7 @@ import {
   uploadBanner,
   findGamesByFilters,
 } from "./game.controller.js";
-import { listReviews, createReview } from "../review/review.controller.js";
+import { listReviewsForGame, createReview } from "../review/review.controller.js";
 import { upload } from "../shared/multer.js";
 
 export const gameRouter = Router();
@@ -36,7 +36,7 @@ gameRouter.put("/:id(\\d+)", validateExists, sanitizeInput, update);
 gameRouter.patch("/:id(\\d+)", validateExists, sanitizeInput, update);
 gameRouter.delete("/:id(\\d+)", validateExists, remove);
 
-gameRouter.get("/:id(\\d+)/reviews", validateExists, listReviews);
+gameRouter.get("/:id(\\d+)/reviews", validateExists, listReviewsForGame);
 gameRouter.post("/:id(\\d+)/reviews", validateExists, createReview);
 
 gameRouter.patch(

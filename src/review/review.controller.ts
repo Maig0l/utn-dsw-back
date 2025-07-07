@@ -11,7 +11,6 @@ import { Game } from "../game/game.entity.js";
 import { User } from "../user/user.entity.js";
 import { Tag } from "../tag/tag.entity.js";
 import { FilterQuery } from "@mikro-orm/core";
-import { populate } from "dotenv";
 import { updateRating } from "../game/game.controller.js";
 
 // Mensajes
@@ -89,7 +88,14 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-async function listReviews(req: Request, res: Response) {
+/**
+ * Devuelve un listado de reviews para un juego dado.
+ * Asume que pasa por el middleware GameController.validateExists.
+ * TODO: No tiene mucho sentido el param 'mine' si la regla de negocio dice 1 review por juego por usuario
+ * @param req Responde a los queryParams `page: int` y `mine: bool`, y al header `Authorization` si `mine=1`
+ * @param res `res.locals` contiene `id` del juego
+ */
+async function listReviewsForGame(req: Request, res: Response) {
   // Guardar los Parámetros de búsqueda
   const pageNo = Number.parseInt(req.query["page"]?.toString() ?? "0");
   const showOnlyOwnedReviews = "mine" in req.query;
@@ -129,6 +135,35 @@ async function listReviews(req: Request, res: Response) {
     message: `Showing ${data.length} reviews (page ${pageNo})`,
     data,
   });
+}
+
+/**
+ * Crea un listado de las reviews de un usuario. Es de acceso público.
+ * @param req Responde al route parameter `nick: string`
+ * @param res
+ */
+async function listReviewsByAuthor(req: Request, res: Response) {
+  if (!req.params.nick)
+    throw new Error("Middleware listReviewsForUser requires route parameter `nick`")
+
+  let author;
+  try {
+    author = await em.findOneOrFail(User, { nick: req.params.nick });
+  } catch (e) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  let reviews: Review[] = [];
+  try {
+    reviews = await em.find(Review, { author: author }, {
+      // TODO: Game sólo debería poblar sus campos id y title
+      populate: ['author', 'game'],
+    });
+  } catch (e) {
+    return handleOrmError(res, e);
+  }
+
+  res.json({ data: reviews, message: `Listing ${reviews.length} reviews by ${author.nick}` })
 }
 
 async function createReview(req: Request, res: Response) {
@@ -271,5 +306,6 @@ export {
   validateExists,
   update,
   createReview,
-  listReviews,
+  listReviewsForGame,
+  listReviewsByAuthor,
 };
