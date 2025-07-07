@@ -44,6 +44,9 @@ importers:
       sanitize-html:
         specifier: ^2.13.0
         version: 2.13.0
+      ulid:
+        specifier: ^3.0.1
+        version: 3.0.1
       valibot:
         specifier: ^0.36.0
         version: 0.36.0
@@ -2579,6 +2582,10 @@ packages:
 
   ufo@1.5.3:
     resolution: {integrity: sha512-Y7HYmWaFwPUmkoQCUIAYpKqkOf+SbVj/2fJJZ4RJMCfZp0rTGwRbzQD+HghfnhKOjL9E01okqz+ncJskGYfBNw==}
+
+  ulid@3.0.1:
+    resolution: {integrity: sha512-dPJyqPzx8preQhqq24bBG1YNkvigm87K8kVEHCD+ruZg24t6IFEFv00xMWfxcC4djmFtiTLdFuADn4+DOz6R7Q==}
+    hasBin: true
 
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
@@ -5436,6 +5443,8 @@ snapshots:
   typescript@5.5.2: {}
 
   ufo@1.5.3: {}
+
+  ulid@3.0.1: {}
 
   undici-types@5.26.5: {}
 

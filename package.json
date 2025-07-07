@@ -46,6 +46,7 @@
     "multer": "1.4.5-lts.2",
     "reflect-metadata": "0.2.2",
     "sanitize-html": "^2.13.0",
+    "ulid": "^3.0.1",
     "valibot": "^0.36.0"
   },
   "pnpm": {
