@@ -122,6 +122,7 @@ async function update(req: Request, res: Response) {
   }
 }
 
+/** @deprecated */
 async function uploadImg(req: Request, res: Response) {
   const userId = Number(req.params.id); // Aca deberia el token (Creo)
   const profile_img = req.file?.filename;
