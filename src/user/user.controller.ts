@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { paramCheckFromList } from "../shared/paramCheckFromList.js";
 import sanitizeHtml from "sanitize-html";
 import { orm } from "../shared/db/orm.js";
 import { User } from "./user.entity.js";
@@ -10,7 +9,10 @@ import {
 } from "./user.schema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UserAuthObject } from "../auth/userAuthObject.interface";
+import { UserAuthObject } from "../auth/userAuthObject.interface.js";
+import { getUserReferenceFromAuthHeader } from "../auth/auth.middleware.js";
+import fs from "node:fs/promises";
+import {existsSync} from "node:fs";
 
 // TODO: I know this is sloppy, but there's no time
 const API_SECRET = process.env.apiSecret ?? "";
@@ -192,6 +194,27 @@ async function login(req: Request, res: Response) {
 
 async function logout(req: Request, res: Response) {}
 
+async function changeProfilePicture(req: Request, res: Response, next: NextFunction) {
+  let user;
+  try {
+    user = getUserReferenceFromAuthHeader(req.headers.authorization);
+  } catch (err) {
+    return res.status(403).json( {message: "Invalid Token"} );
+  }
+  user = await em.findOneOrFail(User, user);
+
+  if (!req.file)
+    return res.status(500).json( {message: "Something went wrong during file upload"} );
+
+
+  const oldFile=`uploads/${user.profile_img}`;
+  if (existsSync(oldFile))
+    await fs.unlink(oldFile)
+  user.profile_img = req.file.filename
+  await em.flush();
+  res.json( {message: "Profile picture updated OK"} )
+}
+
 /* *** Helper functions ***
  */
 
@@ -293,4 +316,5 @@ export {
   sanitizeInput,
   login,
   uploadImg,
+  changeProfilePicture,
 };
