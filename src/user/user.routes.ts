@@ -3,6 +3,7 @@ import {
   add,
   findAll,
   findOne,
+  findOneByNick,
   remove,
   sanitizeInput,
   update,
@@ -22,6 +23,7 @@ userRouter.post("/login", sanitizeInput, login); // TODO: Move to an /auth endpo
 // No hace falta aclarar el nick o id del usuario
 userRouter.patch("/me/profile_img", upload.single('profile_img'), changeProfilePicture);
 
+userRouter.get("/:nick", findOneByNick);
 userRouter.get("/:nick/reviews", listReviewsByAuthor);
 
 // Todas las rutas /:id usan el validateExists

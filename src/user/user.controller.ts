@@ -62,6 +62,34 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+/**
+ * Busca un usuario por su nick.
+ * @param req Requiere al route param `nick`
+ * @param res
+ */
+async function findOneByNick(req: Request, res: Response) {
+  if (!req.params.nick)
+    return res.status(400).json({ message: "Provide a nick to search." });
+
+  let user;
+  try {
+    user = await em.findOneOrFail(
+      User,
+      { nick: req.params.nick },
+      {
+        populate: [
+          "bio_text",
+          "linked_accounts",
+        ]
+      }
+    );
+  } catch (err) {
+    return handleOrmError(res, err);
+  }
+
+  res.json({ data: user });
+}
+
 // *** A.K.A: Register ***
 async function add(req: Request, res: Response) {
   const incoming = await validateRegistration(res.locals.sanitizedInput);
@@ -311,6 +339,7 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 export {
   findAll,
   findOne,
+  findOneByNick,
   add,
   update,
   remove,
