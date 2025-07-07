@@ -36,7 +36,6 @@ export class User extends BaseEntity {
   @ManyToMany("Tag", undefined, { lazy: true })
   likedTags = new Collection<Tag>(this);
 
-  // TODO: Implementar entidad Review
   @OneToMany("Review", "author", { lazy: true })
   reviews = new Collection<Review>(this);
 }

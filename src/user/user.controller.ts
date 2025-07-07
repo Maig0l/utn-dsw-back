@@ -187,7 +187,8 @@ async function login(req: Request, res: Response) {
     nick: user.nick,
     isAdmin: false, //TODO: add admin property
   };
-  const token = jwt.sign(tokenData, API_SECRET, { expiresIn: "1h" });
+  // 1 semana = 168 hs
+  const token = jwt.sign(tokenData, API_SECRET, { expiresIn: "168h" });
 
   res.json({ message: "Login successful", data: { token: token } });
 }
