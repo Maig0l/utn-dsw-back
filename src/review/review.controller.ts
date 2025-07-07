@@ -101,8 +101,8 @@ async function listReviews(req: Request, res: Response) {
     try {
       userRef = getUserReferenceFromAuthHeader(req.headers.authorization);
     } catch (e) {
-      if (e instanceof Error) res.status(500).json({ message: e.message });
-      if (e instanceof AuthError) res.status(401).json({ message: e.message });
+      if (e instanceof Error) return res.status(500).json({ message: e.message });
+      if (e instanceof AuthError) return res.status(401).json({ message: e.message });
     }
   }
 
