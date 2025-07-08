@@ -95,7 +95,7 @@ async function add(req: Request, res: Response) {
   const incoming = await validateRegistration(res.locals.sanitizedInput);
   if (!incoming.success)
     return res.status(400).json({ message: incoming.issues });
-  const newUserData = incoming.output;
+  const newUserData = incoming.output as User;
 
   const matchingUser = await em.findOne(User, {
     $or: [{ nick: newUserData.nick }, { email: newUserData.email }],

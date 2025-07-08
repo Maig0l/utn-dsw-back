@@ -30,6 +30,9 @@ export class User extends BaseEntity {
   @Property({ nullable: true, lazy: true })
   linked_accounts?: string[];
 
+  @Property({ nullable: false, default: false })
+  is_admin: boolean = false;
+
   @OneToMany("Playlist", "owner", { lazy: true })
   playlists = new Collection<Playlist>(this);
 
