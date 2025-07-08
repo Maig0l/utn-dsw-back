@@ -6,5 +6,5 @@ import { JwtPayload } from "jsonwebtoken";
 export interface UserAuthObject extends JwtPayload {
   id: number;
   nick: string;
-  isAdmin: boolean;
+  is_admin: boolean;
 }
