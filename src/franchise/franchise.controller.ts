@@ -7,6 +7,7 @@ import {
   validateNewFranchise,
   validateUpdateFranchise,
 } from "./franchise.schema.js";
+import {Game} from "../game/game.entity.js";
 
 //const VALID_PARAMS = 'name description'.split(' ');
 //const hasParams = paramCheckFromList(VALID_PARAMS);
@@ -65,10 +66,18 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
+  const id = Number.parseInt(res.locals.id);
+  const franchise = em.getReference(Franchise, id);
+
+  let gamesInFranchise: Game[] = [];
+
+  if (req.body.games) {
+    gamesInFranchise = await em.find(Game, {id: {$in: req.body.games}})
+  }
+
+
   try {
-    const id = Number.parseInt(res.locals.id);
-    const franchise = em.getReference(Franchise, id);
-    em.assign(franchise, req.body);
+    em.assign(franchise, {...req.body, games: gamesInFranchise});
     await em.flush();
     res.status(200).json({ message: "Franchise updated", data: franchise });
   } catch (error: any) {
