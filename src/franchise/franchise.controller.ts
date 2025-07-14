@@ -17,7 +17,11 @@ async function findFranchisesByName(req: Request, res: Response) {
     const name = req.query.name as string;
     const franchises = await em.find(Franchise, {
       name: { $like: `%${name}%` },
-    });
+    }, {
+        populate: [
+          "games",
+        ],
+      });
     res.json({ data: franchises });
   } catch (err) {
     handleOrmError(res, err);
@@ -26,7 +30,11 @@ async function findFranchisesByName(req: Request, res: Response) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const franchises = await em.find(Franchise, {});
+    const franchises = await em.find(Franchise, {},  {
+        populate: [
+          "games",
+        ],
+      });
     res.json({ data: franchises });
   } catch (err) {
     handleOrmError(res, err);
@@ -35,7 +43,11 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
-    const franchise = await em.findOneOrFail(Franchise, { id: res.locals.id });
+    const franchise = await em.findOneOrFail(Franchise, { id: res.locals.id }, {
+        populate: [
+          "games",
+        ],
+      });
     res.json({ data: franchise });
   } catch (err) {
     handleOrmError(res, err);
