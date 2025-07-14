@@ -1,0 +1,61 @@
+GET http://localhost:8080/api/games/
+
+
+### obtener un tag
+GET http://localhost:8080/api/games/15
+
+
+http://localhost:8080/api/games/search?title=fa
+
+### crear un nuevo tag
+POST http://localhost:8080/api/games
+Content-Type: application/json
+
+{
+  "title": "Fallout 79",
+  "synopsis": "Apocalipsis",
+  "releaseDate": "2020-09-06T00:00:00.000Z",
+  "portrait": "https://en.wikipedia.org/wiki/File:Fallout.jpg",
+  "banner": "https://en.wikipedia.org/wiki/File:Fallout.jpg",
+  "pictures": {
+    "url": "https://en.wikipedia.org/wiki/File:Fallout.jpg"
+  },
+  "tags": [
+    0,
+    1,
+    5,
+    4,
+    8
+  ]
+}
+
+### borrar un tag
+DELETE http://localhost:8080/api/games/5
+
+###
+PUT  http://localhost:8080/api/games/5
+Content-Type: application/json
+
+{
+  "name": "Studio Skibidi",
+  "description": "Cosos"
+}
+
+###
+PATCH http://localhost:8080/api/games/15
+Content-Type: application/json
+
+{
+  "tags": [
+    6,
+    5
+  ]
+}
+
+###
+PUT http://localhost:8080/api/games/1/add-picture
+Content-Type: application/json
+
+{
+  "url": "https://upload.wikimedia.org/wikipedia/en/e/e1/The_Binding_of_Issac_Rebirth_cover.jpg"
+}

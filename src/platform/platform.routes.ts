@@ -1,11 +1,21 @@
 import { Router } from "express";
-import { sanitizePlatformInput, findAll, findOne, add, update, remove } from "./platform.controller.js";
+import {
+  findOne,
+  findAll,
+  add,
+  remove,
+  update,
+  validateExists,
+  sanitizeInput,
+  findPlatformsByName,
+} from "./platform.controller.js";
 
-export const platformRouter = Router()
+export const platformRouter = Router();
 
-platformRouter.get('/', findAll)
-platformRouter.get('/:id',findOne)
-platformRouter.post('/', sanitizePlatformInput, add)
-platformRouter.put('/:id', sanitizePlatformInput, update)
-platformRouter.patch('/:id', sanitizePlatformInput, update)
-platformRouter.delete('/:id',remove)
+platformRouter.get("/search", findPlatformsByName);
+platformRouter.get("/", findAll);
+platformRouter.post("/", sanitizeInput, add);
+platformRouter.get("/:id", validateExists, findOne);
+platformRouter.put("/:id", validateExists, sanitizeInput, update);
+platformRouter.patch("/:id", validateExists, sanitizeInput, update);
+platformRouter.delete("/:id", validateExists, remove);

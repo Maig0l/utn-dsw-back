@@ -1,107 +1,153 @@
-import { Request, Response, NextFunction } from "express"
-import { StudioRepository } from "./studio.repository.js"
-import { paramCheckFromList } from "../shared/paramCheckFromList.js";
+import { Request, Response, NextFunction } from "express";
+import { Studio } from "./studio.entity.js";
+import { orm } from "../shared/db/orm.js";
+import { validateNewStudio, validateUpdateStudio } from "./studio.schema.js";
 
-const validParams = ['name', 'type', 'site']
-const hasParams = paramCheckFromList(validParams)
+const em = orm.em;
 
-const Repository = new StudioRepository();
-
-function findAll(req: Request, res: Response) {
-    const studios = Repository.findAll();
-    if (!studios) {
-        return res.status(404).json({ message: "Studio Not Found" });
-    }
-    res.json({data: studios});
+async function findAll(req: Request, res: Response) {
+  try {
+    const studios = await em.find(Studio, {});
+    res.json({ data: studios });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
 }
 
-function findOne(req: Request, res: Response) {
-    const studio = Repository.findOne({ id: parseInt(req.params.id) });
-    if (!studio) {
-        return res.status(404).json({ message: "Studio Not Found" });
-    }
-    res.json({data: studio});
+async function findOne(req: Request, res: Response) {
+  try {
+    const studio = await em.findOneOrFail(Studio, { id: res.locals.id });
+    res.json({ data: studio });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
 }
 
-function add(req: Request, res: Response) {
-    const studio = Repository.add(req.body);
-    if (!studio) {
-        return res.status(500).json({message: "Add new Studio failed"})
-    }
-    res.status(201).json({data: studio})
+async function findStudiosByName(req: Request, res: Response) {
+  try {
+    const name = req.query.name as string;
+    const studios = await em.find(Studio, { name: { $like: `%${name}%` } });
+    res.json({ data: studios });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
 }
 
-function update(req: Request, res: Response) {
-    const newData = {...res.locals.sanitizedInput, id: res.locals.id}
-    
-    const studio = Repository.update(newData);
-    if (!studio) {
-        return res.status(500).json({message: "Update Studio failed"})
-    }
-    res.json({data: studio});
+async function add(req: Request, res: Response) {
+  try {
+    const studio = em.create(Studio, res.locals.sanitizedInput);
+    await em.flush();
+    res
+      .status(201)
+      .json({ message: "Studio created successfully", data: studio });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
 }
 
-function remove(req: Request, res: Response) {
-    const studio = Repository.remove({ id: parseInt(req.params.id) });
-    if (!studio) {
-        return res.status(404).json({ message: "Studio Not Found, so no deleted" });
-    }
-    res.status(200).json({data: studio});
+async function update(req: Request, res: Response) {
+  try {
+    const studio = await em.findOneOrFail(Studio, { id: res.locals.id });
+    em.assign(studio, res.locals.sanitizedInput);
+    await em.flush();
+    res.json({ message: "Studio updated", data: studio });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
 }
 
-function sanitizeInput(req:Request, res:Response, next:NextFunction) {
+async function remove(req: Request, res: Response) {
+  try {
+    const studio = await em.findOneOrFail(Studio, { id: res.locals.id });
+    const studioRef = em.getReference(Studio, res.locals.id);
+    await em.removeAndFlush(studioRef);
 
-    if (["POST", "PUT"].includes(req.method) && !hasParams(req.body, true))
-        return res.status(400)
-            .json({message: "Must provide all attributes"})
+    res.json({ message: "Studio deleted successfully", data: studio });
+  } catch (err) {
+    handleOrmError(res, err);
+  }
+}
 
-    if ("PATCH" == req.method && !hasParams(req.body, false))
-        return res.status(400)
-            .json({message: "Must provide at least one valid attribute"})
-          
+//middleware
 
-    res.locals.sanitizedInput = {
-        name: req.body.name,
-        type: req.body.type,
-        site: req.body.site
-    }
+async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
+  const incoming = await validateNewStudio(req.body);
+  if (!incoming.success)
+    return res.status(400).json({ message: incoming.issues[0].message });
+  const newStudio = incoming.output;
 
-    const sanitizedInput = res.locals.sanitizedInput
-    
-    const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
-    if(!urlRegex.test(req.body.site))
-        sanitizedInput.site = undefined
+  res.locals.sanitizedInput = newStudio;
 
-    if (!urlRegex.test(req.body.site))
-        sanitizedInput.site = undefined
-    
+  next();
+}
 
-    Object.keys(sanitizedInput).forEach((key) => {
-        if (sanitizedInput[key] === undefined) {
-            delete sanitizedInput[key];
-        }
-    });
-    
-    next();
+async function sanitizePartialInput(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const incoming = await validateUpdateStudio(req.body);
+  if (!incoming.success)
+    return res.status(400).json({ message: incoming.issues[0].message });
+  const newStudio = incoming.output;
+
+  res.locals.sanitizedInput = newStudio;
+
+  next();
 }
 
 // santizacion del tipo
 
-function validateExists(req:Request, res:Response, next:NextFunction) {
-    const id = parseInt(req.params.id);
+function validateExists(req: Request, res: Response, next: NextFunction) {
+  const id = parseInt(req.params.id);
 
-    if (Number.isNaN(id))
-        return res.status(400).json({ message: "ID must be an integer" })
+  if (Number.isNaN(id))
+    return res.status(400).json({ message: "ID must be an integer" });
 
-    const studio = Repository.findOne({ id });
+  res.locals.id = id;
 
-    if (!studio) 
-        return res.status(404).json({ message: "Studio Not Found with the selected ID" });
-
-    res.locals.id = id
-    res.locals.studio = studio
-
-    next();
+  next();
 }
-    
-export { findAll, findOne, add, update, remove, sanitizeInput, validateExists };
+
+function handleOrmError(res: Response, err: any) {
+  if (err.code) {
+    switch (err.code) {
+      case "ER_DUP_ENTRY":
+        // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
+        res
+          .status(400)
+          .json({ message: `A studio with that name/site already exists.` });
+        break;
+      case "ER_DATA_TOO_LONG":
+        res.status(400).json({ message: `Data too long.` });
+        break;
+    }
+  } else {
+    switch (err.name) {
+      case "NotFoundError":
+        res
+          .status(404)
+          .json({ message: `Studio not found for ID ${res.locals.id}` });
+        break;
+      default:
+        console.error("\n--- ORM ERROR ---");
+        console.error(err.message);
+        res
+          .status(500)
+          .json({ message: "Oops! Something went wrong. This is our fault." });
+        break;
+    }
+  }
+}
+
+export {
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  sanitizeInput,
+  sanitizePartialInput,
+  validateExists,
+  findStudiosByName,
+};

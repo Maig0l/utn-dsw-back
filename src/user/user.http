@@ -11,3 +11,13 @@ Content-Type: application/json
   "email": "inbox@civy.net",
   "password": "Hunter 2!"
 }
+
+### New user
+
+PATCH  http://localhost:8080/api/users/?1
+{
+  "nick": "Civy",
+  "email": "inbox@civy.net",
+  "password": "Hunter 2!",
+  "profile_img": "asdas"
+}

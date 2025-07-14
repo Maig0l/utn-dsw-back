@@ -1,0 +1,33 @@
+GET http://localhost:8080/api/franchises
+
+
+### obtener un tag
+GET http://localhost:8080/api/franchises/1
+
+
+### crear un nuevo tag
+POST http://localhost:8080/api/franchises
+Content-Type: application/json
+
+{
+  "name": "Persona"
+}
+
+### borrar un tag
+DELETE http://localhost:8080/api/franchises/2
+
+###
+PUT  http://localhost:8080/api/franchises/14
+Content-Type: application/json
+
+{
+  "name": "Persona"
+}
+
+###
+PATCH http://localhost:8080/api/franchises/14
+Content-Type: application/json
+
+{
+  "name": "test patched"
+}

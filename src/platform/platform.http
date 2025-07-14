@@ -2,32 +2,44 @@
 POST http://localhost:8080/restart
 
 ###
-GET http://localhost:8080/api/platforms
+GET http://localhost:8080/api/
 
 ###
 POST http://localhost:8080/api/platforms
 Content-Type: application/json
 
 {
-  "name": "Studio",
-  "type": ["Developer", "asldkfjaslñdkfj"],
-  "site": "https://google.com"
+  "name": "PlayStation1",
+  "img": "imgPS1"
 }
 
 ###
-GET http://localhost:8080/api/platforms/1
-
-###
-PUT http://localhost:8080/api/platforms/4
+POST http://localhost:8080/api/shops
 Content-Type: application/json
 
 {
-  "name": "Studio Skibidi",
-  "type": ["Publisher"],
-  "site": "https://coso.org"
+  "name": "steam",
+  "img": "imgstream",
+  "site": "https://store.steampowered.com/"
+
+}
+
+#@id = {{createPlatform.response.body.data.id}}
+
+###
+GET http://localhost:8080/api/platforms/33
+
+###
+PUT http://localhost:8080/api/platforms/2
+Content-Type: application/json
+{
+  "name": "PlayStation1",
+  "img": "imgPS122"
 }
 
 ###
+
+
 PATCH http://localhost:8080/api/platforms/4
 Content-Type: application/json
 
@@ -37,4 +49,4 @@ Content-Type: application/json
 
 
 ###
-DELETE http://localhost:8080/api/platforms/1
+DELETE http://localhost:8080/api/platforms/3

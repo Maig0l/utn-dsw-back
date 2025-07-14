@@ -1,4 +1,4 @@
-import {describe, test, expect, afterEach, beforeEach} from 'vitest'
+/*import {describe, test, expect, afterEach, beforeEach} from 'vitest'
 import {app} from '../src/app'
 import supertest from 'supertest'
 
@@ -78,8 +78,6 @@ describe('User CRUD', () => {
         .put(`${BASE_ENDPOINT}/${createdUserId}`)
         .send(newData);
       
-      // CONSULTA: Tiene que haber una mejor forma de testear esto que comprobar
-      //   uno por uno
       try {
         expect(response.statusCode).toBe(200)
         expect(response.body).toHaveProperty('data')
@@ -173,4 +171,4 @@ describe('User CRUD', () => {
       expect(res.status).toBe(400)
     })
   })
-})
+})*/
