@@ -46,17 +46,17 @@ const gameBanner = v.pipe(
 
 export const gameSchema = v.object({
   title: gameName,
-  synopsis: v.optional(gameSynopsis),
-  releaseDate: v.optional(gameReleaseDate),
-  portrait: v.optional(v.string()),
-  banner: v.optional(v.string()),
+  synopsis: v.nullish(gameSynopsis),
+  releaseDate: v.nullish(gameReleaseDate),
+  portrait: v.nullish(v.string()),
+  banner: v.nullish(v.string()),
   // do NOT include these in the schema, they are calculated fields
   // cumulativeRating: v.number(), reviewCount: v.number(),
-  franchise: v.optional(v.number()),
-  tags: v.optional(v.array(v.number())),
-  shops: v.optional(v.array(v.number())),
-  platforms: v.optional(v.array(v.number())),
-  studios: v.optional(v.array(v.number())),
+  franchise: v.nullish(v.number()),
+  tags: v.nullish(v.array(v.number())),
+  shops: v.nullish(v.array(v.number())),
+  platforms: v.nullish(v.array(v.number())),
+  studios: v.nullish(v.array(v.number())),
 });
 
 export const gameOptional = v.partial(gameSchema);
