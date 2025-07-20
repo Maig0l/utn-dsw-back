@@ -1,20 +1,20 @@
-import { NextFunction, Request, Response } from "express";
-import { orm } from "../shared/db/orm.js";
-import { Review } from "./review.entity.js";
-import { validateReviewNew, validateReviewEdit } from "./review.schema.js";
-import sanitizeHtml from "sanitize-html";
+import { NextFunction, Request, Response } from 'express';
+import { orm } from '../shared/db/orm.js';
+import { Review } from './review.entity.js';
+import { validateReviewNew, validateReviewEdit } from './review.schema.js';
+import sanitizeHtml from 'sanitize-html';
 import {
   AuthError,
   getUserReferenceFromAuthHeader,
-} from "../auth/auth.middleware.js";
-import { Game } from "../game/game.entity.js";
-import { User } from "../user/user.entity.js";
-import { Tag } from "../tag/tag.entity.js";
-import { FilterQuery } from "@mikro-orm/core";
-import { updateRating } from "../game/game.controller.js";
+} from '../auth/auth.middleware.js';
+import { Game } from '../game/game.entity.js';
+import { User } from '../user/user.entity.js';
+import { Tag } from '../tag/tag.entity.js';
+import { FilterQuery } from '@mikro-orm/core';
+import { updateRating } from '../game/game.controller.js';
 
 // Mensajes
-const ERR_500 = "Oops! Something went wrong. This is our fault.";
+const ERR_500 = 'Oops! Something went wrong. This is our fault.';
 
 const REVIEW_PAGE_SIZE = 100;
 const em = orm.em;
@@ -24,7 +24,7 @@ const em = orm.em;
 /** @deprecated */
 async function findAll(req: Request, res: Response) {
   try {
-    const reviews = await em.find(Review, {}, { populate: ["author", "game"] });
+    const reviews = await em.find(Review, {}, { populate: ['author', 'game'] });
     res.json({ data: reviews });
   } catch (e) {
     handleOrmError(res, e);
@@ -36,7 +36,7 @@ async function findOne(req: Request, res: Response) {
     const review = await em.findOneOrFail(
       Review,
       { id: res.locals.id },
-      { populate: ["author", "game"] }
+      { populate: ['author', 'game'] }
     );
     res.json({ data: review });
   } catch (e) {
@@ -49,8 +49,8 @@ async function findOne(req: Request, res: Response) {
  */
 async function add(req: Request, res: Response) {
   try {
-    console.log("body", req.body);
-    console.log("SANITIZED INPUT", res.locals.newReview);
+    console.log('body', req.body);
+    console.log('SANITIZED INPUT', res.locals.newReview);
     // TODO newReview doen't contain author and gameId
     const review = await em.create(Review, req.body);
     // update the game's cumulative rating and review count
@@ -60,7 +60,7 @@ async function add(req: Request, res: Response) {
 
     res
       .status(201)
-      .json({ message: "Review created successfully", data: review });
+      .json({ message: 'Review created successfully', data: review });
   } catch (e) {
     handleOrmError(res, e);
   }
@@ -68,11 +68,84 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
-    // TODO
-    let review = await em.findOneOrFail(Review, { id: res.locals.id });
-    review = { ...review, ...res.locals.newReview };
-    console.log(review);
-    return res.status(418).json({ data: review });
+    // Verificar autenticación
+    let userReference: User;
+    try {
+      userReference = getUserReferenceFromAuthHeader(req.headers.authorization);
+    } catch (e) {
+      if (e instanceof AuthError)
+        return res.status(401).json({ message: e.message });
+      else if (e instanceof Error)
+        return res.status(500).json({ message: e.message });
+      else {
+        return res.status(500).json({ message: 'Unknown error' });
+      }
+    }
+
+    // Buscar la review existente
+    const review = await em.findOneOrFail(
+      Review,
+      { id: res.locals.id },
+      { populate: ['author', 'game'] }
+    );
+
+    // Verificar que el usuario sea el autor de la review
+    if (review.author.id !== userReference.id) {
+      return res
+        .status(403)
+        .json({ message: 'You can only edit your own reviews' });
+    }
+
+    // Actualizar los campos que vienen en res.locals.newReview
+    const updateData = res.locals.newReview;
+
+    if (
+      updateData.score !== undefined &&
+      typeof updateData.score === 'number'
+    ) {
+      // Si se actualiza el score, también actualizar el rating del juego
+      const oldScore = review.score;
+      const newScore = updateData.score;
+      review.score = newScore;
+
+      // Actualizar el rating acumulativo del juego
+      if (typeof review.game.id !== 'number') {
+        throw new Error('Game ID is missing or invalid');
+      }
+      await updateGameRatingOnEdit(review.game.id, oldScore, newScore, em);
+    }
+
+    if (updateData.title !== undefined) {
+      review.title = updateData.title;
+    }
+
+    if (updateData.body !== undefined) {
+      review.body = updateData.body;
+    }
+
+    if (updateData.suggestedTags !== undefined) {
+      // Limpiar tags existentes y agregar los nuevos
+      review.suggestedTags.removeAll();
+      const tagArray: Tag[] = [];
+      for (const tagId of updateData.suggestedTags) {
+        tagArray.push(em.getReference(Tag, tagId));
+      }
+      review.suggestedTags.add(tagArray);
+    }
+
+    await em.flush();
+
+    // Recargar la review con todas las relaciones para la respuesta
+    const updatedReview = await em.findOneOrFail(
+      Review,
+      { id: review.id },
+      { populate: ['author', 'game'] }
+    );
+
+    res.json({
+      message: 'Review updated successfully',
+      data: updatedReview,
+    });
   } catch (e) {
     handleOrmError(res, e);
   }
@@ -80,9 +153,63 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
-    const review = await em.findOneOrFail(Review, { id: res.locals.id });
+    // Verificar autenticación
+    let userReference: User;
+    try {
+      userReference = getUserReferenceFromAuthHeader(req.headers.authorization);
+    } catch (e) {
+      if (e instanceof AuthError)
+        return res.status(401).json({ message: e.message });
+      else if (e instanceof Error)
+        return res.status(500).json({ message: e.message });
+      else {
+        return res.status(500).json({ message: 'Unknown error' });
+      }
+    }
+
+    // Buscar la review con relaciones pobladas
+    const review = await em.findOneOrFail(
+      Review,
+      { id: res.locals.id },
+      { populate: ['author', 'game'] }
+    );
+
+    console.log('Review to delete:', {
+      id: review.id,
+      gameId: review.game.id,
+      gameIdType: typeof review.game.id,
+      score: review.score,
+      scoreType: typeof review.score,
+      authorId: review.author.id,
+    });
+
+    // Verificar que el usuario sea el autor de la review
+    if (review.author.id !== userReference.id) {
+      return res
+        .status(403)
+        .json({ message: 'You can only delete your own reviews' });
+    }
+
+    // Actualizar el rating del juego antes de eliminar la review
+    const gameId = Number(review.game.id);
+    const reviewScore = Number(review.score);
+
+    if (isNaN(gameId) || isNaN(reviewScore)) {
+      console.error('Invalid data:', {
+        gameId: review.game.id,
+        reviewScore: review.score,
+        gameIdType: typeof review.game.id,
+        reviewScoreType: typeof review.score,
+      });
+      return res
+        .status(500)
+        .json({ message: 'Game ID or review score is missing or invalid' });
+    }
+
+    await updateGameRatingOnDelete(gameId, reviewScore, em);
+
     await em.removeAndFlush(review);
-    res.json({ message: "Review deleted successfully", data: review });
+    res.json({ message: 'Review deleted successfully', data: review });
   } catch (e) {
     handleOrmError(res, e);
   }
@@ -97,8 +224,8 @@ async function remove(req: Request, res: Response) {
  */
 async function listReviewsForGame(req: Request, res: Response) {
   // Guardar los Parámetros de búsqueda
-  const pageNo = Number.parseInt(req.query["page"]?.toString() ?? "0");
-  const showOnlyOwnedReviews = "mine" in req.query;
+  const pageNo = Number.parseInt(req.query['page']?.toString() ?? '0');
+  const showOnlyOwnedReviews = 'mine' in req.query;
 
   // Relegar autenticación al middleware
   // Notar que no estamos llamando al middleware desde el router, si no manualmente acá
@@ -107,8 +234,10 @@ async function listReviewsForGame(req: Request, res: Response) {
     try {
       userRef = getUserReferenceFromAuthHeader(req.headers.authorization);
     } catch (e) {
-      if (e instanceof Error) return res.status(500).json({ message: e.message });
-      if (e instanceof AuthError) return res.status(401).json({ message: e.message });
+      if (e instanceof Error)
+        return res.status(500).json({ message: e.message });
+      if (e instanceof AuthError)
+        return res.status(401).json({ message: e.message });
     }
   }
 
@@ -126,7 +255,7 @@ async function listReviewsForGame(req: Request, res: Response) {
     data = await em.find(Review, criteria, {
       limit: REVIEW_PAGE_SIZE,
       offset: pageNo * REVIEW_PAGE_SIZE,
-      populate: ["author", "game"],
+      populate: ['author', 'game'],
     });
   } catch (e) {
     return handleOrmError(res, e);
@@ -144,26 +273,35 @@ async function listReviewsForGame(req: Request, res: Response) {
  */
 async function listReviewsByAuthor(req: Request, res: Response) {
   if (!req.params.nick)
-    throw new Error("Middleware listReviewsForUser requires route parameter `nick`")
+    throw new Error(
+      'Middleware listReviewsForUser requires route parameter `nick`'
+    );
 
   let author;
   try {
     author = await em.findOneOrFail(User, { nick: req.params.nick });
   } catch (e) {
-    return res.status(404).json({ message: "User not found" });
+    return res.status(404).json({ message: 'User not found' });
   }
 
   let reviews: Review[] = [];
   try {
-    reviews = await em.find(Review, { author: author }, {
-      // TODO: Game sólo debería poblar sus campos id y title
-      populate: ['author', 'game'],
-    });
+    reviews = await em.find(
+      Review,
+      { author: author },
+      {
+        // TODO: Game sólo debería poblar sus campos id y title
+        populate: ['author', 'game'],
+      }
+    );
   } catch (e) {
     return handleOrmError(res, e);
   }
 
-  res.json({ data: reviews, message: `Listing ${reviews.length} reviews by ${author.nick}` })
+  res.json({
+    data: reviews,
+    message: `Listing ${reviews.length} reviews by ${author.nick}`,
+  });
 }
 
 async function createReview(req: Request, res: Response) {
@@ -179,7 +317,7 @@ async function createReview(req: Request, res: Response) {
     else if (e instanceof Error)
       return res.status(500).json({ message: e.message });
     else {
-      return res.status(500).json({ message: "Unknown error" });
+      return res.status(500).json({ message: 'Unknown error' });
     }
   }
 
@@ -188,7 +326,7 @@ async function createReview(req: Request, res: Response) {
   if (!incoming.success)
     return res
       .status(400)
-      .json({ message: "Invalid input: " + incoming.issues[0].message });
+      .json({ message: 'Invalid input: ' + incoming.issues[0].message });
   const reviewInput = incoming.output;
 
   const tagArray: Tag[] = [];
@@ -201,16 +339,20 @@ async function createReview(req: Request, res: Response) {
   const review = new Review();
   review.game = gameReference;
   review.author = userReference;
-  review.title = sanitizeHtml(reviewInput.title || "");
-  review.body = sanitizeHtml(reviewInput.body || "");
+  review.title = sanitizeHtml(reviewInput.title || '');
+  review.body = sanitizeHtml(reviewInput.body || '');
   review.score = reviewInput.score;
   review.suggestedTags.add(tagArray);
 
   let loadedReview;
   try {
     loadedReview = em.create(Review, review);
+
+    // Actualizar el rating del juego al crear la review
+    await updateRating(res.locals.id, reviewInput.score, em);
+
     await em.flush();
-    res.status(201).json({ message: "Review created!", data: loadedReview });
+    res.status(201).json({ message: 'Review created!', data: loadedReview });
   } catch (e) {
     return handleOrmError(res, e);
   }
@@ -221,7 +363,7 @@ async function createReview(req: Request, res: Response) {
 async function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = Number.parseInt(req.params.id);
   if (Number.isNaN(id))
-    return res.status(400).json({ message: "ID must be an integer" });
+    return res.status(400).json({ message: 'ID must be an integer' });
 
   res.locals.id = id;
 
@@ -231,10 +373,10 @@ async function validateExists(req: Request, res: Response, next: NextFunction) {
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   let incoming;
   switch (req.method) {
-    case "PATCH":
+    case 'PATCH':
       incoming = await validateReviewEdit(req.body);
       break;
-    case "POST":
+    case 'POST':
     default:
       incoming = await validateReviewNew(req.body);
       break;
@@ -264,28 +406,85 @@ function roundToNextHalf(num: number) {
   return num;
 }
 
+/**
+ * Actualiza el rating acumulativo del juego cuando se edita una review
+ */
+async function updateGameRatingOnEdit(
+  gameId: number,
+  oldScore: number,
+  newScore: number,
+  em: any
+) {
+  try {
+    const game = await em.findOneOrFail(Game, { id: gameId });
+
+    // Calcular el nuevo rating acumulativo
+    // Restar el score anterior y sumar el nuevo
+    game.cumulativeRating = game.cumulativeRating - oldScore + newScore;
+
+    await em.flush();
+  } catch (e) {
+    console.error('Error updating game rating:', e);
+    throw e;
+  }
+}
+
+/**
+ * Actualiza el rating acumulativo del juego cuando se elimina una review
+ */
+async function updateGameRatingOnDelete(
+  gameId: number,
+  deletedScore: number,
+  em: any
+) {
+  try {
+    console.log(
+      `Updating rating on delete: gameId=${gameId}, deletedScore=${deletedScore}`
+    );
+
+    const game = await em.findOneOrFail(Game, { id: gameId });
+
+    console.log(
+      `Game before update: cumulativeRating=${game.cumulativeRating}, reviewCount=${game.reviewCount}`
+    );
+
+    // Restar el score de la review eliminada y decrementar el contador
+    game.cumulativeRating = game.cumulativeRating - deletedScore;
+    game.reviewCount = game.reviewCount - 1;
+
+    console.log(
+      `Game after update: cumulativeRating=${game.cumulativeRating}, reviewCount=${game.reviewCount}`
+    );
+
+    await em.flush();
+  } catch (e) {
+    console.error('Error updating game rating on delete:', e);
+    throw e;
+  }
+}
+
 function handleOrmError(res: Response, err: any) {
   if (err.code) {
     switch (err.code) {
-      case "ER_DUP_ENTRY":
+      case 'ER_DUP_ENTRY':
         // No debería ocurrir. No hay atributos únicos en esta entidad
         res
           .status(400)
           .json({ message: `A review with those attributes already exists.` });
         break;
-      case "ER_DATA_TOO_LONG":
+      case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
         break;
     }
   } else {
     switch (err.name) {
-      case "NotFoundError":
+      case 'NotFoundError':
         res
           .status(404)
           .json({ message: `Review not found for ID ${res.locals.id}` });
         break;
       default:
-        console.error("\n--- ORM ERROR ---");
+        console.error('\n--- ORM ERROR ---');
         console.error(err.message);
         res.status(500).json({ message: ERR_500 });
         break;
