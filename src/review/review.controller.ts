@@ -174,15 +174,6 @@ async function remove(req: Request, res: Response) {
       { populate: ['author', 'game'] }
     );
 
-    console.log('Review to delete:', {
-      id: review.id,
-      gameId: review.game.id,
-      gameIdType: typeof review.game.id,
-      score: review.score,
-      scoreType: typeof review.score,
-      authorId: review.author.id,
-    });
-
     // Verificar que el usuario sea el autor de la review
     if (review.author.id !== userReference.id) {
       return res
@@ -438,23 +429,11 @@ async function updateGameRatingOnDelete(
   em: any
 ) {
   try {
-    console.log(
-      `Updating rating on delete: gameId=${gameId}, deletedScore=${deletedScore}`
-    );
-
     const game = await em.findOneOrFail(Game, { id: gameId });
-
-    console.log(
-      `Game before update: cumulativeRating=${game.cumulativeRating}, reviewCount=${game.reviewCount}`
-    );
 
     // Restar el score de la review eliminada y decrementar el contador
     game.cumulativeRating = game.cumulativeRating - deletedScore;
     game.reviewCount = game.reviewCount - 1;
-
-    console.log(
-      `Game after update: cumulativeRating=${game.cumulativeRating}, reviewCount=${game.reviewCount}`
-    );
 
     await em.flush();
   } catch (e) {
