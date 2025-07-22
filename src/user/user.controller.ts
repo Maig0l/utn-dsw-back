@@ -2,18 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import sanitizeHtml from 'sanitize-html';
 import { orm } from '../shared/db/orm.js';
 import { User } from './user.entity.js';
-import {
-  validateLogin,
-  validateRegistration,
-  validateUserModification,
-} from './user.schema.js';
+import { validateLogin, validateRegistration, validateUserModification } from './user.schema.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserAuthObject } from '../auth/userAuthObject.interface.js';
-import {
-  getUserReferenceFromAuthHeader,
-  AuthError,
-} from '../auth/auth.middleware.js';
+import { getUserReferenceFromAuthHeader, AuthError } from '../auth/auth.middleware.js';
 import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
@@ -50,13 +43,7 @@ async function findOne(req: Request, res: Response) {
       User,
       { id: res.locals.id },
       {
-        populate: [
-          'bio_text',
-          'linked_accounts',
-          'playlists',
-          'likedTags',
-          'reviews',
-        ],
+        populate: ['bio_text', 'linked_accounts', 'playlists', 'likedTags', 'reviews'],
       }
     );
     res.json({ data: user });
@@ -71,8 +58,7 @@ async function findOne(req: Request, res: Response) {
  * @param res
  */
 async function findOneByNick(req: Request, res: Response) {
-  if (!req.params.nick)
-    return res.status(400).json({ message: 'Provide a nick to search.' });
+  if (!req.params.nick) return res.status(400).json({ message: 'Provide a nick to search.' });
 
   let user;
   try {
@@ -80,13 +66,7 @@ async function findOneByNick(req: Request, res: Response) {
       User,
       { nick: req.params.nick },
       {
-        populate: [
-          'bio_text',
-          'linked_accounts',
-          'playlists',
-          'likedTags',
-          'reviews',
-        ],
+        populate: ['bio_text', 'linked_accounts', 'playlists', 'likedTags', 'reviews'],
       }
     );
   } catch (err) {
@@ -99,15 +79,13 @@ async function findOneByNick(req: Request, res: Response) {
 // *** A.K.A: Register ***
 async function add(req: Request, res: Response) {
   const incoming = await validateRegistration(res.locals.sanitizedInput);
-  if (!incoming.success)
-    return res.status(400).json({ message: incoming.issues });
+  if (!incoming.success) return res.status(400).json({ message: incoming.issues });
   const newUserData = incoming.output as User;
 
   const matchingUser = await em.findOne(User, {
     $or: [{ nick: newUserData.nick }, { email: newUserData.email }],
   });
-  if (matchingUser)
-    return res.status(400).json({ message: 'Nick or email already in use' });
+  if (matchingUser) return res.status(400).json({ message: 'Nick or email already in use' });
 
   newUserData.password = hashPassword(newUserData.password);
 
@@ -146,18 +124,10 @@ async function update(req: Request, res: Response) {
     // TODO: Qué pasa si en el input viene para cambiar el id?
     // Debería sacarlo la sanitización?
 
-    const user = await em.findOneOrFail(
-      User,
-      { id: res.locals.id },
-      { populate: ['likedTags'] }
-    );
+    const user = await em.findOneOrFail(User, { id: res.locals.id }, { populate: ['likedTags'] });
 
     // Si likedTags es un array vacío, lo vaciamos porque el ORM no lo hace automáticamente
-    if (
-      input.likedTags &&
-      Array.isArray(input.likedTags) &&
-      input.likedTags.length === 0
-    ) {
+    if (input.likedTags && Array.isArray(input.likedTags) && input.likedTags.length === 0) {
       user.likedTags.removeAll();
     }
 
@@ -186,14 +156,34 @@ async function uploadImg(req: Request, res: Response) {
   user.profile_img = `/uploads/${profile_img}`;
   await orm.em.flush();
 
-  res
-    .status(200)
-    .json({ message: 'Profile pic uploaded', profile_img: user.profile_img });
+  res.status(200).json({ message: 'Profile pic uploaded', profile_img: user.profile_img });
 }
 
 async function remove(req: Request, res: Response) {
   try {
-    const user = await em.findOneOrFail(User, { id: res.locals.id });
+    // Verificar autenticación
+    const authHeader = req.headers.authorization;
+    let authenticatedUser: User;
+
+    try {
+      authenticatedUser = getUserReferenceFromAuthHeader(authHeader);
+    } catch (authError) {
+      if (authError instanceof AuthError) {
+        return res.status(401).json({ message: authError.message });
+      }
+      throw authError;
+    }
+
+    const targetUserId = res.locals.id;
+
+    // Verificar que el usuario autenticado solo pueda eliminar su propia cuenta
+    if (authenticatedUser.id !== targetUserId) {
+      return res.status(403).json({
+        message: 'Forbidden: You can only delete your own account',
+      });
+    }
+
+    const user = await em.findOneOrFail(User, { id: targetUserId });
     await em.removeAndFlush(user);
     res.json({ message: 'User deleted successfully', data: user });
   } catch (e) {
@@ -205,8 +195,7 @@ async function login(req: Request, res: Response) {
   const ERR_LOGIN_BAD_CREDS = 'Invalid user/pass';
 
   const incoming = await validateLogin(res.locals.sanitizedInput);
-  if (!incoming.success)
-    return res.status(400).json({ message: ERR_LOGIN_BAD_CREDS });
+  if (!incoming.success) return res.status(400).json({ message: ERR_LOGIN_BAD_CREDS });
   const loginData = incoming.output;
 
   // Uso findOne y no findOneOrFail para devolver el error LOGIN_BAD_CREDS, no un ERR_404 del handleOrmError
@@ -218,12 +207,8 @@ async function login(req: Request, res: Response) {
   }
   if (!user) return res.status(400).json({ message: ERR_LOGIN_BAD_CREDS });
 
-  const passwdIsCorrect = await bcrypt.compare(
-    loginData.password,
-    user.password
-  );
-  if (!passwdIsCorrect)
-    return res.status(400).json({ message: ERR_LOGIN_BAD_CREDS });
+  const passwdIsCorrect = await bcrypt.compare(loginData.password, user.password);
+  if (!passwdIsCorrect) return res.status(400).json({ message: ERR_LOGIN_BAD_CREDS });
 
   // Generar JWT con el ID del usuario y otros datos que quieras incluir
 
@@ -245,19 +230,13 @@ async function login(req: Request, res: Response) {
 
 async function logout(req: Request, res: Response) {}
 
-async function changeProfilePicture(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+async function changeProfilePicture(req: Request, res: Response, next: NextFunction) {
   let user;
   try {
     user = getUserReferenceFromAuthHeader(req.headers.authorization);
   } catch (e) {
-    if (e instanceof AuthError)
-      return res.status(401).json({ message: e.message });
-    else if (e instanceof Error)
-      return res.status(500).json({ message: e.message });
+    if (e instanceof AuthError) return res.status(401).json({ message: e.message });
+    else if (e instanceof Error) return res.status(500).json({ message: e.message });
     else {
       return res.status(500).json({ message: 'Unknown error' });
     }
@@ -265,9 +244,7 @@ async function changeProfilePicture(
   user = await em.findOneOrFail(User, user);
 
   if (!req.file)
-    return res
-      .status(500)
-      .json({ message: 'Something went wrong during file upload' });
+    return res.status(500).json({ message: 'Something went wrong during file upload' });
 
   // Solo intentar eliminar el archivo anterior si existe un nombre de archivo válido
   if (user.profile_img && user.profile_img.trim() !== '') {
@@ -291,14 +268,9 @@ function handleOrmError(res: Response, err: any) {
   if (err.code) {
     switch (err.code) {
       case 'ER_DUP_ENTRY':
-        if (err.message.includes('nick'))
-          res.status(400).json({ message: ERR_USED_NICK });
-        else if (err.message.includes('email'))
-          res.status(400).json({ message: ERR_USED_EMAIL });
-        else
-          res
-            .status(400)
-            .json({ message: `A user with those attributes already exists.` });
+        if (err.message.includes('nick')) res.status(400).json({ message: ERR_USED_NICK });
+        else if (err.message.includes('email')) res.status(400).json({ message: ERR_USED_EMAIL });
+        else res.status(400).json({ message: `A user with those attributes already exists.` });
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
         // TODO: Devolver un error dinámico que indique que el email o nick ya está usado, no cualquier atributo)
         break;
@@ -309,16 +281,12 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res
-          .status(404)
-          .json({ message: `User not found for ID ${res.locals.id}` });
+        res.status(404).json({ message: `User not found for ID ${res.locals.id}` });
         break;
       default:
         console.error('\n--- ORM ERROR ---');
         console.error(err.message);
-        res
-          .status(500)
-          .json({ message: 'Oops! Something went wrong. This is our fault.' });
+        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
         break;
     }
   }
@@ -333,8 +301,7 @@ function throw500(res: Response, err: any) {
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = Number.parseInt(req.params.id);
-  if (Number.isNaN(id))
-    return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
 
   // const user = repo.findOne({id})
   // if (!user)
@@ -349,8 +316,7 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
 // Se ejecuta al crear o modificar un registro
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   const incoming = await validateUserModification(req.body);
-  if (!incoming.success)
-    return res.status(400).json({ message: incoming.issues[0].message });
+  if (!incoming.success) return res.status(400).json({ message: incoming.issues[0].message });
   const userModifications = incoming.output;
 
   res.locals.sanitizedInput = userModifications;
@@ -364,8 +330,7 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
     });
 
   Object.keys(res.locals.sanitizedInput).forEach((k) => {
-    if (res.locals.sanitizedInput[k] === undefined)
-      delete res.locals.sanitizedInput[k];
+    if (res.locals.sanitizedInput[k] === undefined) delete res.locals.sanitizedInput[k];
   });
 
   next();
