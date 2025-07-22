@@ -228,7 +228,7 @@ async function login(req: Request, res: Response) {
   res.json({ message: 'Login successful', data: { token: token } });
 }
 
-async function logout(req: Request, res: Response) {}
+async function logout(req: Request, res: Response) { }
 
 async function changeProfilePicture(req: Request, res: Response, next: NextFunction) {
   let user;
@@ -348,4 +348,5 @@ export {
   login,
   uploadImg,
   changeProfilePicture,
+  hashPassword,
 };
