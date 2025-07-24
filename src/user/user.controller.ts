@@ -6,9 +6,10 @@ import { validateLogin, validateRegistration, validateUserModification } from '.
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserAuthObject } from '../auth/userAuthObject.interface.js';
-import { getUserReferenceFromAuthHeader, AuthError } from '../auth/auth.middleware.js';
+import { getUserReferenceFromAuthHeader, AuthError, getUserTokenDataFromAuthHeader } from '../auth/auth.middleware.js';
 import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import * as valibot from "valibot";
 
 // TODO: I know this is sloppy, but there's no time
 const API_SECRET = process.env.apiSecret ?? '';
@@ -257,6 +258,37 @@ async function changeProfilePicture(req: Request, res: Response, next: NextFunct
   res.json({ message: 'Profile picture updated OK' });
 }
 
+/* *** Interactions ***
+ */
+
+/**
+ * For route /api/users/:nick/setAdminStatus?admin=[true|false]
+ * Assumes middlewares used: getAndSaveUserToResponseLocals, isAdminGuard
+ * @param req Requires Path Variable `nick` (a valid username) and Query Parameter `admin` (boolean)
+ * @param res
+ * @returns
+ */
+async function setAdminStatus(req: Request, res: Response) {
+  if (!req.params.admin || !req.params.nick)
+    return res.status(400).json({ message: "Target nick and desired admin status needed." })
+  if (!req.params.admin.match(/true|false/))
+    return res.status(400).json({ message: "`admin` param must be either 'true' or 'false'." })
+
+  const targetNick = req.params.nick;
+
+  const targetUser = await em.findOne(User, { nick: req.params.nick });
+  if (!targetUser)
+    return res.status(404).json({ message: `User ${targetNick} not found.` })
+
+  const newVal = req.params.admin === "true" ? true : false;
+  targetUser.is_admin = newVal;
+  try {
+    em.persistAndFlush(targetUser);
+  } catch (e) {
+    handleOrmError(res, e);
+  }
+}
+
 /* *** Helper functions ***
  */
 
@@ -349,4 +381,5 @@ export {
   uploadImg,
   changeProfilePicture,
   hashPassword,
+  setAdminStatus,
 };
