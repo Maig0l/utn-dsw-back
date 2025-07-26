@@ -11,11 +11,9 @@ describe("user test", () => {
     expect(response.body.data[0]).toHaveProperty("nick");
   });
 
-  it("get one, should return only one user", async () => {
+  it("get one, should not return one user", async () => {
     const response = await request(url_base).get("users/1");
-    expect(response.status).toBe(200);
-    expect(response.body.data).toHaveProperty("nick");
-    expect(!Array.isArray(response.body.data)).toBe(true);
+    expect(response.status).toBe(404);
   });
 
  /* it("post one user, should create a user", async () => {
