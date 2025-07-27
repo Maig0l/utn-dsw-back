@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { paramCheckFromList } from '../shared/paramCheckFromList.js';
 import { Playlist } from './playlist.entity.js';
+import { Game } from '../game/game.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { validatePlaylist } from './playlist.schema.js';
 import { User } from '../user/user.entity.js';
@@ -22,7 +23,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(res.locals.id);
-    const playlist = await em.findOneOrFail(Playlist, { id });
+    const playlist = await em.findOneOrFail(Playlist, { id }, { populate: ['games'] });
     res.status(200).json({ message: 'found playlist', data: playlist });
   } catch (err) {
     handleOrmError(res, err);
@@ -55,11 +56,32 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(res.locals.id);
-    const playlist = em.getReference(Playlist, id);
-    em.assign(playlist, req.body);
+
+    // Cargar la playlist completa con sus relaciones en lugar de usar getReference
+    const playlist = await em.findOneOrFail(Playlist, { id }, { populate: ['games'] });
+
+    // Manejar la actualización manualmente para evitar problemas con relaciones
+    if (req.body.name) playlist.name = req.body.name;
+    if (req.body.description !== undefined) playlist.description = req.body.description;
+    if (req.body.isPrivate !== undefined) playlist.isPrivate = req.body.isPrivate;
+
+    // Manejar la relación con juegos
+    if (req.body.games && Array.isArray(req.body.games)) {
+      // Limpiar los juegos existentes
+      playlist.games.removeAll();
+
+      // Agregar los nuevos juegos
+      for (const gameId of req.body.games) {
+        const game = em.getReference(Game, gameId);
+        playlist.games.add(game);
+      }
+    }
+
     await em.flush();
+
     res.status(200).json({ message: 'playlist updated', data: playlist });
   } catch (err) {
+    console.error('Error in update function:', err);
     handleOrmError(res, err);
   }
 }
