@@ -4,7 +4,7 @@ import { User } from "./user.entity.js";
 
 const em = orm.em;
 const DEFAULT_NICK = "Admin";
-const DEFAULT_PASS = "admin";
+const DEFAULT_PASS = "Admin_init1";
 const DEFAULT_EMAIL = "";
 
 export async function initializeAdminUserIfAbsent(): Promise<boolean> {
@@ -22,7 +22,9 @@ export async function initializeAdminUserIfAbsent(): Promise<boolean> {
   }
 
   try {
-    em.create(User, userData);
+    em.create(User, userData)
+    await em.flush()
+    console.info(`-- First user created. Login with credentials:\n Nick: ${DEFAULT_NICK}\n Password: ${DEFAULT_PASS}`)
     return true;
   } catch (e) {
     console.error("-- DB error while initializing admin user.")
