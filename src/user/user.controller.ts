@@ -6,9 +6,10 @@ import { validateLogin, validateRegistration, validateUserModification } from '.
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserAuthObject } from '../auth/userAuthObject.interface.js';
-import { getUserReferenceFromAuthHeader, AuthError } from '../auth/auth.middleware.js';
+import { getUserReferenceFromAuthHeader, AuthError, getUserTokenDataFromAuthHeader } from '../auth/auth.middleware.js';
 import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import * as valibot from "valibot";
 
 // TODO: I know this is sloppy, but there's no time
 const API_SECRET = process.env.apiSecret ?? '';
@@ -228,7 +229,7 @@ async function login(req: Request, res: Response) {
   res.json({ message: 'Login successful', data: { token: token } });
 }
 
-async function logout(req: Request, res: Response) {}
+async function logout(req: Request, res: Response) { }
 
 async function changeProfilePicture(req: Request, res: Response, next: NextFunction) {
   let user;
@@ -255,6 +256,40 @@ async function changeProfilePicture(req: Request, res: Response, next: NextFunct
   user.profile_img = req.file.filename;
   await em.flush();
   res.json({ message: 'Profile picture updated OK' });
+}
+
+/* *** Interactions ***
+ */
+
+/**
+ * For route /api/users/:nick/setAdminStatus?admin=[true|false]
+ * Assumes middlewares used: getAndSaveUserToResponseLocals, isAdminGuard
+ * @param req Requires Path Variable `nick` (a valid username) and Query Parameter `admin` (boolean)
+ * @param res
+ * @returns
+ */
+async function setAdminStatus(req: Request, res: Response) {
+  if (!req.query.admin || !req.params.nick)
+    return res.status(400).json({ message: "Target nick and desired admin status needed." })
+
+  const adminVal = req.query.admin as string;
+  if (!adminVal.match(/^(true|false)$/i))
+    return res.status(400).json({ message: "`admin` param must be either 'true' or 'false'." })
+
+  const targetNick = req.params.nick;
+
+  const targetUser = await em.findOne(User, { nick: req.params.nick });
+  if (!targetUser)
+    return res.status(404).json({ message: `User ${targetNick} not found.` })
+
+  const newVal = adminVal === "true" ? true : false;
+  targetUser.is_admin = newVal;
+  try {
+    await em.persistAndFlush(targetUser);
+    return res.status(200).json({ message: 'User changed successfully' });
+  } catch (e) {
+    handleOrmError(res, e);
+  }
 }
 
 /* *** Helper functions ***
@@ -348,4 +383,6 @@ export {
   login,
   uploadImg,
   changeProfilePicture,
+  hashPassword,
+  setAdminStatus,
 };

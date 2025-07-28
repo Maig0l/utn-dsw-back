@@ -15,6 +15,7 @@ import { reviewRouter } from "./review/review.routes.js";
 import { gamePictureRouter } from "./game-picture/game-picture.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { initializeAdminUserIfAbsent } from "./user/user.init.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,6 +50,7 @@ app.use("/api/game-picture", gamePictureRouter);
 app.use("/uploads", express.static(path.join(__dirname, "../../uploads"))); // Usamos este path porque el server se ejecuta desde la carpeta /src
 
 await syncSchema(); // TODO: Never in prod
+await initializeAdminUserIfAbsent();
 
 app.use((_, res) => {
   return res.status(404).json({ message: "Resource not found" });

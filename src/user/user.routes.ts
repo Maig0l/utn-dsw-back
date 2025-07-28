@@ -10,9 +10,11 @@ import {
   validateExists,
   login,
   changeProfilePicture,
+  setAdminStatus,
 } from "./user.controller.js";
 import { upload } from "../shared/multer.js";
 import { listReviewsByAuthor } from "../review/review.controller.js";
+import { getAndSaveUserObjectsToResponseLocals, isAdminGuard } from "../auth/auth.middleware.js";
 
 export const userRouter = Router();
 
@@ -26,6 +28,8 @@ userRouter.patch("/me/profile_img", upload.single('profile_img'), changeProfileP
 userRouter.get("/:nick", findOneByNick);
 userRouter.get("/:nick/reviews", listReviewsByAuthor);
 
+userRouter.put("/:nick/setAdminStatus", getAndSaveUserObjectsToResponseLocals, isAdminGuard, setAdminStatus);
+
 // Todas las rutas /:id usan el validateExists
 userRouter.use("/:id", validateExists);
 
@@ -33,7 +37,6 @@ userRouter.get("/:id", findOne);
 userRouter.put("/:id", sanitizeInput, update);
 userRouter.patch("/:id", sanitizeInput, update);
 userRouter.delete("/:id", remove);
-
 
 /// (Deprecado)
 // userRouter.patch(
