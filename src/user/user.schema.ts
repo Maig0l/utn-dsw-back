@@ -38,7 +38,7 @@ const email = v.pipe(v.string(), v.email(ERR_BAD_EMAIL));
 const password = v.pipe(
   v.string(),
   v.regex(
-    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d @$!%*#?&]{8,50}$/,
+    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[ _\-@$!%*#?&])[A-Za-z\d _\-@$!%*#?&]{8,50}$/,
     ERR_BAD_PASS,
   ),
 );
