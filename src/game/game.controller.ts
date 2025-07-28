@@ -244,16 +244,16 @@ async function uploadPortrait(req: Request, res: Response) {
   const portrait = req.file?.filename;
 
   if (!portrait) {
-    return res.status(400).json({ message: 'No se subió ninguna imagen' });
+    return res.status(400).json({ message: 'No portrait picture was uploaded' });
   }
 
   const game = await orm.em.findOne(Game, { id: gameId });
-  if (!game) return res.status(404).json({ message: 'Juego no encontrado' });
+  if (!game) return res.status(404).json({ message: 'Game not found' });
 
   game.portrait = `/uploads/${portrait}`;
   await orm.em.flush();
 
-  res.status(200).json({ message: 'Portrait subido', portrait: game.portrait });
+  res.status(200).json({ message: 'Portrait picture uploaded', portrait: game.portrait });
 }
 
 async function uploadBanner(req: Request, res: Response) {
@@ -261,16 +261,16 @@ async function uploadBanner(req: Request, res: Response) {
   const banner = req.file?.filename;
 
   if (!banner) {
-    return res.status(400).json({ message: 'No se subió ninguna imagen' });
+    return res.status(400).json({ message: 'No banner picture was uploaded' });
   }
 
   const game = await orm.em.findOne(Game, { id: gameId });
-  if (!game) return res.status(404).json({ message: 'Juego no encontrado' });
+  if (!game) return res.status(404).json({ message: 'Game not found' });
 
   game.banner = `/uploads/${banner}`;
   await orm.em.flush();
 
-  res.status(200).json({ message: 'Banner subido', banner: game.banner });
+  res.status(200).json({ message: 'Banner picture uploaded', banner: game.banner });
 }
 
 // Podria ser 1 funcion que se bifurque, pero no me funcaba (?)

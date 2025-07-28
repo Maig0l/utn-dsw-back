@@ -22,7 +22,7 @@ const filterImageTypes = (req: any, file: Express.Multer.File, cb: any) => {
   const isValid =
     allowedTypes.test(path.extname(file.originalname).toLowerCase()) &&
     allowedTypes.test(file.mimetype);
-  isValid ? cb(null, true) : cb(new Error("Solo se permiten imágenes"));
+  isValid ? cb(null, true) : cb(new Error("Only image files are allowed."));
 };
 
 // Middleware de subida

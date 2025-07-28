@@ -152,7 +152,7 @@ async function uploadImg(req: Request, res: Response) {
   }
 
   const user = await orm.em.findOne(User, { id: userId });
-  if (!user) return res.status(404).json({ message: 'User not finded' });
+  if (!user) return res.status(404).json({ message: 'User not found' });
 
   user.profile_img = `/uploads/${profile_img}`;
   await orm.em.flush();

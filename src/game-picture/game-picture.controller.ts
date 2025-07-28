@@ -11,7 +11,7 @@ async function addPicture(req: Request, res: Response) {
     const game = await em.findOneOrFail(Game, {
       id: res.locals.sanitizedInput.game_id,
     });
-    console.log("JUEGO: ", game);
+    console.log("GAME: ", game);
     console.log("SANITIZED: ", res.locals.sanitizedInput);
     for (let i = 0; i < res.locals.sanitizedInput.urls.length; i++) {
       const picture = em.create(GamePicture, {
