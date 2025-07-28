@@ -28,7 +28,7 @@ userRouter.patch("/me/profile_img", upload.single('profile_img'), changeProfileP
 userRouter.get("/:nick", findOneByNick);
 userRouter.get("/:nick/reviews", listReviewsByAuthor);
 
-userRouter.patch("/:nick/setAdminStatus", getAndSaveUserObjectsToResponseLocals, isAdminGuard, setAdminStatus);
+userRouter.put("/:nick/setAdminStatus", getAndSaveUserObjectsToResponseLocals, isAdminGuard, setAdminStatus);
 
 // Todas las rutas /:id usan el validateExists
 userRouter.use("/:id", validateExists);

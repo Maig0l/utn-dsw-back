@@ -269,9 +269,11 @@ async function changeProfilePicture(req: Request, res: Response, next: NextFunct
  * @returns
  */
 async function setAdminStatus(req: Request, res: Response) {
-  if (!req.params.admin || !req.params.nick)
+  if (!req.query.admin || !req.params.nick)
     return res.status(400).json({ message: "Target nick and desired admin status needed." })
-  if (!req.params.admin.match(/true|false/))
+
+  const adminVal = req.query.admin as string;
+  if (!adminVal.match(/^(true|false)$/i))
     return res.status(400).json({ message: "`admin` param must be either 'true' or 'false'." })
 
   const targetNick = req.params.nick;
@@ -280,10 +282,11 @@ async function setAdminStatus(req: Request, res: Response) {
   if (!targetUser)
     return res.status(404).json({ message: `User ${targetNick} not found.` })
 
-  const newVal = req.params.admin === "true" ? true : false;
+  const newVal = adminVal === "true" ? true : false;
   targetUser.is_admin = newVal;
   try {
-    em.persistAndFlush(targetUser);
+    await em.persistAndFlush(targetUser);
+    return res.status(200).json({ message: 'User changed successfully' });
   } catch (e) {
     handleOrmError(res, e);
   }

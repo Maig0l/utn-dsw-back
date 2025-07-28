@@ -84,4 +84,5 @@ export function getAndSaveUserObjectsToResponseLocals(req: Request, res: Respons
 export function isAdminGuard(req: Request, res: Response, next: NextFunction) {
   if (!res.locals.currentUserTokenData.is_admin)
     return res.status(403).json({ message: "You need admin status to perform this action." })
+  next();
 }
