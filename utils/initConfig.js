@@ -1,9 +1,10 @@
-import { randomBytes } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 
 const configVars = {
   General: {
+    port: 8080,
     baseDir: '/api\t# No trailing slash',
-    apiSecret: randomBytes(32),
+    apiSecret: randomSecret(),
   },
   Database: {
     dbHost: 'localhost',
@@ -13,6 +14,11 @@ const configVars = {
     dbName: '',
   },
 };
+
+function randomSecret() {
+  const length = 64;
+  return randomBytes(length).toString('base64url');
+}
 
 function toIni() {
   let str = '';
