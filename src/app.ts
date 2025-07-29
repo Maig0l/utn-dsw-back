@@ -16,6 +16,8 @@ import { gamePictureRouter } from "./game-picture/game-picture.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { initializeAdminUserIfAbsent } from "./user/user.init.js";
+import swaggerUI from "swagger-ui-express";
+import { apiSpec } from "./swagger/swagger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +37,7 @@ app.use((req, res, next) => {
 });
 
 // Registrar routers para entidades
+app.use("/api/_docs", swaggerUI.serve, swaggerUI.setup(apiSpec, { explorer: true }));
 app.use("/api/users", userRouter);
 app.use("/api/users/:id(\\d+)/uploads", express.static("uploads")); // TODO: Cambiar a un bucket de S3 o similar
 app.use("/api/shops", shopRouter);

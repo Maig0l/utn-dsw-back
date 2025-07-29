@@ -1,0 +1,62 @@
+components:
+  responses:
+    BasicApiResponse:
+      content:
+        application/json:
+          schema:
+            $ref: '#components/schemas/BasicApiResponse'
+
+  schemas:
+    BasicApiResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          oneof:
+            - type: array
+            - type: object
+
+    ImageUri:
+      type: string
+      description: |
+        Either a filename to search in the backend's own file store, or an URL to an image in an external storage server.
+        May be used for game images or small icons.
+
+    Franchise:
+      type: object
+      description: Set of games related by a common series or character
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        games:
+          $ref: '#/components/schemas/Game'
+
+    Game:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        releaseDate:
+          type: string
+          format: date
+        portrait:
+          $ref: '#/components/schemas/ImageUri'
+        banner:
+          $ref: '#/components/schemas/ImageUri'
+        cumulativeRating:
+          type: number
+        reviewCount:
+          type: number
+        pictures:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageUri'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
