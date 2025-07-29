@@ -14,12 +14,6 @@ const name = v.pipe(
   v.maxLength(100, ERR_NAME_LEN),
 );
 
-const img = v.pipe(
-  v.string(),
-  v.nonEmpty(ERR_IMG_URL_EMPTY),
-  //v.url(ERR_URL), TODO 
-);
-
 const site = v.pipe(
   v.string(),
   v.nonEmpty(ERR_SITE_URL_EMPTY),
@@ -29,7 +23,6 @@ const site = v.pipe(
 
 const shopSchema = v.object({
   name: name,
-  img: v.optional(img),
   site: v.optional(site),
 });
 
