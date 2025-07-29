@@ -102,7 +102,6 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
-  // TODO: Tal vez pedir también la contraseña para cambiar atributos como el email o passwd
   if (req.method === 'PATCH' && !validateUserModification(req.body))
     return res.status(400).json({ message: ERR_PARAMS_PATCH });
 
@@ -122,9 +121,6 @@ async function update(req: Request, res: Response) {
   }
 
   try {
-    // TODO: Qué pasa si en el input viene para cambiar el id?
-    // Debería sacarlo la sanitización?
-
     const user = await em.findOneOrFail(User, { id: res.locals.id }, { populate: ['likedTags'] });
 
     // Si likedTags es un array vacío, lo vaciamos porque el ORM no lo hace automáticamente
@@ -307,7 +303,6 @@ function handleOrmError(res: Response, err: any) {
         else if (err.message.includes('email')) res.status(400).json({ message: ERR_USED_EMAIL });
         else res.status(400).json({ message: `A user with those attributes already exists.` });
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        // TODO: Devolver un error dinámico que indique que el email o nick ya está usado, no cualquier atributo)
         break;
       case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });

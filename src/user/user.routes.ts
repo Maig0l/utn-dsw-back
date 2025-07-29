@@ -20,7 +20,7 @@ export const userRouter = Router();
 
 userRouter.get("/", findAll);
 userRouter.post("/", sanitizeInput, add);
-userRouter.post("/login", sanitizeInput, login); // TODO: Move to an /auth endpoint
+userRouter.post("/login", sanitizeInput, login);
 
 // No hace falta aclarar el nick o id del usuario
 userRouter.patch("/me/profile_img", upload.single('profile_img'), changeProfilePicture);

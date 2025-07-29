@@ -33,7 +33,6 @@ const email = v.pipe(v.string(), v.email(ERR_BAD_EMAIL));
  * Longitud: 8 >= L >= 50 (limitación de bcrypt)
  * Caracteres obligatorios: 1x letra, 1x número, 1x caractér especial
  * RegEx tomado de: https://stackoverflow.com/a/21456918
- * TODO: El espacio no está siendo tomado como caracter especial
  */
 const password = v.pipe(
   v.string(),

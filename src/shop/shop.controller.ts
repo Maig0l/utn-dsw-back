@@ -4,10 +4,6 @@ import { orm } from "../shared/db/orm.js";
 import { Shop } from "./shop.entity.js";
 import { validateNewShop, validateUpdateShop } from "./shop.schema.js";
 
-// Registrar parámetros válidos para un post/put/patch
-const VALID_PARAMS = "name img site".split(" ");
-const hasParams = paramCheckFromList(VALID_PARAMS);
-
 const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
@@ -61,10 +57,8 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
-    // CONSULTA[ans]: Está bien hacer esta doble consulta? O getReference no va a la DB?
     const shop = await em.findOneOrFail(Shop, { id: res.locals.id });
-    const shopRef = em.getReference(Shop, res.locals.id); // ANS: TODO: Quitar
-    await em.removeAndFlush(shopRef);
+    await em.removeAndFlush(shop);
 
     res.json({ message: "Shop deleted successfully", data: shop });
   } catch (err) {
@@ -75,13 +69,6 @@ async function remove(req: Request, res: Response) {
 /**
  * MiddleWarez!
  */
-
-/**
- * Todas las funciones que deban trabajar con input sanitizado,
- * que trabajen con los valores guardados en res.locals!
- * TODO: (Code Convention para el equipo)
- */
-//middleware
 
 async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
   const incoming = await validateNewShop(req.body);
