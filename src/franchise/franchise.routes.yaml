@@ -1,0 +1,310 @@
+'/api/franchises/search':
+  get:
+    summary: Search franchises
+    operationId: searchFranchises
+    parameters:
+      - name: name
+        in: query
+        description: Partial name of the franchise to look for
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of matching franchises
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Franchise'
+
+'/api/franchises':
+  get:
+    summary: Get all franchises
+    operationId: getAllFranchises
+    responses:
+      '200':
+        description: List of all franchises
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Franchise'
+  post:
+    summary: Create a new franchise
+    operationId: createFranchise
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the franchise
+            example:
+              name: 'Super Mario'
+    responses:
+      '201':
+        description: Franchise created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Franchise'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+
+'/api/franchises/{id}':
+  get:
+    summary: Get a franchise by ID
+    operationId: getFranchiseById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The franchise ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Franchise found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Franchise'
+      '404':
+        description: Franchise not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+  put:
+    summary: Update a franchise completely
+    operationId: updateFranchise
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The franchise ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the franchise
+              games:
+                type: array
+                items:
+                  type: integer
+                description: Array of game IDs to associate with this franchise
+            example:
+              name: 'Super Mario'
+              games: [1, 2, 3]
+    responses:
+      '200':
+        description: Franchise updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Franchise'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Franchise not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+  patch:
+    summary: Partially update a franchise
+    operationId: partialUpdateFranchise
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The franchise ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the franchise
+              games:
+                type: array
+                items:
+                  type: integer
+                description: Array of game IDs to associate with this franchise
+            example:
+              name: 'Super Mario Bros'
+    responses:
+      '200':
+        description: Franchise updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Franchise'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Franchise not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+  delete:
+    summary: Delete a franchise
+    operationId: deleteFranchise
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The franchise ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Franchise deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Franchise not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Response message
+        data:
+          description: Response data (type varies by endpoint)
+        error:
+          type: string
+          description: Error message (present only on error responses)
+      example:
+        message: "Success"
+        data: {}
+    
+    Franchise:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the franchise
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Name of the franchise
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
+          description: Games associated with this franchise
+        createdAt:
+          type: string
+          format: date-time
+          description: When the franchise was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the franchise was last updated
+      required:
+        - id
+        - name
+      example:
+        id: 1
+        name: "Super Mario"
+        games: []
+        createdAt: "2024-01-01T00:00:00Z"
+        updatedAt: "2024-01-01T00:00:00Z"
+    
+    Game:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the game
+        name:
+          type: string
+          description: Name of the game
+      required:
+        - id
+        - name
+      example:
+        id: 1
+        name: "Super Mario Bros"

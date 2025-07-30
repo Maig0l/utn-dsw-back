@@ -7,15 +7,13 @@ components:
             $ref: '#components/schemas/BasicApiResponse'
 
   schemas:
-    BasicApiResponse:
+    ApiResponse:
       type: object
       properties:
         message:
           type: string
-        data:
-          oneof:
-            - type: array
-            - type: object
+        data: true
+      additionalProperties: false
 
     ImageUri:
       type: string
@@ -32,7 +30,9 @@ components:
         name:
           type: string
         games:
-          $ref: '#/components/schemas/Game'
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
 
     Game:
       type: object
