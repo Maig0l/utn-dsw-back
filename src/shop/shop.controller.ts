@@ -84,7 +84,7 @@ async function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 async function sanitizePartialInput(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const incoming = await validateUpdateShop(req.body);
   if (!incoming.success)
@@ -130,9 +130,9 @@ function handleOrmError(res: Response, err: any) {
             .status(400)
             .json({ message: `A shop with that site already exists.` });
         else
-        res
-          .status(400)
-          .json({ message: `A shop with that name/site already exists.` });
+          res
+            .status(400)
+            .json({ message: `A shop with that name/site already exists.` });
         break;
       case "ER_DATA_TOO_LONG":
         res.status(400).json({ message: `Data too long.` });
