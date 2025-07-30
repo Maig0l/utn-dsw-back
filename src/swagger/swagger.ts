@@ -9,7 +9,7 @@ const options = {
     ...rootInfo,
     components,
   },
-  apis: ['../**/*.routes.ts', '../**/*.routes.js'],
+  apis: ['../**/*.routes.yaml'],
 }
 
 export const apiSpec = swaggerJsdoc(options);
