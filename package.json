@@ -5,8 +5,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "build": "tsc -p ./tsconfig.json",
-    "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/src/server.js\"",
+    "copyExtraFiles": "node utils/copyExtraFiles.js",
+    "build": "tsc -p ./tsconfig.json && pnpm copyExtraFiles",
+    "_run:dev": "pnpm copyExtraFiles && node ./dist/src/server.js",
+    "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"pnpm _run:dev\"",
     "test": "jest",
     "initConfig": "node utils/initConfig.js > .env"
   },
