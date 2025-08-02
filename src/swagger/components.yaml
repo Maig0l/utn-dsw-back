@@ -12,8 +12,21 @@ components:
       properties:
         message:
           type: string
-        data: true
+        data:
+          description: Response data (type varies by endpoint)
       additionalProperties: false
+
+    ApiResponseError:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            message:
+              type: string
+              example: 'An error occurred'
+            data:
+              type: 'null'
+              example: null
 
     ImageUri:
       type: string
@@ -41,6 +54,9 @@ components:
           type: number
         title:
           type: string
+        synopsis:
+          type: string
+          description: A brief description of the game.
         releaseDate:
           type: string
           format: date
@@ -50,13 +66,42 @@ components:
           $ref: '#/components/schemas/ImageUri'
         cumulativeRating:
           type: number
+          description: |
+            The average rating of the game, calculated from all user reviews.
+            This is a number between 0 and 5.
         reviewCount:
           type: number
         pictures:
           type: array
           items:
             $ref: '#/components/schemas/ImageUri'
+          description: A list of images related to the game, such as screenshots or promotional art.
         tags:
           type: array
           items:
             $ref: '#/components/schemas/Tag'
+
+    Tag:
+      type: object
+      description: |
+        A tag that can be associated with games to categorize them.
+        It may relate to genres, themes, or technical aspects of the games.
+      properties:
+        id:
+          type: number
+          description: Unique identifier for the tag
+        name:
+          type: string
+          description: Name of the tag (must be unique)
+        description:
+          type: string
+          description: Description of what this tag represents
+      required:
+        - id
+        - name
+        - description
+      example:
+        id: 1
+        name: 'Action'
+        description: 'Fast-paced games with combat and adventure elements'
+        games: []
