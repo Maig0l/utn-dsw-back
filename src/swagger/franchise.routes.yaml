@@ -1,4 +1,4 @@
-'/api/franchises/search':
+'/franchises/search':
   get:
     summary: Search franchises
     operationId: searchFranchises
@@ -23,7 +23,7 @@
                       items:
                         $ref: '#/components/schemas/Franchise'
 
-'/api/franchises':
+'/franchises':
   get:
     summary: Get all franchises
     operationId: getAllFranchises
@@ -57,6 +57,11 @@
                 minLength: 3
                 maxLength: 100
                 description: Name of the franchise
+              games:
+                type: array
+                description: Array of **game IDs** to associate with this franchis.
+                items:
+                  type: integer
             example:
               name: 'Super Mario'
     responses:
@@ -77,7 +82,7 @@
             schema:
               $ref: '#/components/schemas/ApiResponse'
 
-'/api/franchises/{id}':
+'/franchises/{id}':
   get:
     summary: Get a franchise by ID
     operationId: getFranchiseById
@@ -105,7 +110,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApiResponse'
+              $ref: '#/components/schemas/ApiResponseError'
   put:
     summary: Update a franchise completely
     operationId: updateFranchise
@@ -155,13 +160,13 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApiResponse'
+              $ref: '#/components/schemas/ApiResponseError'
       '404':
         description: Franchise not found
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApiResponse'
+              $ref: '#/components/schemas/ApiResponseError'
   patch:
     summary: Partially update a franchise
     operationId: partialUpdateFranchise
@@ -208,13 +213,13 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApiResponse'
+              $ref: '#/components/schemas/ApiResponseError'
       '404':
         description: Franchise not found
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApiResponse'
+              $ref: '#/components/schemas/ApiResponseError'
   delete:
     summary: Delete a franchise
     operationId: deleteFranchise
@@ -238,4 +243,4 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApiResponse'
+              $ref: '#/components/schemas/ApiResponseError'
