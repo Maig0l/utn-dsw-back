@@ -1,0 +1,305 @@
+'/platforms/search':
+  get:
+    tags: [Platform]
+    summary: Search platforms
+    operationId: searchPlatforms
+    parameters:
+      - name: name
+        in: query
+        description: Partial name of the platform to look for
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of matching platforms
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Platform'
+
+'/platforms':
+  get:
+    tags: [Platform]
+    summary: Get all platforms
+    operationId: getAllPlatforms
+    responses:
+      '200':
+        description: List of all platforms
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Platform'
+  post:
+    tags: [Platform]
+    summary: Create a new platform
+    operationId: createPlatform
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 100
+                description: Name of the platform (must be unique)
+              img:
+                type: string
+                format: uri
+                description: Optional image URL for the platform
+            example:
+              name: 'PlayStation 5'
+              img: 'https://example.com/ps5-logo.png'
+    responses:
+      '201':
+        description: Platform created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Platform'
+      '400':
+        description: Bad request - Invalid input data or platform already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/platforms/{id}':
+  get:
+    tags: [Platform]
+    summary: Get a platform by ID
+    operationId: getPlatformById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The platform ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Platform found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Platform'
+      '404':
+        description: Platform not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  put:
+    tags: [Platform]
+    summary: Update a platform completely
+    operationId: updatePlatform
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The platform ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 100
+                description: Name of the platform (must be unique)
+              img:
+                type: string
+                format: uri
+                description: Optional image URL for the platform
+            example:
+              name: 'PlayStation 5'
+              img: 'https://example.com/ps5-logo.png'
+    responses:
+      '200':
+        description: Platform updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Platform'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Platform not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  patch:
+    tags: [Platform]
+    summary: Partially update a platform
+    operationId: partialUpdatePlatform
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The platform ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 100
+                description: Name of the platform (must be unique)
+              img:
+                type: string
+                format: uri
+                description: Optional image URL for the platform
+            example:
+              name: 'PlayStation 5 Pro'
+    responses:
+      '200':
+        description: Platform updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Platform'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Platform not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  delete:
+    tags: [Platform]
+    summary: Delete a platform
+    operationId: deletePlatform
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The platform ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Platform deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Platform not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/platforms/{id}/upload':
+  patch:
+    tags: [Platform]
+    summary: Upload an image for a platform
+    operationId: uploadPlatformImage
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The platform ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - img
+            properties:
+              img:
+                type: string
+                format: binary
+                description: Image file to upload for the platform
+    responses:
+      '200':
+        description: Platform image uploaded successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: object
+                      properties:
+                        img:
+                          type: string
+                          description: Path to the uploaded image
+      '400':
+        description: Bad request - No image file provided or invalid file
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Platform not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'

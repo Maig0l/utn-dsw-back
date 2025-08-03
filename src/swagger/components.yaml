@@ -106,6 +106,35 @@ components:
         description: 'Fast-paced games with combat and adventure elements'
         games: []
 
+    Platform:
+      type: object
+      description: |
+        A hardware platform or gaming system that can run games.
+        Examples include consoles, PC, mobile devices, etc.
+      properties:
+        id:
+          type: number
+          description: Unique identifier for the platform
+        name:
+          type: string
+          description: Name of the platform (must be unique)
+        img:
+          $ref: '#/components/schemas/ImageUri'
+          description: Image representing the platform (logo or icon)
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
+          description: Games available on this platform
+      required:
+        - id
+        - name
+      example:
+        id: 1
+        name: 'PlayStation 5'
+        img: 'ps5-logo.png'
+        games: []
+
   tags:
     - name: Franchise
       description: Game series
