@@ -1,5 +1,6 @@
 '/franchises/search':
   get:
+    tags: [Franchise]
     summary: Search franchises
     operationId: searchFranchises
     parameters:
@@ -25,6 +26,7 @@
 
 '/franchises':
   get:
+    tags: [Franchise]
     summary: Get all franchises
     operationId: getAllFranchises
     responses:
@@ -41,6 +43,7 @@
                       items:
                         $ref: '#/components/schemas/Franchise'
   post:
+    tags: [Franchise]
     summary: Create a new franchise
     operationId: createFranchise
     requestBody:
@@ -84,6 +87,7 @@
 
 '/franchises/{id}':
   get:
+    tags: [Franchise]
     summary: Get a franchise by ID
     operationId: getFranchiseById
     parameters:
@@ -112,6 +116,7 @@
             schema:
               $ref: '#/components/schemas/ApiResponseError'
   put:
+    tags: [Franchise]
     summary: Update a franchise completely
     operationId: updateFranchise
     parameters:
@@ -168,6 +173,7 @@
             schema:
               $ref: '#/components/schemas/ApiResponseError'
   patch:
+    tags: [Franchise]
     summary: Partially update a franchise
     operationId: partialUpdateFranchise
     parameters:
@@ -221,6 +227,7 @@
             schema:
               $ref: '#/components/schemas/ApiResponseError'
   delete:
+    tags: [Franchise]
     summary: Delete a franchise
     operationId: deleteFranchise
     parameters:

@@ -105,3 +105,31 @@ components:
         name: 'Action'
         description: 'Fast-paced games with combat and adventure elements'
         games: []
+
+  tags:
+    - name: Franchise
+      description: Game series
+    - name: Game
+      description: Individual games
+    - name: Platform
+      description: Hardware platforms
+    - name: Playlist
+      description: User-created game lists
+    - name: Review
+      description: User reviews and ratings
+    - name: Shop
+      description: Game stores
+    - name: Studio
+      description: Game development studios and publishers
+    - name: Tag
+      description: Game categorization tags
+    - name: User
+      description: User accounts and profiles
+    - name: GamePicture
+      description: Game-related images (file uploads)
+    - name: CRUD
+      description: Basic CRUD operations
+    - name: Search
+      description: Search operations
+    - name: Auth
+      description: Authentication and user management
