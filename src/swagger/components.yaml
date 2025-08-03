@@ -135,6 +135,43 @@ components:
         img: 'ps5-logo.png'
         games: []
 
+    Studio:
+      type: object
+      description: |
+        A game development studio or publisher that creates or distributes games.
+        Can be a developer, publisher, or both.
+      properties:
+        id:
+          type: number
+          description: Unique identifier for the studio
+        name:
+          type: string
+          description: Name of the studio (must be unique)
+        type:
+          type: string
+          enum: ['Developer', 'Publisher', 'Both']
+          description: Type of studio - Developer, Publisher, or Both
+        site:
+          type: string
+          format: uri
+          description: Official website URL of the studio (must be unique)
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
+          description: Games developed or published by this studio
+      required:
+        - id
+        - name
+        - type
+        - site
+      example:
+        id: 1
+        name: 'Nintendo'
+        type: 'Both'
+        site: 'https://www.nintendo.com'
+        games: []
+
   tags:
     - name: Franchise
       description: Game series
@@ -156,9 +193,3 @@ components:
       description: User accounts and profiles
     - name: GamePicture
       description: Game-related images (file uploads)
-    - name: CRUD
-      description: Basic CRUD operations
-    - name: Search
-      description: Search operations
-    - name: Auth
-      description: Authentication and user management

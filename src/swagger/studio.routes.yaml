@@ -1,0 +1,267 @@
+'/studios/search':
+  get:
+    tags: [Studio]
+    summary: Search studios
+    operationId: searchStudios
+    parameters:
+      - name: name
+        in: query
+        description: Partial name of the studio to look for
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of matching studios
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Studio'
+
+'/studios':
+  get:
+    tags: [Studio]
+    summary: Get all studios
+    operationId: getAllStudios
+    responses:
+      '200':
+        description: List of all studios
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Studio'
+  post:
+    tags: [Studio]
+    summary: Create a new studio
+    operationId: createStudio
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - type
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the studio (must be unique)
+              type:
+                type: string
+                enum: ['Developer', 'Publisher', 'Both']
+                description: Type of studio - Developer, Publisher, or Both
+              site:
+                type: string
+                format: uri
+                description: Official website URL of the studio (must be unique and start with http:// or https://, end with .com, .net, .org, or .io)
+            example:
+              name: 'Nintendo'
+              type: 'Both'
+              site: 'https://www.nintendo.com'
+    responses:
+      '201':
+        description: Studio created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Studio'
+      '400':
+        description: Bad request - Invalid input data or studio already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/studios/{id}':
+  get:
+    tags: [Studio]
+    summary: Get a studio by ID
+    operationId: getStudioById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The studio ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Studio found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Studio'
+      '404':
+        description: Studio not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  put:
+    tags: [Studio]
+    summary: Update a studio completely
+    operationId: updateStudio
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The studio ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - type
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the studio (must be unique)
+              type:
+                type: string
+                enum: ['Developer', 'Publisher', 'Both']
+                description: Type of studio - Developer, Publisher, or Both
+              site:
+                type: string
+                format: uri
+                description: Official website URL of the studio (must be unique and start with http:// or https://, end with .com, .net, .org, or .io)
+            example:
+              name: 'Nintendo'
+              type: 'Both'
+              site: 'https://www.nintendo.com'
+    responses:
+      '200':
+        description: Studio updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Studio'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Studio not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  patch:
+    tags: [Studio]
+    summary: Partially update a studio
+    operationId: partialUpdateStudio
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The studio ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the studio (must be unique)
+              type:
+                type: string
+                enum: ['Developer', 'Publisher', 'Both']
+                description: Type of studio - Developer, Publisher, or Both
+              site:
+                type: string
+                format: uri
+                description: Official website URL of the studio (must be unique and start with http:// or https://, end with .com, .net, .org, or .io)
+            example:
+              name: 'Nintendo Co., Ltd.'
+    responses:
+      '200':
+        description: Studio updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Studio'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Studio not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  delete:
+    tags: [Studio]
+    summary: Delete a studio
+    operationId: deleteStudio
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The studio ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Studio deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Studio not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
