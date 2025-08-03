@@ -172,6 +172,37 @@ components:
         site: 'https://www.nintendo.com'
         games: []
 
+    Shop:
+      type: object
+      description: |
+        A digital storefront or marketplace where games can be purchased or downloaded.
+        Examples include Steam, Epic Games Store, PlayStation Store, etc.
+      properties:
+        id:
+          type: number
+          description: Unique identifier for the shop
+        name:
+          type: string
+          description: Name of the shop (must be unique)
+        site:
+          type: string
+          format: uri
+          description: Official website URL of the shop (must be unique and end with .com)
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
+          description: Games available in this shop
+      required:
+        - id
+        - name
+        - site
+      example:
+        id: 1
+        name: 'Steam'
+        site: 'https://store.steampowered.com'
+        games: []
+
   tags:
     - name: Franchise
       description: Game series
