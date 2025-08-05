@@ -49,37 +49,94 @@ components:
 
     Game:
       type: object
+      description: A video game entity with all its associated information
       properties:
         id:
           type: number
+          description: Unique identifier for the game
         title:
           type: string
+          minLength: 1
+          maxLength: 180
+          description: Title of the game (must be unique)
         synopsis:
           type: string
-          description: A brief description of the game.
+          minLength: 10
+          maxLength: 255
+          description: A brief description of the game
+          nullable: true
         releaseDate:
           type: string
           format: date
+          description: Release date of the game
+          nullable: true
         portrait:
           $ref: '#/components/schemas/ImageUri'
+          description: Portrait/cover image of the game
+          nullable: true
         banner:
           $ref: '#/components/schemas/ImageUri'
+          description: Banner image of the game
+          nullable: true
         cumulativeRating:
           type: number
           description: |
-            The average rating of the game, calculated from all user reviews.
-            This is a number between 0 and 5.
+            The cumulative rating of the game from all user reviews.
+            This is the sum of all review scores.
+          readOnly: true
         reviewCount:
           type: number
-        pictures:
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageUri'
-          description: A list of images related to the game, such as screenshots or promotional art.
+          description: Total number of reviews for this game
+          readOnly: true
         tags:
           type: array
           items:
             $ref: '#/components/schemas/Tag'
+          description: Tags associated with this game
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Platform'
+          description: Platforms where this game is available
+        shops:
+          type: array
+          items:
+            $ref: '#/components/schemas/Shop'
+          description: Shops where this game can be purchased
+        studios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Studio'
+          description: Studios that developed or published this game
+        franchise:
+          $ref: '#/components/schemas/Franchise'
+          description: Franchise this game belongs to
+          nullable: true
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+          description: User reviews for this game
+      required:
+        - id
+        - title
+        - cumulativeRating
+        - reviewCount
+      example:
+        id: 1
+        title: 'The Witcher 3: Wild Hunt'
+        synopsis: 'An open-world action RPG set in a fantasy universe filled with meaningful choices and impactful consequences.'
+        releaseDate: '2015-05-19'
+        portrait: 'witcher3-portrait.jpg'
+        banner: 'witcher3-banner.jpg'
+        cumulativeRating: 450.5
+        reviewCount: 100
+        tags: []
+        platforms: []
+        shops: []
+        studios: []
+        franchise: null
+        reviews: []
 
     Tag:
       type: object
@@ -386,5 +443,3 @@ components:
       description: Game categorization tags
     - name: User
       description: User accounts and profiles
-    - name: GamePicture
-      description: Game-related images (file uploads)

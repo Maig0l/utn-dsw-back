@@ -15,7 +15,7 @@ async function findAll(req: Request, res: Response) {
       Game,
       {},
       {
-        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'],
+        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise'],
       }
     );
     res.json({ data: games });
@@ -30,7 +30,7 @@ async function findOne(req: Request, res: Response) {
       Game,
       { id: res.locals.id },
       {
-        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'],
+        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise'],
       }
     );
     res.json({ data: game });
@@ -108,7 +108,7 @@ async function findGamesByFilters(req: Request, res: Response) {
 
     // Fetch games from the database
     const games = await em.find(Game, filterQuery, {
-      populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise', 'pictures'],
+      populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise'],
     });
 
     // Filter by starValue in memory

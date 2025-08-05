@@ -14,7 +14,6 @@ import { Platform } from '../platform/platform.entity.js';
 import { Franchise } from '../franchise/franchise.entity.js';
 import { Tag } from '../tag/tag.entity.js';
 import { Review } from '../review/review.entity.js';
-import { GamePicture } from '../game-picture/game-picture.entity.js';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -41,12 +40,6 @@ export class Game extends BaseEntity {
   // number of reviews that contributed to the cumulative rating
   @Property({ default: 0 })
   reviewCount!: number;
-
-  @OneToMany('GamePicture', 'game', {
-    cascade: [Cascade.ALL],
-    nullable: true,
-  })
-  pictures = new Collection<GamePicture>(this);
 
   @ManyToMany(() => Tag, (tag) => tag.games, {
     cascade: [Cascade.ALL],

@@ -1,8 +1,8 @@
-import swaggerJsdoc from "swagger-jsdoc";
-import { parse } from "yaml";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import swaggerJsdoc from 'swagger-jsdoc';
+import { parse } from 'yaml';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +16,6 @@ const options = {
     ...components,
   },
   apis: ['./**/*.routes.yaml'],
-}
+};
 
 export const apiSpec = swaggerJsdoc(options);
