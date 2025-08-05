@@ -203,6 +203,145 @@ components:
         site: 'https://store.steampowered.com'
         games: []
 
+    Review:
+      type: object
+      description: |
+        A user review for a game, including rating, title, body text, and optional suggested tags.
+        Each user can only have one review per game.
+      properties:
+        id:
+          type: number
+          description: Unique identifier for the review
+        author:
+          $ref: '#/components/schemas/User'
+          description: The user who wrote this review
+        game:
+          $ref: '#/components/schemas/Game'
+          description: The game being reviewed
+        score:
+          type: number
+          format: decimal
+          minimum: 0
+          maximum: 5
+          multipleOf: 0.5
+          description: Rating score from 0 to 5 (rounded to nearest 0.5)
+        title:
+          type: string
+          description: Optional title for the review
+          nullable: true
+        body:
+          type: string
+          description: Optional detailed review text
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          description: When the review was created
+          readOnly: true
+      required:
+        - id
+        - author
+        - game
+        - score
+        - createdAt
+      example:
+        id: 1
+        author:
+          id: 1
+          nick: 'gamer123'
+          profile_img: 'profile1.jpg'
+        game:
+          id: 1
+          title: 'The Witcher 3'
+        score: 4.5
+        title: 'Amazing RPG Experience'
+        body: 'One of the best RPGs I have ever played. Great story and characters.'
+        createdAt: '2024-01-15T10:30:00Z'
+
+    User:
+      type: object
+      description: A registered user account
+      properties:
+        id:
+          type: number
+          description: Unique identifier for the user
+        nick:
+          type: string
+          minLength: 3
+          maxLength: 30
+          description: Username (must be unique)
+        email:
+          type: string
+          format: email
+          description: User's email address (hidden in responses)
+          writeOnly: true
+        profile_img:
+          $ref: '#/components/schemas/ImageUri'
+          description: User's profile picture
+          nullable: true
+        bio_text:
+          type: string
+          description: User's biography text
+          nullable: true
+        linked_accounts:
+          type: array
+          items:
+            type: string
+          description: User's linked social media accounts
+          nullable: true
+        is_admin:
+          type: boolean
+          description: Whether the user has admin privileges
+          readOnly: true
+        likedTags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          description: Tags liked by the user
+        playlists:
+          type: array
+          items:
+            $ref: '#/components/schemas/Playlist'
+          description: Playlists created by the user
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+          description: Reviews written by the user
+      required:
+        - id
+        - nick
+        - is_admin
+      example:
+        id: 1
+        nick: 'gamer123'
+        profile_img: 'profile1.jpg'
+        bio_text: 'Passionate gamer and reviewer'
+        linked_accounts: ['@gamer123_twitter']
+        is_admin: false
+        likedTags: []
+        playlists: []
+        reviews: []
+
+    Playlist:
+      type: object
+      description: A user-created collection of games
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        isPrivate:
+          type: boolean
+        owner:
+          $ref: '#/components/schemas/User'
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
+
   tags:
     - name: Franchise
       description: Game series

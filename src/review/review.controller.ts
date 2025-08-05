@@ -3,10 +3,7 @@ import { orm } from '../shared/db/orm.js';
 import { Review } from './review.entity.js';
 import { validateReviewNew, validateReviewEdit } from './review.schema.js';
 import sanitizeHtml from 'sanitize-html';
-import {
-  AuthError,
-  getUserReferenceFromAuthHeader,
-} from '../auth/auth.middleware.js';
+import { AuthError, getUserReferenceFromAuthHeader } from '../auth/auth.middleware.js';
 import { Game } from '../game/game.entity.js';
 import { User } from '../user/user.entity.js';
 import { Tag } from '../tag/tag.entity.js';
@@ -58,9 +55,7 @@ async function add(req: Request, res: Response) {
     await updateRating(req.body.game, req.body.score, em);
     await em.flush();
 
-    res
-      .status(201)
-      .json({ message: 'Review created successfully', data: review });
+    res.status(201).json({ message: 'Review created successfully', data: review });
   } catch (e) {
     handleOrmError(res, e);
   }
@@ -73,10 +68,8 @@ async function update(req: Request, res: Response) {
     try {
       userReference = getUserReferenceFromAuthHeader(req.headers.authorization);
     } catch (e) {
-      if (e instanceof AuthError)
-        return res.status(401).json({ message: e.message });
-      else if (e instanceof Error)
-        return res.status(500).json({ message: e.message });
+      if (e instanceof AuthError) return res.status(401).json({ message: e.message });
+      else if (e instanceof Error) return res.status(500).json({ message: e.message });
       else {
         return res.status(500).json({ message: 'Unknown error' });
       }
@@ -91,18 +84,13 @@ async function update(req: Request, res: Response) {
 
     // Verificar que el usuario sea el autor de la review
     if (review.author.id !== userReference.id) {
-      return res
-        .status(403)
-        .json({ message: 'You can only edit your own reviews' });
+      return res.status(403).json({ message: 'You can only edit your own reviews' });
     }
 
     // Actualizar los campos que vienen en res.locals.newReview
     const updateData = res.locals.newReview;
 
-    if (
-      updateData.score !== undefined &&
-      typeof updateData.score === 'number'
-    ) {
+    if (updateData.score !== undefined && typeof updateData.score === 'number') {
       // Si se actualiza el score, también actualizar el rating del juego
       const oldScore = review.score;
       const newScore = updateData.score;
@@ -121,16 +109,6 @@ async function update(req: Request, res: Response) {
 
     if (updateData.body !== undefined) {
       review.body = updateData.body;
-    }
-
-    if (updateData.suggestedTags !== undefined) {
-      // Limpiar tags existentes y agregar los nuevos
-      review.suggestedTags.removeAll();
-      const tagArray: Tag[] = [];
-      for (const tagId of updateData.suggestedTags) {
-        tagArray.push(em.getReference(Tag, tagId));
-      }
-      review.suggestedTags.add(tagArray);
     }
 
     await em.flush();
@@ -158,10 +136,8 @@ async function remove(req: Request, res: Response) {
     try {
       userReference = getUserReferenceFromAuthHeader(req.headers.authorization);
     } catch (e) {
-      if (e instanceof AuthError)
-        return res.status(401).json({ message: e.message });
-      else if (e instanceof Error)
-        return res.status(500).json({ message: e.message });
+      if (e instanceof AuthError) return res.status(401).json({ message: e.message });
+      else if (e instanceof Error) return res.status(500).json({ message: e.message });
       else {
         return res.status(500).json({ message: 'Unknown error' });
       }
@@ -176,9 +152,7 @@ async function remove(req: Request, res: Response) {
 
     // Verificar que el usuario sea el autor de la review
     if (review.author.id !== userReference.id) {
-      return res
-        .status(403)
-        .json({ message: 'You can only delete your own reviews' });
+      return res.status(403).json({ message: 'You can only delete your own reviews' });
     }
 
     // Actualizar el rating del juego antes de eliminar la review
@@ -192,9 +166,7 @@ async function remove(req: Request, res: Response) {
         gameIdType: typeof review.game.id,
         reviewScoreType: typeof review.score,
       });
-      return res
-        .status(500)
-        .json({ message: 'Game ID or review score is missing or invalid' });
+      return res.status(500).json({ message: 'Game ID or review score is missing or invalid' });
     }
 
     await updateGameRatingOnDelete(gameId, reviewScore, em);
@@ -225,10 +197,8 @@ async function listReviewsForGame(req: Request, res: Response) {
     try {
       userRef = getUserReferenceFromAuthHeader(req.headers.authorization);
     } catch (e) {
-      if (e instanceof Error)
-        return res.status(500).json({ message: e.message });
-      if (e instanceof AuthError)
-        return res.status(401).json({ message: e.message });
+      if (e instanceof Error) return res.status(500).json({ message: e.message });
+      if (e instanceof AuthError) return res.status(401).json({ message: e.message });
     }
   }
 
@@ -264,9 +234,7 @@ async function listReviewsForGame(req: Request, res: Response) {
  */
 async function listReviewsByAuthor(req: Request, res: Response) {
   if (!req.params.nick)
-    throw new Error(
-      'Middleware listReviewsForUser requires route parameter `nick`'
-    );
+    throw new Error('Middleware listReviewsForUser requires route parameter `nick`');
 
   let author;
   try {
@@ -303,10 +271,8 @@ async function createReview(req: Request, res: Response) {
   try {
     userReference = getUserReferenceFromAuthHeader(req.headers.authorization);
   } catch (e) {
-    if (e instanceof AuthError)
-      return res.status(401).json({ message: e.message });
-    else if (e instanceof Error)
-      return res.status(500).json({ message: e.message });
+    if (e instanceof AuthError) return res.status(401).json({ message: e.message });
+    else if (e instanceof Error) return res.status(500).json({ message: e.message });
     else {
       return res.status(500).json({ message: 'Unknown error' });
     }
@@ -315,17 +281,8 @@ async function createReview(req: Request, res: Response) {
   // crear la entidad review y cargarla a la db
   let incoming = await validateReviewNew(req.body);
   if (!incoming.success)
-    return res
-      .status(400)
-      .json({ message: 'Invalid input: ' + incoming.issues[0].message });
+    return res.status(400).json({ message: 'Invalid input: ' + incoming.issues[0].message });
   const reviewInput = incoming.output;
-
-  const tagArray: Tag[] = [];
-  if (reviewInput.suggestedTags) {
-    for (const tagId of reviewInput.suggestedTags) {
-      tagArray.push(em.getReference(Tag, tagId));
-    }
-  }
 
   const review = new Review();
   review.game = gameReference;
@@ -333,7 +290,6 @@ async function createReview(req: Request, res: Response) {
   review.title = sanitizeHtml(reviewInput.title || '');
   review.body = sanitizeHtml(reviewInput.body || '');
   review.score = reviewInput.score;
-  review.suggestedTags.add(tagArray);
 
   let loadedReview;
   try {
@@ -353,8 +309,7 @@ async function createReview(req: Request, res: Response) {
 
 async function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = Number.parseInt(req.params.id);
-  if (Number.isNaN(id))
-    return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
 
   res.locals.id = id;
 
@@ -400,12 +355,7 @@ function roundToNextHalf(num: number) {
 /**
  * Actualiza el rating acumulativo del juego cuando se edita una review
  */
-async function updateGameRatingOnEdit(
-  gameId: number,
-  oldScore: number,
-  newScore: number,
-  em: any
-) {
+async function updateGameRatingOnEdit(gameId: number, oldScore: number, newScore: number, em: any) {
   try {
     const game = await em.findOneOrFail(Game, { id: gameId });
 
@@ -423,11 +373,7 @@ async function updateGameRatingOnEdit(
 /**
  * Actualiza el rating acumulativo del juego cuando se elimina una review
  */
-async function updateGameRatingOnDelete(
-  gameId: number,
-  deletedScore: number,
-  em: any
-) {
+async function updateGameRatingOnDelete(gameId: number, deletedScore: number, em: any) {
   try {
     const game = await em.findOneOrFail(Game, { id: gameId });
 
@@ -447,9 +393,7 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case 'ER_DUP_ENTRY':
         // No debería ocurrir. No hay atributos únicos en esta entidad
-        res
-          .status(400)
-          .json({ message: `A review with those attributes already exists.` });
+        res.status(400).json({ message: `A review with those attributes already exists.` });
         break;
       case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
@@ -458,9 +402,7 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res
-          .status(404)
-          .json({ message: `Review not found for ID ${res.locals.id}` });
+        res.status(404).json({ message: `Review not found for ID ${res.locals.id}` });
         break;
       default:
         console.error('\n--- ORM ERROR ---');
