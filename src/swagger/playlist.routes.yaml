@@ -1,0 +1,280 @@
+'/playlists/search':
+  get:
+    tags: [Playlist]
+    summary: Search playlists by owner
+    operationId: searchPlaylistsByOwner
+    parameters:
+      - name: owner
+        in: query
+        description: User ID to get playlists for
+        required: true
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: List of playlists by owner
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Playlist'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/playlists':
+  get:
+    tags: [Playlist]
+    summary: Get all playlists
+    operationId: getAllPlaylists
+    responses:
+      '200':
+        description: List of all playlists
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Playlist'
+
+  post:
+    tags: [Playlist]
+    summary: Create a new playlist
+    operationId: createPlaylist
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - description
+              - isPrivate
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 100
+                description: Name of the playlist (must be unique)
+              description:
+                type: string
+                minLength: 1
+                maxLength: 255
+                description: Description of the playlist
+              isPrivate:
+                type: boolean
+                description: Whether the playlist should be private or public
+            example:
+              name: 'My Favorite RPGs'
+              description: 'A collection of the best role-playing games I have played'
+              isPrivate: false
+    responses:
+      '201':
+        description: Playlist created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Playlist'
+      '400':
+        description: Bad request - Invalid input data or playlist already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/playlists/{id}':
+  get:
+    tags: [Playlist]
+    summary: Get a playlist by ID
+    operationId: getPlaylistById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The playlist ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Playlist found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Playlist'
+      '404':
+        description: Playlist not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+  put:
+    tags: [Playlist]
+    summary: Update a playlist completely
+    operationId: updatePlaylist
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The playlist ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - description
+              - isPrivate
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 100
+                description: Name of the playlist (must be unique)
+              description:
+                type: string
+                minLength: 1
+                maxLength: 255
+                description: Description of the playlist
+              isPrivate:
+                type: boolean
+                description: Whether the playlist should be private or public
+            example:
+              name: 'My Updated RPG Collection'
+              description: 'An updated collection of my favorite role-playing games'
+              isPrivate: true
+    responses:
+      '200':
+        description: Playlist updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Playlist'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Playlist not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+  patch:
+    tags: [Playlist]
+    summary: Partially update a playlist
+    operationId: partialUpdatePlaylist
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The playlist ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 100
+                description: Name of the playlist (must be unique)
+              description:
+                type: string
+                minLength: 1
+                maxLength: 255
+                description: Description of the playlist
+              isPrivate:
+                type: boolean
+                description: Whether the playlist should be private or public
+            example:
+              name: 'Updated Collection Name'
+    responses:
+      '200':
+        description: Playlist updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Playlist'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Playlist not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+  delete:
+    tags: [Playlist]
+    summary: Delete a playlist
+    operationId: deletePlaylist
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The playlist ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Playlist deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Playlist not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'

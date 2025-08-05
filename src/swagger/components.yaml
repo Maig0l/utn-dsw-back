@@ -329,18 +329,43 @@ components:
       properties:
         id:
           type: number
+          description: Unique identifier for the playlist
         name:
           type: string
+          minLength: 1
+          maxLength: 100
+          description: Name of the playlist (must be unique)
         description:
           type: string
+          minLength: 1
+          maxLength: 255
+          description: Description of the playlist
         isPrivate:
           type: boolean
+          description: Whether the playlist is private (visible only to owner) or public
         owner:
           $ref: '#/components/schemas/User'
+          description: User who created and owns this playlist
         games:
           type: array
           items:
             $ref: '#/components/schemas/Game'
+          description: Games included in this playlist
+      required:
+        - id
+        - name
+        - description
+        - isPrivate
+        - owner
+      example:
+        id: 1
+        name: 'My Favorite RPGs'
+        description: 'A collection of the best role-playing games I have played'
+        isPrivate: false
+        owner:
+          id: 1
+          nick: 'gamer123'
+        games: []
 
   tags:
     - name: Franchise
