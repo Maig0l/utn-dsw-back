@@ -1,0 +1,554 @@
+'/users':
+  get:
+    tags: [User]
+    summary: Get all users
+    operationId: getAllUsers
+    responses:
+      '200':
+        description: List of all users
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/User'
+  post:
+    tags: [User]
+    summary: Register a new user
+    operationId: registerUser
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - nick
+              - email
+              - password
+            properties:
+              nick:
+                type: string
+                minLength: 3
+                maxLength: 30
+                pattern: '^[^.].*[^.]$'
+                description: |
+                  Username (must be unique). Requirements:
+                  - 3-30 characters long
+                  - Can contain letters, numbers, underscores, and dots
+                  - Cannot start or end with a dot
+                  - Cannot have consecutive dots
+              email:
+                type: string
+                format: email
+                description: User's email address (must be unique)
+              password:
+                type: string
+                minLength: 8
+                maxLength: 50
+                pattern: '^(?=.*[A-Za-z])(?=.*\d)(?=.*[ _\-@$!%*#?&])[A-Za-z\d _\-@$!%*#?&]{8,50}$'
+                description: |
+                  Password requirements:
+                  - 8-50 characters long
+                  - At least one letter, one number, and one special character
+              profileImg:
+                type: string
+                description: Optional profile image filename or URL
+                nullable: true
+            example:
+              nick: 'gamer123'
+              email: 'gamer123@example.com'
+              password: 'MySecure123!'
+              profileImg: 'profile.jpg'
+    responses:
+      '201':
+        description: User registered successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/User'
+      '400':
+        description: Bad request - Invalid input data, username or email already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/users/login':
+  post:
+    tags: [User]
+    summary: User login
+    operationId: loginUser
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - nick
+              - password
+            properties:
+              nick:
+                type: string
+                description: Username
+              password:
+                type: string
+                description: User's password
+            example:
+              nick: 'gamer123'
+              password: 'MySecure123!'
+    responses:
+      '200':
+        description: Login successful
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: object
+                      properties:
+                        token:
+                          type: string
+                          description: JWT authentication token
+                        user:
+                          $ref: '#/components/schemas/User'
+      '400':
+        description: Bad request - Invalid credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/users/me/profile_img':
+  patch:
+    tags: [User]
+    summary: Update current user's profile image
+    operationId: updateCurrentUserProfileImage
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - profile_img
+            properties:
+              profile_img:
+                type: string
+                format: binary
+                description: Profile image file to upload
+    responses:
+      '200':
+        description: Profile image updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: object
+                      properties:
+                        profile_img:
+                          type: string
+                          description: Path to the uploaded profile image
+      '400':
+        description: Bad request - No image file provided or invalid file
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '401':
+        description: Unauthorized - Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/users/{nick}':
+  get:
+    tags: [User]
+    summary: Get a user by nickname
+    operationId: getUserByNick
+    parameters:
+      - name: nick
+        in: path
+        required: true
+        description: The user's nickname
+        schema:
+          type: string
+    responses:
+      '200':
+        description: User found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/User'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/users/{nick}/reviews':
+  get:
+    tags: [User]
+    summary: Get all reviews by a specific user
+    operationId: getUserReviews
+    parameters:
+      - name: nick
+        in: path
+        required: true
+        description: The user's nickname
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of reviews by the user
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Review'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/users/{nick}/setAdminStatus':
+  put:
+    tags: [User]
+    summary: Set admin status for a user (Admin only)
+    operationId: setUserAdminStatus
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: nick
+        in: path
+        required: true
+        description: The user's nickname
+        schema:
+          type: string
+      - name: admin
+        in: query
+        required: true
+        description: Set admin status (true or false)
+        schema:
+          type: boolean
+    responses:
+      '200':
+        description: Admin status updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/User'
+      '400':
+        description: Bad request - Invalid admin parameter
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '401':
+        description: Unauthorized - Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '403':
+        description: Forbidden - Admin privileges required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/users/{id}':
+  get:
+    tags: [User]
+    summary: Get a user by ID
+    operationId: getUserById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The user ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: User found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/User'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  put:
+    tags: [User]
+    summary: Update a user completely
+    operationId: updateUser
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The user ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              nick:
+                type: string
+                minLength: 3
+                maxLength: 30
+                description: Username (must be unique)
+              email:
+                type: string
+                format: email
+                description: User's email address (must be unique)
+              password:
+                type: string
+                minLength: 8
+                maxLength: 50
+                description: New password (will be hashed)
+              profile_img:
+                type: string
+                description: Profile image filename or URL
+                nullable: true
+              bio_text:
+                type: string
+                description: User's biography text
+                nullable: true
+              linked_accounts:
+                type: array
+                items:
+                  type: string
+                description: User's linked social media accounts
+                nullable: true
+              likedTags:
+                type: array
+                items:
+                  type: number
+                description: Array of tag IDs liked by the user
+                nullable: true
+            example:
+              nick: 'gamer123_updated'
+              email: 'newemail@example.com'
+              bio_text: 'Updated bio text'
+              linked_accounts: ['@gamer123_twitter']
+    responses:
+      '200':
+        description: User updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/User'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '401':
+        description: Unauthorized - Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '403':
+        description: Forbidden - Can only update own account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  patch:
+    tags: [User]
+    summary: Partially update a user
+    operationId: partialUpdateUser
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The user ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              nick:
+                type: string
+                minLength: 3
+                maxLength: 30
+                description: Username (must be unique)
+              email:
+                type: string
+                format: email
+                description: User's email address (must be unique)
+              password:
+                type: string
+                minLength: 8
+                maxLength: 50
+                description: New password (will be hashed)
+              profile_img:
+                type: string
+                description: Profile image filename or URL
+                nullable: true
+              bio_text:
+                type: string
+                description: User's biography text
+                nullable: true
+              linked_accounts:
+                type: array
+                items:
+                  type: string
+                description: User's linked social media accounts
+                nullable: true
+              likedTags:
+                type: array
+                items:
+                  type: number
+                description: Array of tag IDs liked by the user
+                nullable: true
+            example:
+              bio_text: 'Just updated my bio!'
+    responses:
+      '200':
+        description: User updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/User'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '401':
+        description: Unauthorized - Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '403':
+        description: Forbidden - Can only update own account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  delete:
+    tags: [User]
+    summary: Delete a user (can only delete own account)
+    operationId: deleteUser
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The user ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: User deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '401':
+        description: Unauthorized - Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '403':
+        description: Forbidden - Can only delete own account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'

@@ -424,6 +424,13 @@ components:
           nick: 'gamer123'
         games: []
 
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
   tags:
     - name: Franchise
       description: Game series
