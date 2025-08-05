@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import { orm } from "../shared/db/orm.js";
-import { GamePicture } from "./game-picture.entity.js";
-import { Game } from "../game/game.entity.js";
-import { paramCheckFromList } from "../shared/paramCheckFromList.js";
+import { Request, Response, NextFunction } from 'express';
+import { orm } from '../shared/db/orm.js';
+import { GamePicture } from './game-picture.entity.js';
+import { Game } from '../game/game.entity.js';
+import { paramCheckFromList } from '../shared/paramCheckFromList.js';
 
 const em = orm.em;
 
@@ -11,8 +11,8 @@ async function addPicture(req: Request, res: Response) {
     const game = await em.findOneOrFail(Game, {
       id: res.locals.sanitizedInput.game_id,
     });
-    console.log("GAME: ", game);
-    console.log("SANITIZED: ", res.locals.sanitizedInput);
+    console.log('GAME: ', game);
+    console.log('SANITIZED: ', res.locals.sanitizedInput);
     for (let i = 0; i < res.locals.sanitizedInput.urls.length; i++) {
       const picture = em.create(GamePicture, {
         url: res.locals.sanitizedInput.urls[i],
@@ -21,7 +21,7 @@ async function addPicture(req: Request, res: Response) {
       await em.flush();
     }
     res.json({
-      message: "Picture added",
+      message: 'Picture added',
       data: res.locals.sanitizedInput.urls,
     });
   } catch (err) {
@@ -34,20 +34,17 @@ async function removePicture(req: Request, res: Response) {
     const picture = await em.findOneOrFail(GamePicture, {
       id: res.locals.sanitizedInput.pic_id,
     });
-    const pictureRef = em.getReference(
-      GamePicture,
-      res.locals.sanitizedInput.pic_id,
-    );
+    const pictureRef = em.getReference(GamePicture, res.locals.sanitizedInput.pic_id);
     await em.removeAndFlush(pictureRef);
 
-    res.json({ message: "Picture deleted successfully", data: picture });
+    res.json({ message: 'Picture deleted successfully', data: picture });
   } catch (err) {
     handleOrmError(res, err);
   }
 }
 
 function sanitizeInput(req: Request, res: Response, next: NextFunction) {
-  console.log("req.body__________", req.body);
+  console.log('req.body__________', req.body);
   res.locals.sanitizedInput = {
     pic_id: req.body.pic_id,
     game_id: req.body.game_id,
@@ -66,8 +63,7 @@ function sanitizeInput(req: Request, res: Response, next: NextFunction) {
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
 
-  if (Number.isNaN(id))
-    return res.status(400).json({ message: "ID must be an integer" });
+  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
 
   res.locals.id = id;
 
@@ -75,26 +71,22 @@ function validateExists(req: Request, res: Response, next: NextFunction) {
 }
 
 function handleOrmError(res: Response, err: any) {
-  console.error("\n--- ORM ERROR ---");
+  console.error('\n--- ORM ERROR ---');
   console.error(err.message);
 
   if (err.code) {
     switch (err.code) {
-      case "ER_DATA_TOO_LONG":
+      case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
         break;
     }
   } else {
     switch (err.name) {
-      case "NotFoundError":
-        res
-          .status(404)
-          .json({ message: `game not found for ID ${res.locals.id}` });
+      case 'NotFoundError':
+        res.status(404).json({ message: `Game not found for ID ${res.locals.id}` });
         break;
       default:
-        res
-          .status(500)
-          .json({ message: "Oops! Something went wrong. This is our fault." });
+        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
         break;
     }
   }

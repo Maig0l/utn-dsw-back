@@ -143,7 +143,7 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case 'ER_DUP_ENTRY':
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        res.status(400).json({ message: `A shop with that name/site already exists.` });
+        res.status(400).json({ message: `A playlist with that name already exists.` });
         break;
       case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
@@ -152,7 +152,7 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res.status(404).json({ message: `Shop not found for ID ${res.locals.id}` });
+        res.status(404).json({ message: `Playlist not found for ID ${res.locals.id}` });
         break;
       default:
         console.error('\n--- ORM ERROR ---');
