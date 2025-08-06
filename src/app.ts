@@ -17,6 +17,7 @@ import { fileURLToPath } from 'url';
 import { initializeAdminUserIfAbsent } from './user/user.init.js';
 import swaggerUI from 'swagger-ui-express';
 import { apiSpec } from './swagger/swagger.js';
+import { corsOptions } from './shared/cors.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,8 +29,7 @@ export const app = express();
 // Nota: En Postman usar body de tipo x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-// TODO: Configurar por seguridad
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);

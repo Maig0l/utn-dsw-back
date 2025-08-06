@@ -5,6 +5,7 @@ const configVars = {
     port: 8080,
     baseDir: '/api\t# No trailing slash',
     apiSecret: randomSecret(),
+    frontendCorsUrl: '*',
   },
   Database: {
     dbHost: 'localhost',
