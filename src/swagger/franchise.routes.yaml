@@ -46,6 +46,8 @@
     tags: [Franchise]
     summary: Create a new franchise
     operationId: createFranchise
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -119,6 +121,8 @@
     tags: [Franchise]
     summary: Update a franchise completely
     operationId: updateFranchise
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -176,6 +180,8 @@
     tags: [Franchise]
     summary: Partially update a franchise
     operationId: partialUpdateFranchise
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -230,6 +236,8 @@
     tags: [Franchise]
     summary: Delete a franchise
     operationId: deleteFranchise
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path

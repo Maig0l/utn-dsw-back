@@ -54,6 +54,8 @@
     tags: [Playlist]
     summary: Create a new playlist
     operationId: createPlaylist
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -135,6 +137,8 @@
     tags: [Playlist]
     summary: Update a playlist completely
     operationId: updatePlaylist
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -199,6 +203,8 @@
     tags: [Playlist]
     summary: Partially update a playlist
     operationId: partialUpdatePlaylist
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -257,6 +263,8 @@
     tags: [Playlist]
     summary: Delete a playlist
     operationId: deletePlaylist
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path

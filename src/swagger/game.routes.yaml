@@ -120,6 +120,8 @@
     tags: [Game]
     summary: Create a new game
     operationId: createGame
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -241,6 +243,8 @@
     tags: [Game]
     summary: Update a game completely
     operationId: updateGame
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -343,6 +347,8 @@
     tags: [Game]
     summary: Partially update a game
     operationId: partialUpdateGame
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -439,6 +445,8 @@
     tags: [Game]
     summary: Delete a game
     operationId: deleteGame
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -497,6 +505,8 @@
     tags: [Game]
     summary: Create a review for a specific game
     operationId: createGameReview
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -562,6 +572,8 @@
     tags: [Game]
     summary: Upload a portrait image for a game
     operationId: uploadGamePortrait
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -616,6 +628,8 @@
     tags: [Game]
     summary: Upload a banner image for a game
     operationId: uploadGameBanner
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path

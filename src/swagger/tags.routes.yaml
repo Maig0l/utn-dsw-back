@@ -46,6 +46,8 @@
     tags: [Tag]
     summary: Create a new tag
     operationId: createTag
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -121,6 +123,8 @@
     tags: [Tag]
     summary: Update a tag completely
     operationId: updateTag
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -179,6 +183,8 @@
     tags: [Tag]
     summary: Partially update a tag
     operationId: partialUpdateTag
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -233,6 +239,8 @@
     tags: [Tag]
     summary: Delete a tag
     operationId: deleteTag
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path

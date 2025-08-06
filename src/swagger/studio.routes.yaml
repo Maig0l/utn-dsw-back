@@ -46,6 +46,8 @@
     tags: [Studio]
     summary: Create a new studio
     operationId: createStudio
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -125,6 +127,8 @@
     tags: [Studio]
     summary: Update a studio completely
     operationId: updateStudio
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -187,6 +191,8 @@
     tags: [Studio]
     summary: Partially update a studio
     operationId: partialUpdateStudio
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -244,6 +250,8 @@
     tags: [Studio]
     summary: Delete a studio
     operationId: deleteStudio
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path

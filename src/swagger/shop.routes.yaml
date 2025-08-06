@@ -46,6 +46,8 @@
     tags: [Shop]
     summary: Create a new shop
     operationId: createShop
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -120,6 +122,8 @@
     tags: [Shop]
     summary: Update a shop completely
     operationId: updateShop
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -177,6 +181,8 @@
     tags: [Shop]
     summary: Partially update a shop
     operationId: partialUpdateShop
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -231,6 +237,8 @@
     tags: [Shop]
     summary: Delete a shop
     operationId: deleteShop
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path

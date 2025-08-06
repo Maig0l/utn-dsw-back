@@ -46,6 +46,8 @@
     tags: [Platform]
     summary: Create a new platform
     operationId: createPlatform
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -119,6 +121,8 @@
     tags: [Platform]
     summary: Update a platform completely
     operationId: updatePlatform
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -175,6 +179,8 @@
     tags: [Platform]
     summary: Partially update a platform
     operationId: partialUpdatePlatform
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -228,6 +234,8 @@
     tags: [Platform]
     summary: Delete a platform
     operationId: deletePlatform
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
@@ -255,6 +263,8 @@
     tags: [Platform]
     summary: Upload an image for a platform
     operationId: uploadPlatformImage
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
