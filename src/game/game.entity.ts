@@ -61,7 +61,7 @@ export class Game extends BaseEntity {
   shops = new Collection<Shop>(this);
 
   @ManyToOne(() => Franchise, { nullable: true })
-  franchise!: Franchise;
+  franchise?: Franchise | null;
 
   @ManyToMany(() => Platform, (platform) => platform.games, {
     cascade: [Cascade.ALL],

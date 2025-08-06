@@ -153,8 +153,11 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     console.log('SANITIZED INPUT UPDATE', res.locals.sanitizedInput);
+
+    // Si franchise es 0, establecerlo como null para desasociar
     if (res.locals.sanitizedInput.franchise === 0) {
-      delete res.locals.sanitizedInput.franchise;
+      res.locals.sanitizedInput.franchise = null;
+      console.log('Setting franchise to null');
     }
 
     const input = res.locals.sanitizedInput;
@@ -177,12 +180,14 @@ async function update(req: Request, res: Response) {
     delete res.locals.cumulativeRating;
     delete res.locals.reviewCount;
     console.log('SANITIZED INPUT UPDATE 2', res.locals.sanitizedInput);
-    if (res.locals.sanitizedInput.franchise === 0) {
-      delete res.locals.sanitizedInput.franchise;
-    }
+
     const game = await em.findOneOrFail(Game, { id: res.locals.id });
     em.assign(game, res.locals.sanitizedInput);
     await em.flush();
+
+    // Recargar el juego para obtener los datos actualizados
+    await em.refresh(game);
+
     res.json({ message: 'Game updated', data: game });
   } catch (err) {
     handleOrmError(res, err);
