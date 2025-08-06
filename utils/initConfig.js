@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from "crypto";
+import { randomBytes, randomUUID } from 'crypto';
 
 const configVars = {
   General: {
@@ -12,6 +12,7 @@ const configVars = {
     dbUser: '',
     dbPasswd: '',
     dbName: '',
+    dbUrl: ' # Optional, if set will ignore the above',
   },
 };
 

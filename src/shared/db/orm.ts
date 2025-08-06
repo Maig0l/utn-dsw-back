@@ -4,18 +4,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Use DATABASE_URL or MYSQL_URL from Railway if available, otherwise use individual variables
+// Use dbURL if available, otherwise construct from individual components
 const databaseUrl =
-  process.env.DATABASE_URL ||
-  process.env.MYSQL_URL ||
+  process.env.dbUrl ||
   `mysql://${process.env.dbUser}:${process.env.dbPasswd}@${process.env.dbHost}:${process.env.dbPort}/${process.env.dbName}`;
 
 const dbName = process.env.MYSQLDATABASE || process.env.dbName || 'railway';
 
+
+
 // Debug: let's see what URL we're actually using
-console.log('DEBUG - DATABASE_URL:', process.env.DATABASE_URL);
-console.log('DEBUG - MYSQL_URL:', process.env.MYSQL_URL);
-console.log('DEBUG - Final databaseUrl:', databaseUrl);
+console.log('DEBUG - Using DB URL?:', process.env.dbUrl ? 'Yes' : 'No');
+console.log('DEBUG - Final connection:', databaseUrl);
 console.log('DEBUG - dbName:', dbName);
 
 console.info('--(i)-- Connecting to DB');
