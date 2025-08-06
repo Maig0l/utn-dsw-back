@@ -1,4 +1,4 @@
-import * as v from "valibot";
+import * as v from 'valibot';
 
 const [NAME_LEN_MIN, NAME_LEN_MAX] = [1, 100];
 const ERR_NAME_LEN = `Name must be between ${NAME_LEN_MIN} and ${NAME_LEN_MAX} characters long`;

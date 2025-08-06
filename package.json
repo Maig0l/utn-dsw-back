@@ -4,6 +4,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "engines": {
+    "node": ">=20.12.2",
+    "pnpm": ">=8.0.0"
+  },
   "scripts": {
     "copyExtraFiles": "node utils/copyExtraFiles.js",
     "build": "tsc -p ./tsconfig.json && pnpm copyExtraFiles",
