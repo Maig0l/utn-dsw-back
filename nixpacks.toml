@@ -1,3 +1,9 @@
 # Railway deployment configuration
+[phases.install]
+cmd = "pnpm install --include=dev"
+
+[phases.build]
+cmd = "pnpm run build"
+
 [start]
 cmd = "pnpm start"

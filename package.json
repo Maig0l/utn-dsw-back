@@ -10,7 +10,7 @@
   },
   "scripts": {
     "copyExtraFiles": "node utils/copyExtraFiles.js",
-    "build": "tsc -p ./tsconfig.json && pnpm copyExtraFiles",
+    "build": "npx tsc -p ./tsconfig.json && pnpm copyExtraFiles",
     "_run:dev": "pnpm copyExtraFiles && node ./dist/src/server.js",
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"pnpm _run:dev\"",
     "start": "node ./dist/src/server.js",
@@ -57,6 +57,7 @@
     "sanitize-html": "^2.13.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "typescript": "^5.0.0",
     "ulid": "^3.0.1",
     "valibot": "^0.36.0",
     "yaml": "^2.8.0"
