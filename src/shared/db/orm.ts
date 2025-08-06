@@ -12,6 +12,12 @@ const databaseUrl =
 
 const dbName = process.env.MYSQLDATABASE || process.env.dbName || 'railway';
 
+// Debug: let's see what URL we're actually using
+console.log('DEBUG - DATABASE_URL:', process.env.DATABASE_URL);
+console.log('DEBUG - MYSQL_URL:', process.env.MYSQL_URL);
+console.log('DEBUG - Final databaseUrl:', databaseUrl);
+console.log('DEBUG - dbName:', dbName);
+
 console.info('--(i)-- Connecting to DB');
 
 export const orm = await MikroORM.init({
