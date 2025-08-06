@@ -1,22 +1,25 @@
-import { MikroORM } from "@mikro-orm/core";
-import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
-import dotenv from "dotenv";
+import { MikroORM } from '@mikro-orm/core';
+import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import dotenv from 'dotenv';
 
 dotenv.config();
-const user = process.env.dbUser;
-const passwd = process.env.dbPasswd;
-const host = process.env.dbHost;
-const port = process.env.dbPort;
-const name = process.env.dbName;
 
-console.info("--(i)-- Connecting to DB");
+// Use DATABASE_URL or MYSQL_URL from Railway if available, otherwise use individual variables
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.MYSQL_URL ||
+  `mysql://${process.env.dbUser}:${process.env.dbPasswd}@${process.env.dbHost}:${process.env.dbPort}/${process.env.dbName}`;
+
+const dbName = process.env.MYSQLDATABASE || process.env.dbName || 'railway';
+
+console.info('--(i)-- Connecting to DB');
 
 export const orm = await MikroORM.init({
-  entities: ["dist/**/*.entity.js"],
-  entitiesTs: ["src/**/*.entity.ts"],
-  dbName: name,
-  type: "mysql",
-  clientUrl: `mysql://${user}:${passwd}@${host}:${port}/${name}`,
+  entities: ['dist/**/*.entity.js'],
+  entitiesTs: ['src/**/*.entity.ts'],
+  dbName: dbName,
+  type: 'mysql',
+  clientUrl: databaseUrl,
   highlighter: new SqlHighlighter(),
   debug: true,
   // TODO: not recommended in prod, bad for scoping and stuff
