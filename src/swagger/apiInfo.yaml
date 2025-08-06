@@ -1,0 +1,11 @@
+openapi: 3.1.1
+info:
+  title: Wellplayed API
+  version: 1.0.0
+  description: Videogame reviews API
+  contact:
+    name: Miguel C. (Repo maintainer)
+    url: https://github.com/Maig0l
+    email: crurbox@gmail.com
+servers:
+  - url: http://localhost:8080/api

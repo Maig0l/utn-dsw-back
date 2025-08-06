@@ -1,0 +1,264 @@
+'/tags/search':
+  get:
+    tags: [Tag]
+    summary: Search tags
+    operationId: searchTags
+    parameters:
+      - name: name
+        in: query
+        description: Partial name of the tag to look for
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of matching tags
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Tag'
+
+'/tags':
+  get:
+    tags: [Tag]
+    summary: Get all tags
+    operationId: getAllTags
+    responses:
+      '200':
+        description: List of all tags
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Tag'
+  post:
+    tags: [Tag]
+    summary: Create a new tag
+    operationId: createTag
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - description
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 30
+                description: Name of the tag (must be unique)
+              description:
+                type: string
+                minLength: 10
+                maxLength: 500
+                description: Description of what this tag represents
+            example:
+              name: 'Action'
+              description: 'Fast-paced games with combat and adventure elements'
+    responses:
+      '201':
+        description: Tag created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Tag'
+      '400':
+        description: Bad request - Invalid input data or tag already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/tags/{id}':
+  get:
+    tags: [Tag]
+    summary: Get a tag by ID
+    operationId: getTagById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The tag ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Tag found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Tag'
+      '404':
+        description: Tag not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  put:
+    tags: [Tag]
+    summary: Update a tag completely
+    operationId: updateTag
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The tag ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - description
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 30
+                description: Name of the tag (must be unique)
+              description:
+                type: string
+                minLength: 10
+                maxLength: 500
+                description: Description of what this tag represents
+            example:
+              name: 'Action'
+              description: 'Fast-paced games with intense combat and adventure elements'
+    responses:
+      '200':
+        description: Tag updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Tag'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Tag not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  patch:
+    tags: [Tag]
+    summary: Partially update a tag
+    operationId: partialUpdateTag
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The tag ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 30
+                description: Name of the tag (must be unique)
+              description:
+                type: string
+                minLength: 10
+                maxLength: 500
+                description: Description of what this tag represents
+            example:
+              name: 'Action-Adventure'
+    responses:
+      '200':
+        description: Tag updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Tag'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Tag not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  delete:
+    tags: [Tag]
+    summary: Delete a tag
+    operationId: deleteTag
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The tag ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Tag deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Tag not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'

@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
   findAll,
   findOne,
@@ -9,20 +9,36 @@ import {
   sanitizePartialInput,
   validateExists,
   findFranchisesByName,
-} from "./franchise.controller.js";
+} from './franchise.controller.js';
+import { getAndSaveUserObjectsToResponseLocals, isAdminGuard } from '../auth/auth.middleware.js';
 
 export const franchiseRouter = Router();
 
-franchiseRouter.get("/search", findFranchisesByName);
-franchiseRouter.get("/", findAll);
-franchiseRouter.post("/", sanitizeInput, add);
+franchiseRouter.get('/search', findFranchisesByName);
+franchiseRouter.get('/', findAll);
+franchiseRouter.post('/', getAndSaveUserObjectsToResponseLocals, isAdminGuard, sanitizeInput, add);
 
-franchiseRouter.get("/:id(\\d+)", validateExists, findOne);
-franchiseRouter.put("/:id(\\d+)", validateExists, sanitizeInput, update);
+franchiseRouter.get('/:id(\\d+)', validateExists, findOne);
+franchiseRouter.put(
+  '/:id(\\d+)',
+  getAndSaveUserObjectsToResponseLocals,
+  isAdminGuard,
+  validateExists,
+  sanitizeInput,
+  update
+);
 franchiseRouter.patch(
-  "/:id(\\d+)",
+  '/:id(\\d+)',
+  getAndSaveUserObjectsToResponseLocals,
+  isAdminGuard,
   validateExists,
   sanitizePartialInput,
-  update,
+  update
 );
-franchiseRouter.delete("/:id(\\d+)", validateExists, remove);
+franchiseRouter.delete(
+  '/:id(\\d+)',
+  getAndSaveUserObjectsToResponseLocals,
+  isAdminGuard,
+  validateExists,
+  remove
+);

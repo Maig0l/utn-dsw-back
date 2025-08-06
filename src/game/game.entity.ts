@@ -14,7 +14,6 @@ import { Platform } from '../platform/platform.entity.js';
 import { Franchise } from '../franchise/franchise.entity.js';
 import { Tag } from '../tag/tag.entity.js';
 import { Review } from '../review/review.entity.js';
-import { GamePicture } from '../game-picture/game-picture.entity.js';
 
 @Entity()
 export class Game extends BaseEntity {
@@ -42,12 +41,6 @@ export class Game extends BaseEntity {
   @Property({ default: 0 })
   reviewCount!: number;
 
-  @OneToMany('GamePicture', 'game', {
-    cascade: [Cascade.ALL],
-    nullable: true,
-  })
-  pictures = new Collection<GamePicture>(this);
-
   @ManyToMany(() => Tag, (tag) => tag.games, {
     cascade: [Cascade.ALL],
     owner: true,
@@ -68,7 +61,7 @@ export class Game extends BaseEntity {
   shops = new Collection<Shop>(this);
 
   @ManyToOne(() => Franchise, { nullable: true })
-  franchise!: Franchise;
+  franchise?: Franchise | null;
 
   @ManyToMany(() => Platform, (platform) => platform.games, {
     cascade: [Cascade.ALL],

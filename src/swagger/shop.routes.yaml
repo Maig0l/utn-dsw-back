@@ -1,0 +1,262 @@
+'/shops/search':
+  get:
+    tags: [Shop]
+    summary: Search shops
+    operationId: searchShops
+    parameters:
+      - name: name
+        in: query
+        description: Partial name of the shop to look for
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of matching shops
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Shop'
+
+'/shops':
+  get:
+    tags: [Shop]
+    summary: Get all shops
+    operationId: getAllShops
+    responses:
+      '200':
+        description: List of all shops
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Shop'
+  post:
+    tags: [Shop]
+    summary: Create a new shop
+    operationId: createShop
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the shop (must be unique)
+              site:
+                type: string
+                format: uri
+                description: Official website URL of the shop (must be unique and end with .com)
+                pattern: '^https?://.*\.com$'
+            example:
+              name: 'Steam'
+              site: 'https://store.steampowered.com'
+    responses:
+      '201':
+        description: Shop created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Shop'
+      '400':
+        description: Bad request - Invalid input data or shop already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/shops/{id}':
+  get:
+    tags: [Shop]
+    summary: Get a shop by ID
+    operationId: getShopById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The shop ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Shop found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Shop'
+      '404':
+        description: Shop not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  put:
+    tags: [Shop]
+    summary: Update a shop completely
+    operationId: updateShop
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The shop ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the shop (must be unique)
+              site:
+                type: string
+                format: uri
+                description: Official website URL of the shop (must be unique and end with .com)
+                pattern: '^https?://.*\.com$'
+            example:
+              name: 'Steam Store'
+              site: 'https://store.steampowered.com'
+    responses:
+      '200':
+        description: Shop updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Shop'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Shop not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  patch:
+    tags: [Shop]
+    summary: Partially update a shop
+    operationId: partialUpdateShop
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The shop ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                minLength: 3
+                maxLength: 100
+                description: Name of the shop (must be unique)
+              site:
+                type: string
+                format: uri
+                description: Official website URL of the shop (must be unique and end with .com)
+                pattern: '^https?://.*\.com$'
+            example:
+              name: 'Steam Digital Store'
+    responses:
+      '200':
+        description: Shop updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Shop'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Shop not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  delete:
+    tags: [Shop]
+    summary: Delete a shop
+    operationId: deleteShop
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The shop ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Shop deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Shop not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'

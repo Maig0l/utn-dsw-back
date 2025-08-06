@@ -158,9 +158,7 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case "ER_DUP_ENTRY":
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        res
-          .status(400)
-          .json({ message: `A platform with that name/site already exists.` });
+        res.status(400).json({ message: `A platform with that name already exists.` });
         break;
       case "ER_DATA_TOO_LONG":
         res.status(400).json({ message: `Data too long.` });

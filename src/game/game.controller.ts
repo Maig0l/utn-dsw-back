@@ -15,15 +15,7 @@ async function findAll(req: Request, res: Response) {
       Game,
       {},
       {
-        populate: [
-          'tags',
-          'shops',
-          'platforms',
-          'studios',
-          'reviews',
-          'franchise',
-          'pictures',
-        ],
+        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise'],
       }
     );
     res.json({ data: games });
@@ -38,15 +30,7 @@ async function findOne(req: Request, res: Response) {
       Game,
       { id: res.locals.id },
       {
-        populate: [
-          'tags',
-          'shops',
-          'platforms',
-          'studios',
-          'reviews',
-          'franchise',
-          'pictures',
-        ],
+        populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise'],
       }
     );
     res.json({ data: game });
@@ -124,28 +108,15 @@ async function findGamesByFilters(req: Request, res: Response) {
 
     // Fetch games from the database
     const games = await em.find(Game, filterQuery, {
-      populate: [
-        'tags',
-        'shops',
-        'platforms',
-        'studios',
-        'reviews',
-        'franchise',
-        'pictures',
-      ],
+      populate: ['tags', 'shops', 'platforms', 'studios', 'reviews', 'franchise'],
     });
 
     // Filter by starValue in memory
-    const minStarValue = filters.minStarValue
-      ? Number(filters.minStarValue)
-      : null;
-    const maxStarValue = filters.maxStarValue
-      ? Number(filters.maxStarValue)
-      : null;
+    const minStarValue = filters.minStarValue ? Number(filters.minStarValue) : null;
+    const maxStarValue = filters.maxStarValue ? Number(filters.maxStarValue) : null;
 
     const filteredGames = games.filter((game) => {
-      const starValue =
-        game.reviewCount > 0 ? game.cumulativeRating / game.reviewCount : 0;
+      const starValue = game.reviewCount > 0 ? game.cumulativeRating / game.reviewCount : 0;
 
       if (minStarValue !== null && starValue < minStarValue) {
         return false;
@@ -182,8 +153,11 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     console.log('SANITIZED INPUT UPDATE', res.locals.sanitizedInput);
+
+    // Si franchise es 0, establecerlo como null para desasociar
     if (res.locals.sanitizedInput.franchise === 0) {
-      delete res.locals.sanitizedInput.franchise;
+      res.locals.sanitizedInput.franchise = null;
+      console.log('Setting franchise to null');
     }
 
     const input = res.locals.sanitizedInput;
@@ -206,23 +180,21 @@ async function update(req: Request, res: Response) {
     delete res.locals.cumulativeRating;
     delete res.locals.reviewCount;
     console.log('SANITIZED INPUT UPDATE 2', res.locals.sanitizedInput);
-    if (res.locals.sanitizedInput.franchise === 0) {
-      delete res.locals.sanitizedInput.franchise;
-    }
+
     const game = await em.findOneOrFail(Game, { id: res.locals.id });
     em.assign(game, res.locals.sanitizedInput);
     await em.flush();
+
+    // Recargar el juego para obtener los datos actualizados
+    await em.refresh(game);
+
     res.json({ message: 'Game updated', data: game });
   } catch (err) {
     handleOrmError(res, err);
   }
 }
 
-async function updateRating(
-  gameId: number,
-  newRating: number,
-  em: EntityManager
-) {
+async function updateRating(gameId: number, newRating: number, em: EntityManager) {
   try {
     em.transactional(async (em) => {
       const game = await em.findOneOrFail(Game, { id: gameId });
@@ -293,8 +265,7 @@ async function remove(req: Request, res: Response) {
 
 function validateExists(req: Request, res: Response, next: NextFunction) {
   const id = parseInt(req.params.id);
-  if (Number.isNaN(id))
-    return res.status(400).json({ message: 'ID must be an integer' });
+  if (Number.isNaN(id)) return res.status(400).json({ message: 'ID must be an integer' });
   res.locals.id = id;
   next();
 }
@@ -329,9 +300,7 @@ function handleOrmError(res: Response, err: any) {
     switch (err.code) {
       case 'ER_DUP_ENTRY':
         // Ocurre cuando el usuario quiere crear un objeto con un atributo duplicado en una tabla marcada como Unique
-        res
-          .status(400)
-          .json({ message: `A game with that name/site already exists.` });
+        res.status(400).json({ message: `A game with that name/site already exists.` });
         break;
       case 'ER_DATA_TOO_LONG':
         res.status(400).json({ message: `Data too long.` });
@@ -340,14 +309,10 @@ function handleOrmError(res: Response, err: any) {
   } else {
     switch (err.name) {
       case 'NotFoundError':
-        res
-          .status(404)
-          .json({ message: `game not found for ID ${res.locals.id}` });
+        res.status(404).json({ message: `Game not found for ID ${res.locals.id}` });
         break;
       default:
-        res
-          .status(500)
-          .json({ message: 'Oops! Something went wrong. This is our fault.' });
+        res.status(500).json({ message: 'Oops! Something went wrong. This is our fault.' });
         break;
     }
   }

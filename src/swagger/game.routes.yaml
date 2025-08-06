@@ -1,0 +1,680 @@
+'/games/search':
+  get:
+    tags: [Game]
+    summary: Search games by title
+    operationId: searchGamesByTitle
+    parameters:
+      - name: title
+        in: query
+        description: Partial title of the game to look for
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of matching games
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Game'
+
+'/games/filter':
+  get:
+    tags: [Game]
+    summary: Filter games by multiple criteria
+    operationId: filterGames
+    parameters:
+      - name: platform
+        in: query
+        description: Comma-separated list of platform IDs
+        schema:
+          type: string
+          example: '1,2,3'
+      - name: tags
+        in: query
+        description: Comma-separated list of tag IDs
+        schema:
+          type: string
+          example: '1,5,10'
+      - name: studio
+        in: query
+        description: Comma-separated list of studio IDs
+        schema:
+          type: string
+          example: '2,4'
+      - name: franchise
+        in: query
+        description: Comma-separated list of franchise IDs
+        schema:
+          type: string
+          example: '1,3'
+      - name: startDate
+        in: query
+        description: Filter games released after this date (inclusive)
+        schema:
+          type: string
+          format: date
+          example: '2020-01-01'
+      - name: endDate
+        in: query
+        description: Filter games released before this date (inclusive)
+        schema:
+          type: string
+          format: date
+          example: '2024-12-31'
+      - name: minStarValue
+        in: query
+        description: Minimum average rating (0-5)
+        schema:
+          type: number
+          minimum: 0
+          maximum: 5
+          example: 3.5
+      - name: maxStarValue
+        in: query
+        description: Maximum average rating (0-5)
+        schema:
+          type: number
+          minimum: 0
+          maximum: 5
+          example: 4.5
+    responses:
+      '200':
+        description: List of games matching the filter criteria
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Game'
+
+'/games':
+  get:
+    tags: [Game]
+    summary: Get all games
+    operationId: getAllGames
+    responses:
+      '200':
+        description: List of all games
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Game'
+  post:
+    tags: [Game]
+    summary: Create a new game
+    operationId: createGame
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - title
+            properties:
+              title:
+                type: string
+                minLength: 1
+                maxLength: 180
+                description: Title of the game (must be unique)
+              synopsis:
+                type: string
+                minLength: 10
+                maxLength: 512
+                description: Brief description of the game
+                nullable: true
+              releaseDate:
+                type: string
+                format: date
+                description: Release date of the game
+                nullable: true
+              portrait:
+                type: string
+                description: Portrait image filename or URL
+                nullable: true
+              banner:
+                type: string
+                description: Banner image filename or URL
+                nullable: true
+              franchise:
+                type: number
+                description: ID of the franchise this game belongs to
+                nullable: true
+              tags:
+                type: array
+                items:
+                  type: number
+                description: Array of tag IDs associated with the game
+                nullable: true
+              shops:
+                type: array
+                items:
+                  type: number
+                description: Array of shop IDs where the game is available
+                nullable: true
+              platforms:
+                type: array
+                items:
+                  type: number
+                description: Array of platform IDs where the game is available
+                nullable: true
+              studios:
+                type: array
+                items:
+                  type: number
+                description: Array of studio IDs associated with the game
+                nullable: true
+            example:
+              title: 'The Witcher 3: Wild Hunt'
+              synopsis: 'An open-world action RPG set in a fantasy universe filled with meaningful choices and impactful consequences.'
+              releaseDate: '2015-05-19'
+              franchise: 1
+              tags: [1, 5, 10]
+              platforms: [1, 2, 3]
+              studios: [4]
+    responses:
+      '201':
+        description: Game created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Game'
+      '400':
+        description: Bad request - Invalid input data or game already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/games/{id}':
+  get:
+    tags: [Game]
+    summary: Get a game by ID
+    operationId: getGameById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The game ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Game found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Game'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  put:
+    tags: [Game]
+    summary: Update a game completely
+    operationId: updateGame
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The game ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                minLength: 1
+                maxLength: 180
+                description: Title of the game (must be unique)
+              synopsis:
+                type: string
+                minLength: 10
+                maxLength: 512
+                description: Brief description of the game
+                nullable: true
+              releaseDate:
+                type: string
+                format: date
+                description: Release date of the game
+                nullable: true
+              portrait:
+                type: string
+                description: Portrait image filename or URL
+                nullable: true
+              banner:
+                type: string
+                description: Banner image filename or URL
+                nullable: true
+              franchise:
+                type: number
+                description: ID of the franchise this game belongs to
+                nullable: true
+              tags:
+                type: array
+                items:
+                  type: number
+                description: Array of tag IDs associated with the game
+                nullable: true
+              shops:
+                type: array
+                items:
+                  type: number
+                description: Array of shop IDs where the game is available
+                nullable: true
+              platforms:
+                type: array
+                items:
+                  type: number
+                description: Array of platform IDs where the game is available
+                nullable: true
+              studios:
+                type: array
+                items:
+                  type: number
+                description: Array of studio IDs associated with the game
+                nullable: true
+            example:
+              title: 'The Witcher 3: Wild Hunt - Complete Edition'
+              synopsis: 'An open-world action RPG set in a fantasy universe filled with meaningful choices and impactful consequences. Includes all DLCs.'
+              releaseDate: '2015-05-19'
+              franchise: 1
+              tags: [1, 5, 10]
+              platforms: [1, 2, 3, 4]
+              studios: [4]
+    responses:
+      '200':
+        description: Game updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Game'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  patch:
+    tags: [Game]
+    summary: Partially update a game
+    operationId: partialUpdateGame
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The game ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                minLength: 1
+                maxLength: 180
+                description: Title of the game (must be unique)
+              synopsis:
+                type: string
+                minLength: 10
+                maxLength: 512
+                description: Brief description of the game
+                nullable: true
+              releaseDate:
+                type: string
+                format: date
+                description: Release date of the game
+                nullable: true
+              portrait:
+                type: string
+                description: Portrait image filename or URL
+                nullable: true
+              banner:
+                type: string
+                description: Banner image filename or URL
+                nullable: true
+              franchise:
+                type: number
+                description: ID of the franchise this game belongs to
+                nullable: true
+              tags:
+                type: array
+                items:
+                  type: number
+                description: Array of tag IDs associated with the game
+                nullable: true
+              shops:
+                type: array
+                items:
+                  type: number
+                description: Array of shop IDs where the game is available
+                nullable: true
+              platforms:
+                type: array
+                items:
+                  type: number
+                description: Array of platform IDs where the game is available
+                nullable: true
+              studios:
+                type: array
+                items:
+                  type: number
+                description: Array of studio IDs associated with the game
+                nullable: true
+            example:
+              synopsis: 'Updated description with more details about the game mechanics and story.'
+    responses:
+      '200':
+        description: Game updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Game'
+      '400':
+        description: Bad request - Invalid input data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  delete:
+    tags: [Game]
+    summary: Delete a game
+    operationId: deleteGame
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The game ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: Game deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/games/{id}/reviews':
+  get:
+    tags: [Game]
+    summary: Get all reviews for a specific game
+    operationId: getGameReviews
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The game ID
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: List of reviews for the game
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Review'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+  post:
+    tags: [Game]
+    summary: Create a review for a specific game
+    operationId: createGameReview
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The game ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - score
+            properties:
+              score:
+                type: number
+                format: decimal
+                minimum: 0
+                maximum: 5
+                multipleOf: 0.5
+                description: Rating score from 0 to 5 (rounded to nearest 0.5)
+              title:
+                type: string
+                description: Optional title for the review
+                nullable: true
+              body:
+                type: string
+                description: Optional detailed review text
+                nullable: true
+            example:
+              score: 4.5
+              title: 'Amazing RPG Experience'
+              body: 'One of the best RPGs I have ever played. Great story and characters.'
+    responses:
+      '201':
+        description: Review created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Review'
+      '400':
+        description: Bad request - Invalid input data or user already reviewed this game
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/games/{id}/uploads/portrait':
+  patch:
+    tags: [Game]
+    summary: Upload a portrait image for a game
+    operationId: uploadGamePortrait
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The game ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - portrait
+            properties:
+              portrait:
+                type: string
+                format: binary
+                description: Portrait image file to upload for the game
+    responses:
+      '200':
+        description: Game portrait uploaded successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: object
+                      properties:
+                        portrait:
+                          type: string
+                          description: Path to the uploaded portrait image
+      '400':
+        description: Bad request - No image file provided or invalid file
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/games/{id}/uploads/banner':
+  patch:
+    tags: [Game]
+    summary: Upload a banner image for a game
+    operationId: uploadGameBanner
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The game ID
+        schema:
+          type: integer
+          format: int64
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - banner
+            properties:
+              banner:
+                type: string
+                format: binary
+                description: Banner image file to upload for the game
+    responses:
+      '200':
+        description: Game banner uploaded successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: object
+                      properties:
+                        banner:
+                          type: string
+                          description: Path to the uploaded banner image
+      '400':
+        description: Bad request - No image file provided or invalid file
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'

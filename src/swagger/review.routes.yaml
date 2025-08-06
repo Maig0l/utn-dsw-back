@@ -1,0 +1,354 @@
+'/reviews':
+  get:
+    tags: [Review]
+    summary: Get reviews for a specific game (deprecated)
+    operationId: listReviewsForGame
+    deprecated: true
+    description: |
+      This endpoint is deprecated. Use /games/{gameId}/reviews instead.
+      Lists reviews for a game specified by query parameter.
+    parameters:
+      - name: gameId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: Game ID to get reviews for
+    responses:
+      '200':
+        description: List of reviews
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Review'
+      '400':
+        description: Invalid game ID
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/reviews/{id}':
+  get:
+    tags: [Review]
+    summary: Get a review by ID
+    operationId: getReviewById
+    description: Retrieve a specific review with full details including author and game information
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: Review ID
+    responses:
+      '200':
+        description: Review found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Review'
+      '400':
+        description: Invalid ID format
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Review not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+  patch:
+    tags: [Review]
+    summary: Update a review
+    operationId: updateReview
+    description: |
+      Update an existing review. Only the review author can update their own review.
+      Requires authentication.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: Review ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              score:
+                type: number
+                format: decimal
+                minimum: 0
+                maximum: 5
+                multipleOf: 0.5
+                description: Rating score from 0 to 5 (rounded to nearest 0.5)
+              title:
+                type: string
+                description: Optional title for the review
+              body:
+                type: string
+                description: Optional detailed review text
+            example:
+              score: 5.0
+              title: 'Updated: Perfect Game!'
+              body: 'After playing more, I realize this is a masterpiece.'
+    responses:
+      '200':
+        description: Review updated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Review'
+      '400':
+        description: Validation error or invalid ID
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '401':
+        description: Unauthorized - authentication required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '403':
+        description: Forbidden - not the review author
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Review not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+  delete:
+    tags: [Review]
+    summary: Delete a review
+    operationId: deleteReview
+    description: |
+      Delete an existing review. Only the review author can delete their own review.
+      Requires authentication.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: Review ID
+    responses:
+      '200':
+        description: Review deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponse'
+      '400':
+        description: Invalid ID format
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '401':
+        description: Unauthorized - authentication required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '403':
+        description: Forbidden - not the review author
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Review not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/games/{gameId}/reviews':
+  get:
+    tags: [Review, Game]
+    summary: Get all reviews for a specific game
+    operationId: getGameReviews
+    description: Retrieve all reviews for a given game
+    parameters:
+      - name: gameId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: Game ID
+    responses:
+      '200':
+        description: Reviews retrieved successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Review'
+      '400':
+        description: Invalid game ID
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+  post:
+    tags: [Review, Game]
+    summary: Create a new review for a specific game
+    operationId: createGameReview
+    description: |
+      Create a new review for a specific game. Each user can only have one review per game.
+      Requires authentication. The author is set automatically from the logged-in user.
+
+      **This is the preferred way to create reviews.**
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: gameId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: Game ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              score:
+                type: number
+                format: decimal
+                minimum: 0
+                maximum: 5
+                multipleOf: 0.5
+                description: Rating score from 0 to 5 (rounded to nearest 0.5)
+              title:
+                type: string
+                description: Optional title for the review
+              body:
+                type: string
+                description: Optional detailed review text
+            required:
+              - score
+            example:
+              score: 4.5
+              title: 'Amazing RPG Experience'
+              body: 'One of the best RPGs I have ever played. Great story and characters.'
+    responses:
+      '201':
+        description: Review created successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      $ref: '#/components/schemas/Review'
+      '400':
+        description: Validation error or duplicate review
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '401':
+        description: Unauthorized - authentication required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+      '404':
+        description: Game not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
+
+'/users/{nick}/reviews':
+  get:
+    tags: [Review, User]
+    summary: Get all reviews by a specific user
+    operationId: getUserReviews
+    description: Retrieve all reviews written by a given user
+    parameters:
+      - name: nick
+        in: path
+        required: true
+        schema:
+          type: string
+        description: User nickname
+    responses:
+      '200':
+        description: Reviews retrieved successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApiResponse'
+                - properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Review'
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiResponseError'
