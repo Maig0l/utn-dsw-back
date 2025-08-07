@@ -53,7 +53,7 @@ app.use("/api/games", gameRouter);
 app.use("/api/games/:id(\\d+)/uploads", express.static(UPLOADS_PATH)); // Usar variable de entorno para uploads
 app.use("/api/playlists", playlistRouter);
 app.use("/api/reviews", reviewRouter);
-app.use("/uploads", express.static(UPLOADS_PATH)); // Usar variable de entorno para uploads
+app.use("/api/uploads", express.static(UPLOADS_PATH)); // Usar variable de entorno para uploads
 
 await syncSchema(); // TODO: Never in prod
 await initializeAdminUserIfAbsent();
