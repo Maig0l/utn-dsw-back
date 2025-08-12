@@ -25,7 +25,7 @@ const storageBase = multer.diskStorage({
 
 // Filtro para aceptar solo imágenes
 const filterImageTypes = (req: any, file: Express.Multer.File, cb: any) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
   const isValid =
     allowedTypes.test(path.extname(file.originalname).toLowerCase()) &&
     allowedTypes.test(file.mimetype);
