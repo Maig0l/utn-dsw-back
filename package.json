@@ -15,7 +15,8 @@
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"pnpm _run:dev\"",
     "start": "node ./dist/src/server.js",
     "test": "jest",
-    "initConfig": "node utils/initConfig.js > .env"
+    "initConfig": "node utils/initConfig.js > .env",
+    "db:sync": "node utils/syncSchema.js"
   },
   "keywords": [],
   "author": "",

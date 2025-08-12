@@ -8,7 +8,7 @@ import { tagRouter } from "./tag/tag.routes.js";
 import { franchiseRouter } from "./franchise/franchise.routes.js";
 import { gameRouter } from "./game/game.routes.js";
 import { playlistRouter } from "./playlist/playlist.routes.js";
-import { orm, syncSchema } from "./shared/db/orm.js";
+import { orm } from "./shared/db/orm.js";
 import { RequestContext } from "@mikro-orm/core";
 import cors from "cors";
 import { reviewRouter } from "./review/review.routes.js";
@@ -55,7 +55,6 @@ app.use("/api/playlists", playlistRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/uploads", express.static(UPLOADS_PATH)); // Usar variable de entorno para uploads
 
-await syncSchema(); // TODO: Never in prod
 await initializeAdminUserIfAbsent();
 
 app.use((_, res) => {
